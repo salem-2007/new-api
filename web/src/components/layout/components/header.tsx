@@ -19,13 +19,16 @@ For commercial licensing, please contact support@quantumnous.com
 import { SidebarTrigger } from '@/components/ui/sidebar'
 import { cn } from '@/lib/utils'
 
-type HeaderProps = React.HTMLAttributes<HTMLElement>
+type HeaderProps = React.HTMLAttributes<HTMLElement> & {
+  scrolledClass?: string
+}
 
-export function Header({ className, children, ...props }: HeaderProps) {
+export function Header({ className, children, scrolledClass, ...props }: HeaderProps) {
   return (
     <header
       className={cn(
         'sticky top-0 z-40 h-[var(--app-header-height,3rem)] w-full shrink-0 bg-transparent',
+        scrolledClass,
         className
       )}
       {...props}

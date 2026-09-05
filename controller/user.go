@@ -983,7 +983,8 @@ func DeleteUser(c *gin.Context) {
 		common.ApiError(c, err)
 		return
 	}
-	originUser, err := model.GetUserById(id, false)
+	// Unscoped 查询：允许管理员硬删已注销(软删)用户
+	originUser, err := model.GetUserByIdUnscoped(id, false)
 	if err != nil {
 		common.ApiError(c, err)
 		return
