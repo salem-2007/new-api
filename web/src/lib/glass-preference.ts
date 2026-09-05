@@ -22,7 +22,7 @@ For commercial licensing, please contact support@quantumnous.com
  * - glassPulse: 卡片 hover 脉冲发光开关
  */
 
-export type WallpaperOption = 'default' | 'day-shinji' | 'day-asuka' | 'night-eva' | 'night-rei' | 'custom'
+export type WallpaperOption = 'default' | 'day-shinji' | 'day-asuka' | 'night-eva' | 'night-rei'
 export type MouseEffect = 'firework' | 'heart' | 'text' | 'particle'
 
 export type GlassPreference = {
@@ -30,7 +30,6 @@ export type GlassPreference = {
   glassPulse: boolean
   wallpaperDay: WallpaperOption
   wallpaperNight: WallpaperOption
-  customWallpaperUrl: string
   mouseEffects: MouseEffect[]
 }
 
@@ -49,7 +48,6 @@ export const DEFAULT_GLASS_PREFERENCE: GlassPreference = {
   glassPulse: true,
   wallpaperDay: 'default',
   wallpaperNight: 'default',
-  customWallpaperUrl: '',
   mouseEffects: [],
 }
 
@@ -64,7 +62,6 @@ export function readGlassPreference(): GlassPreference {
       glassPulse: parsed.glassPulse ?? DEFAULT_GLASS_PREFERENCE.glassPulse,
       wallpaperDay: parsed.wallpaperDay ?? 'default',
       wallpaperNight: parsed.wallpaperNight ?? 'default',
-      customWallpaperUrl: parsed.customWallpaperUrl ?? '',
       mouseEffects: Array.isArray(parsed.mouseEffects) ? parsed.mouseEffects : [],
     }
   } catch {
@@ -83,7 +80,6 @@ export function writeGlassPreference(pref: GlassPreference) {
 /** 解析当前主题下应使用的壁纸 URL */
 function resolveWallpaper(pref: GlassPreference, isDark: boolean): string {
   const pick = isDark ? pref.wallpaperNight : pref.wallpaperDay
-  if (pick === 'custom' && pref.customWallpaperUrl) return pref.customWallpaperUrl
   const asset = WALLPAPER_ASSETS[pick]
   if (asset) return (isDark ? asset.night : asset.day) ?? asset.day ?? asset.night ?? ''
   return isDark ? '/wallpapers/night-eva.jpg' : '/wallpapers/day-shinji.jpg'

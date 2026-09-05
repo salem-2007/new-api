@@ -33,7 +33,6 @@ type GlassPreferenceContextType = {
   setLiquidGlass: (on: boolean) => void
   setGlassPulse: (on: boolean) => void
   setWallpaper: (which: 'day' | 'night', option: WallpaperOption) => void
-  setCustomWallpaperUrl: (url: string) => void
   toggleMouseEffect: (effect: MouseEffect, on: boolean) => void
   resetGlass: () => void
 }
@@ -43,7 +42,6 @@ const FALLBACK: GlassPreferenceContextType = {
   setLiquidGlass: () => {},
   setGlassPulse: () => {},
   setWallpaper: () => {},
-  setCustomWallpaperUrl: () => {},
   toggleMouseEffect: () => {},
   resetGlass: () => {},
 }
@@ -80,8 +78,6 @@ export function GlassPreferenceProvider(props: { children: React.ReactNode }) {
             ? { ...p, wallpaperDay: option }
             : { ...p, wallpaperNight: option }
         ),
-      setCustomWallpaperUrl: (url) =>
-        setPreference((p) => ({ ...p, customWallpaperUrl: url })),
       toggleMouseEffect: (effect, on) =>
         setPreference((p) => ({
           ...p,

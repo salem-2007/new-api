@@ -45,32 +45,61 @@ function makeCanvas(zIndex: number): { canvas: HTMLCanvasElement; ctx: CanvasRen
 /* ---------- 粒子拖尾 ---------- */
 function mountParticle(): Cleaner {
   const { canvas, ctx } = makeCanvas(9998)
-  const colors = ['#aac6ff', '#c3b8ff', '#8ec5ff', '#e0c3fc']
-  const parts: { x: number; y: number; vx: number; vy: number; life: number; color: string }[] = []
+  const colors = ['#00bdff', '#4d39ce', '#088eff']
+  const mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 - 80 }
+
+  function randomIntFromRange(min: number, max: number) {
+    return Math.floor(Math.random() * (max - min + 1) + min)
+  }
+
+  class OrbitParticle {
+    x = canvas.width / 2
+    y = canvas.height / 2
+    radius = Math.random() * 2 + 1
+    color = colors[Math.floor(Math.random() * colors.length)]
+    radians = Math.random() * Math.PI * 2
+    velocity = 0.05
+    distance = randomIntFromRange(50, 120)
+    lastMouse = { x: mouse.x, y: mouse.y }
+
+    update() {
+      const lastPoint = { x: this.x, y: this.y }
+      this.radians += this.velocity
+      // 拖尾跟随（缓动追踪鼠标）
+      this.lastMouse.x += (mouse.x - this.lastMouse.x) * 0.05
+      this.lastMouse.y += (mouse.y - this.lastMouse.y) * 0.05
+      // 圆形轨道 + 正弦摆动
+      this.x =
+        this.lastMouse.x + Math.cos(this.radians) * (this.distance + Math.sin(this.radians) * 100)
+      this.y =
+        this.lastMouse.y + Math.sin(this.radians) * (this.distance + Math.sin(this.radians) * 100)
+      this.draw(lastPoint)
+    }
+
+    draw(lastPoint: { x: number; y: number }) {
+      ctx.beginPath()
+      ctx.strokeStyle = this.color
+      ctx.lineWidth = this.radius
+      ctx.moveTo(lastPoint.x, lastPoint.y)
+      ctx.lineTo(this.x, this.y)
+      ctx.stroke()
+      ctx.closePath()
+    }
+  }
+
+  const particles: OrbitParticle[] = []
+  for (let i = 0; i < 50; i++) particles.push(new OrbitParticle())
+
   let raf = 0
   const onMove = (e: MouseEvent) => {
-    for (let i = 0; i < 3; i++) {
-      parts.push({
-        x: e.clientX, y: e.clientY,
-        vx: (Math.random() - 0.5) * 1.6, vy: (Math.random() - 0.5) * 1.6,
-        life: 1, color: colors[Math.floor(Math.random() * colors.length)],
-      })
-    }
-    if (parts.length > 200) parts.splice(0, parts.length - 200)
+    mouse.x = e.clientX
+    mouse.y = e.clientY
   }
   const tick = () => {
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-    for (let i = parts.length - 1; i >= 0; i--) {
-      const p = parts[i]
-      p.x += p.vx; p.y += p.vy; p.life -= 0.02
-      if (p.life <= 0) { parts.splice(i, 1); continue }
-      ctx.globalAlpha = p.life
-      ctx.fillStyle = p.color
-      ctx.beginPath()
-      ctx.arc(p.x, p.y, 2.4 * p.life, 0, Math.PI * 2)
-      ctx.fill()
-    }
-    ctx.globalAlpha = 1
+    // 半透明覆盖形成拖尾（黑色画布上用暗色覆盖以适配深浅主题）
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+    particles.forEach((p) => p.update())
     raf = requestAnimationFrame(tick)
   }
   window.addEventListener('mousemove', onMove, { passive: true })
@@ -78,7 +107,6 @@ function mountParticle(): Cleaner {
   return () => {
     cancelAnimationFrame(raf)
     window.removeEventListener('mousemove', onMove)
-    window.removeEventListener('resize', () => {})
     canvas.remove()
   }
 }
