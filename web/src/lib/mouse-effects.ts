@@ -30,7 +30,7 @@ const isDesktop = () =>
 
 function makeCanvas(zIndex: number): { canvas: HTMLCanvasElement; ctx: CanvasRenderingContext2D } {
   const canvas = document.createElement('canvas')
-  canvas.style.cssText = `position:fixed;inset:0;pointer-events:none;z-index:${zIndex};`
+  canvas.style.cssText = `position:fixed;inset:0;pointer-events:none;z-index:${zIndex};mix-blend-mode:screen;`
   document.body.appendChild(canvas)
   const ctx = canvas.getContext('2d')!
   const resize = () => {
@@ -44,7 +44,7 @@ function makeCanvas(zIndex: number): { canvas: HTMLCanvasElement; ctx: CanvasRen
 
 /* ---------- 粒子拖尾 ---------- */
 function mountParticle(): Cleaner {
-  const { canvas, ctx } = makeCanvas(9998)
+  const { canvas, ctx } = makeCanvas(9985)
   const colors = ['#00bdff', '#4d39ce', '#088eff']
   const mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 - 80 }
 
@@ -70,9 +70,9 @@ function mountParticle(): Cleaner {
       this.lastMouse.y += (mouse.y - this.lastMouse.y) * 0.05
       // 圆形轨道 + 正弦摆动
       this.x =
-        this.lastMouse.x + Math.cos(this.radians) * (this.distance + Math.sin(this.radians) * 100)
+        this.lastMouse.x + Math.cos(this.radians) * (this.distance + Math.sin(this.radians) * 44)
       this.y =
-        this.lastMouse.y + Math.sin(this.radians) * (this.distance + Math.sin(this.radians) * 100)
+        this.lastMouse.y + Math.sin(this.radians) * (this.distance + Math.sin(this.radians) * 44)
       this.draw(lastPoint)
     }
 
@@ -88,7 +88,7 @@ function mountParticle(): Cleaner {
   }
 
   const particles: OrbitParticle[] = []
-  for (let i = 0; i < 50; i++) particles.push(new OrbitParticle())
+  for (let i = 0; i < 28; i++) particles.push(new OrbitParticle())
 
   let raf = 0
   const onMove = (e: MouseEvent) => {
@@ -96,9 +96,11 @@ function mountParticle(): Cleaner {
     mouse.y = e.clientY
   }
   const tick = () => {
-    // 半透明覆盖形成拖尾（黑色画布上用暗色覆盖以适配深浅主题）
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'
+    // destination-out 擦除法：透明画布上渐隐旧帧，不产生遮罩层
+    ctx.globalCompositeOperation = 'destination-out'
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.08)'
     ctx.fillRect(0, 0, canvas.width, canvas.height)
+    ctx.globalCompositeOperation = 'source-over'
     particles.forEach((p) => p.update())
     raf = requestAnimationFrame(tick)
   }
@@ -113,7 +115,7 @@ function mountParticle(): Cleaner {
 
 /* ---------- 点击烟花 ---------- */
 function mountFirework(): Cleaner {
-  const { canvas, ctx } = makeCanvas(9997)
+  const { canvas, ctx } = makeCanvas(9984)
   const sparks: { x: number; y: number; vx: number; vy: number; life: number; color: string }[] = []
   let raf = 0
   const onDown = (e: MouseEvent) => {
@@ -154,7 +156,7 @@ function mountFirework(): Cleaner {
 
 /* ---------- 滑动爱心 ---------- */
 function mountHeart(): Cleaner {
-  const { canvas, ctx } = makeCanvas(9996)
+  const { canvas, ctx } = makeCanvas(9983)
   const hearts: { x: number; y: number; size: number; life: number; hue: number }[] = []
   let last = 0
   let raf = 0
@@ -202,7 +204,7 @@ function mountText(): Cleaner {
   const onDown = (e: MouseEvent) => {
     const el = document.createElement('span')
     el.textContent = words[idx++ % words.length]
-    el.style.cssText = `position:fixed;left:${e.clientX}px;top:${e.clientY - 16}px;pointer-events:none;z-index:99999;font-size:14px;font-weight:600;color:#a5c8ff;text-shadow:0 0 8px rgba(96,165,250,.8);animation:me-text-float 1s ease-out forwards;`
+    el.style.cssText = `position:fixed;left:${e.clientX}px;top:${e.clientY - 16}px;pointer-events:none;z-index:99999;font-size:22px;font-weight:700;color:#a5c8ff;text-shadow:0 0 12px rgba(96,165,250,.9);animation:me-text-float 1s ease-out forwards;`
     document.body.appendChild(el)
     setTimeout(() => el.remove(), 1000)
   }

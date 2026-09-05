@@ -272,12 +272,15 @@ function WallpaperPicker(props: {
     queryKey: ['glass-wallpapers'],
     queryFn: async () => {
       const res = await api.get('/api/glass_wallpaper/list')
-      return res.data.data || []
+      return (res.data?.data || res.data || []) as GlassWallpaperEntry[]
     },
     staleTime: 60_000,
     enabled: isAdmin,
+    retry: false,
   })
-  const entries = (library.data || []).filter((e) => e.scope === props.scope)
+  const entries = (Array.isArray(library.data) ? library.data : []).filter(
+    (e) => e.scope === props.scope
+  )
 
   const handleUpload = async (file: File) => {
     setUploading(true)
