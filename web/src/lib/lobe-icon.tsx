@@ -29,9 +29,11 @@ import * as LobeIcons from '@lobehub/icons'
 import type React from 'react'
 
 import { IconSub2api } from '@/assets/custom/icon-sub2api'
+import { IconAgnes } from '@/assets/custom/icon-agnes'
 
 const CUSTOM_ICONS: Record<string, React.ComponentType<{ size?: number }>> = {
   Sub2API: IconSub2api,
+  Agnes: IconAgnes,
 }
 
 /**

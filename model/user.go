@@ -504,6 +504,21 @@ func GetUserById(id int, selectAll bool) (*User, error) {
 	return &user, err
 }
 
+// GetUserByIdUnscoped 同 GetUserById，但包含已软删除用户（管理员管理已注销用户用）
+func GetUserByIdUnscoped(id int, selectAll bool) (*User, error) {
+	if id == 0 {
+		return nil, errors.New("id 为空！")
+	}
+	user := User{Id: id}
+	var err error = nil
+	if selectAll {
+		err = DB.Unscoped().First(&user, "id = ?", id).Error
+	} else {
+		err = DB.Unscoped().Omit("password", "access_token").First(&user, "id = ?", id).Error
+	}
+	return &user, err
+}
+
 func GetUserIdByAffCode(affCode string) (int, error) {
 	if affCode == "" {
 		return 0, errors.New("affCode 为空！")
