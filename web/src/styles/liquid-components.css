@@ -259,3 +259,125 @@ section > div {
 ::selection {
   background: rgba(96, 165, 250, 0.3);
 }
+
+/* ---------- 21. v9.1 修复 ---------- */
+/* ① data-glass 显式挂档（CSS 侧通过 data-slot 直接映射三档，组件无需改动） */
+[data-slot='dialog-content'],
+[data-slot='alert-dialog-content'],
+[data-slot='sheet-content'] {
+  --liquid-blur: var(--liquid-blur-deep);
+}
+[data-slot='sidebar-inner'] {
+  --liquid-blur: var(--liquid-blur-liquid);
+}
+
+/* ② 渠道卡片（data-table-card）玻璃化 —— 之前漏掉的选择器 */
+[data-slot='data-table-card'] {
+  background: var(--liquid-bg) !important;
+  backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation));
+  -webkit-backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation));
+  border-color: var(--liquid-border) !important;
+  box-shadow: var(--liquid-highlight), var(--liquid-shadow) !important;
+}
+[data-slot='data-table-card']:hover {
+  background: var(--liquid-bg-hover) !important;
+  border-color: var(--liquid-border-hover) !important;
+}
+[data-slot='data-table-card'][data-state='selected'] {
+  border-color: rgba(120, 100, 255, 0.55) !important;
+}
+
+/* ④ Switch 修复：防全局背景/输入规则污染，恢复明确开关形态 */
+[data-slot='switch'] {
+  background: transparent !important;
+  border: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+[data-slot='switch'][data-unchecked] {
+  background: color-mix(in srgb, var(--muted-foreground) 35%, transparent) !important;
+}
+[data-slot='switch'][data-checked] {
+  background: var(--primary) !important;
+}
+[data-slot='switch-thumb'] {
+  background: #ffffff !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+.dark [data-slot='switch-thumb'] {
+  background: #f5f7fa !important;
+}
+
+/* ⑤ 设置页所有开关行容器不受宽口径 bg-background/ 规则误伤 */
+[data-slot='switch'] [class*='bg-background/'] {
+  background: transparent !important;
+}
+
+/* ---------- 22. 鼠标滑动液态流光（v9.1）---------- */
+/* 双层：::after = 跟随鼠标的柔光（已有），::before = 斜向流光扫过 */
+.liquid-glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(
+    115deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.06) 42%,
+    rgba(255, 255, 255, 0.16) 50%,
+    rgba(255, 255, 255, 0.06) 58%,
+    transparent 70%
+  );
+  background-size: 250% 250%;
+  background-position: 120% 120%;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+.liquid-glass:hover::before {
+  opacity: 1;
+  animation: liquid-sheen 1.6s ease-in-out infinite;
+}
+@keyframes liquid-sheen {
+  0%   { background-position: 120% 120%; }
+  60%  { background-position: -20% -20%; }
+  100% { background-position: -20% -20%; }
+}
+.dark .liquid-glass::before {
+  background: linear-gradient(
+    115deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.04) 42%,
+    rgba(255, 255, 255, 0.11) 50%,
+    rgba(255, 255, 255, 0.04) 58%,
+    transparent 70%
+  );
+  background-size: 250% 250%;
+}
+
+/* 鼠标柔光增强：双层径向（中心亮 + 外圈色散） */
+.liquid-glass::after {
+  width: 220px;
+  height: 220px;
+  background:
+    radial-gradient(circle, rgba(255, 255, 255, 0.14), transparent 60%),
+    radial-gradient(circle, rgba(140, 120, 255, 0.10), transparent 70%);
+  filter: blur(24px);
+  mix-blend-mode: screen;
+}
+.dark .liquid-glass::after {
+  background:
+    radial-gradient(circle, rgba(255, 255, 255, 0.07), transparent 60%),
+    radial-gradient(circle, rgba(120, 100, 255, 0.14), transparent 70%);
+}
+
+/* overflow 豁免：光晕/流光不能被 overflow:hidden 父级裁剪时需 visible，
+   但卡片多为 rounded+hidden——流光 inset:0 自适应圆角，无需改 */
+@media (prefers-reduced-motion: reduce) {
+  .liquid-glass:hover::before {
+    animation: none;
+    opacity: 0.6;
+    background-position: 50% 50%;
+  }
+}
