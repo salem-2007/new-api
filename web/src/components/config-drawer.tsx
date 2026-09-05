@@ -51,12 +51,17 @@ import {
 import { useDirection } from '@/context/direction-provider'
 import { type Collapsible, useLayout } from '@/context/layout-provider'
 import { useGlassPreference } from '@/context/glass-preference-provider'
+import { useRef, useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { api } from '@/lib/api'
 import {
   DEFAULT_GLASS_PREFERENCE,
   type MouseEffect,
   type WallpaperOption,
   type GlassPreference,
 } from '@/lib/glass-preference'
+import { ROLE } from '@/lib/roles'
+import { useAuthStore } from '@/stores/auth-store'
 import { useThemeCustomization } from '@/context/theme-customization-provider'
 import { Switch } from '@/components/ui/switch'
 import { useTheme } from '@/context/theme-provider'
@@ -220,6 +225,18 @@ function RadioGroupItem(props: {
   )
 }
 
+type GlassWallpaperEntry = {
+  name: string
+  url: string
+  scope: string
+  size: number
+}
+
+function useIsAdmin() {
+  const auth = useAuthStore()
+  return (auth.user?.role ?? 0) >= ROLE.ADMIN
+}
+
 type GlassConfigFont = GlassPreference['font']
 
 const WALLPAPER_CHOICES: {
@@ -249,31 +266,129 @@ function WallpaperPicker(props: {
   onChange: (v: WallpaperOption) => void
 }) {
   const { t } = useTranslation()
-  const choices = WALLPAPER_CHOICES.filter(
-    (c) => c.scope === 'both' || c.scope === props.scope
-  )
+  const queryClient = useQueryClient()
+  const [uploading, setUploading] = useState(false)
+  const fileRef = useRef<HTMLInputElement>(null)
+  const isAdmin = useIsAdmin()
+
+  const library = useQuery<GlassWallpaperEntry[]>({
+    queryKey: ['glass-wallpapers'],
+    queryFn: async () => {
+      const res = await api.get('/api/glass_wallpaper/list')
+      return res.data.data || []
+    },
+    staleTime: 60_000,
+    enabled: isAdmin,
+  })
+  const entries = (library.data || []).filter((e) => e.scope === props.scope)
+
+  const handleUpload = async (file: File) => {
+    setUploading(true)
+    try {
+      const form = new FormData()
+      form.append('scope', props.scope)
+      form.append('file', file)
+      await api.post('/api/glass_wallpaper/upload', form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      await queryClient.invalidateQueries({ queryKey: ['glass-wallpapers'] })
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const handleDelete = async (name: string) => {
+    await api.delete(
+      `/api/glass_wallpaper/delete?scope=${props.scope}&name=${encodeURIComponent(name)}`
+    )
+    queryClient.invalidateQueries({ queryKey: ['glass-wallpapers'] })
+  }
+
   return (
     <div className='space-y-1.5'>
       <div className='text-muted-foreground text-xs font-medium'>
         {props.scope === 'day' ? t('Day wallpaper') : t('Night wallpaper')}
       </div>
-      <div className='grid grid-cols-3 gap-1.5'>
-        {choices.map((c) => (
-          <button
-            key={c.value}
-            type='button'
-            onClick={() => props.onChange(c.value)}
-            className={cn(
-              'rounded-md border px-1.5 py-1.5 text-[11px] font-medium transition-colors',
-              props.value === c.value
-                ? 'border-primary bg-primary/10 text-primary'
-                : 'border-border hover:bg-muted/50 text-muted-foreground'
-            )}
-          >
-            {t(c.label)}
-          </button>
-        ))}
+      <div className='grid grid-cols-2 gap-1.5'>
+        <button
+          type='button'
+          onClick={() => props.onChange('default')}
+          className={cn(
+            'rounded-md border px-1.5 py-1.5 text-[11px] font-medium transition-colors',
+            props.value === 'default'
+              ? 'border-primary bg-primary/10 text-primary'
+              : 'border-border text-muted-foreground hover:bg-muted/50'
+          )}
+        >
+          {t('默认')}
+        </button>
+        <button
+          type='button'
+          onClick={() => props.onChange('custom')}
+          className={cn(
+            'rounded-md border px-1.5 py-1.5 text-[11px] font-medium transition-colors',
+            props.value === 'custom'
+              ? 'border-primary bg-primary/10 text-primary'
+              : 'border-border text-muted-foreground hover:bg-muted/50'
+          )}
+        >
+          {t('自定义 URL')}
+        </button>
       </div>
+
+      {isAdmin && (
+        <div className='space-y-1.5'>
+          <input
+            ref={fileRef}
+            type='file'
+            accept='image/jpeg,image/png,image/webp'
+            className='hidden'
+            onChange={(e) => {
+              const f = e.target.files?.[0]
+              if (f) handleUpload(f)
+              e.target.value = ''
+            }}
+          />
+          <Button
+            variant='outline'
+            size='sm'
+            className='w-full'
+            disabled={uploading}
+            onClick={() => fileRef.current?.click()}
+          >
+            {uploading ? t('Uploading...') : t('Upload wallpaper')}
+          </Button>
+          {entries.length > 0 && (
+            <div className='grid grid-cols-2 gap-1.5'>
+              {entries.map((e) => (
+                <div key={e.url} className='group relative'>
+                  <button
+                    type='button'
+                    onClick={() => props.onChange(`upload:${e.url}` as WallpaperOption)}
+                    className={cn(
+                      'h-14 w-full overflow-hidden rounded-md border transition-all',
+                      props.value === (`upload:${e.url}` as WallpaperOption)
+                        ? 'border-primary ring-1 ring-primary'
+                        : 'border-border hover:border-muted-foreground/50'
+                    )}
+                    title={e.name}
+                  >
+                    <img src={e.url} alt={e.name} className='size-full object-cover' />
+                  </button>
+                  <button
+                    type='button'
+                    onClick={() => handleDelete(e.name)}
+                    className='bg-destructive absolute top-0.5 right-0.5 hidden size-4 items-center justify-center rounded-sm text-[10px] text-white group-hover:flex'
+                    aria-label={t('Delete wallpaper')}
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
