@@ -3,6 +3,8 @@ package router
 import (
 	"embed"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/QuantumNous/new-api/common"
@@ -21,6 +23,17 @@ type WebAssets struct {
 
 func SetWebRouter(router *gin.Engine, assets WebAssets, pluginDispatcher gin.HandlerFunc) {
 	frontendFS := common.EmbedFolder(assets.BuildFS, "web/dist")
+
+	// 液态玻璃壁纸（管理员上传，存于 data/glass-wallpapers）
+	router.GET("/glass-wallpapers/:scope/:name", func(c *gin.Context) {
+		scope := c.Param("scope")
+		name := c.Param("name")
+		if scope != "day" && scope != "night" || strings.Contains(name, "..") {
+			c.Status(http.StatusNotFound)
+			return
+		}
+		c.File(filepath.Join("glass-wallpapers", scope, name))
+	})
 
 	router.NoRoute(
 		pluginDispatcher,
