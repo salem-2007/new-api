@@ -441,8 +441,7 @@ function GlassConfig() {
         </div>
       </div>
 
-      {preference.liquidGlass && (
-        <div className='space-y-3 border-t pt-3'>
+              <div className='space-y-3 border-t pt-3'>
           <WallpaperPicker
             scope='day'
             value={preference.wallpaperDay}
@@ -480,7 +479,6 @@ function GlassConfig() {
             </div>
           </div>
         </div>
-      )}
     </div>
   )
 }

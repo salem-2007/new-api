@@ -30,7 +30,7 @@ const isDesktop = () =>
 
 function makeCanvas(zIndex: number): { canvas: HTMLCanvasElement; ctx: CanvasRenderingContext2D } {
   const canvas = document.createElement('canvas')
-  canvas.style.cssText = `position:fixed;inset:0;pointer-events:none;z-index:${zIndex};mix-blend-mode:screen;`
+  canvas.style.cssText = `position:fixed;inset:0;pointer-events:none;z-index:${zIndex};`
   document.body.appendChild(canvas)
   const ctx = canvas.getContext('2d')!
   const resize = () => {
@@ -45,7 +45,10 @@ function makeCanvas(zIndex: number): { canvas: HTMLCanvasElement; ctx: CanvasRen
 /* ---------- 粒子拖尾 ---------- */
 function mountParticle(): Cleaner {
   const { canvas, ctx } = makeCanvas(9985)
-  const colors = ['#00bdff', '#4d39ce', '#088eff']
+  const isDark = document.documentElement.classList.contains('dark')
+  const colors = isDark
+    ? ['#00bdff', '#4d39ce', '#088eff']
+    : ['#1d4ed8', '#6d28d9', '#0e7490']
   const mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 - 80 }
 
   function randomIntFromRange(min: number, max: number) {
@@ -96,6 +99,7 @@ function mountParticle(): Cleaner {
     mouse.y = e.clientY
   }
   const tick = () => {
+    ctx.lineCap = 'round'
     // destination-out 擦除法：透明画布上渐隐旧帧，不产生遮罩层
     ctx.globalCompositeOperation = 'destination-out'
     ctx.fillStyle = 'rgba(0, 0, 0, 0.08)'
