@@ -381,3 +381,53 @@ section > div {
     background-position: 50% 50%;
   }
 }
+
+/* ---------- 23. 卡片 hover 脉冲发光（neon-pulse 适配）---------- */
+[data-slot='card']:hover,
+.bg-card:hover,
+[data-slot='data-table-card']:hover {
+  animation: neon-pulse 1.5s ease-in-out infinite;
+  border-color: rgba(255, 255, 255, 0.75) !important;
+}
+[data-slot='card']:hover,
+.bg-card:hover {
+  box-shadow:
+    0 0 5px rgba(255, 255, 255, 0.6),
+    0 0 15px rgba(255, 255, 255, 0.4),
+    0 0 30px rgba(96, 165, 250, 0.45),
+    0 0 50px rgba(96, 165, 250, 0.3),
+    0 0 80px rgba(96, 165, 250, 0.25),
+    inset 0 0 8px rgba(255, 255, 255, 0.3),
+    var(--liquid-shadow) !important;
+}
+.dark [data-slot='card']:hover,
+.dark .bg-card:hover,
+.dark [data-slot='data-table-card']:hover {
+  box-shadow:
+    0 0 5px rgba(255, 255, 255, 0.45),
+    0 0 15px rgba(165, 214, 255, 0.35),
+    0 0 30px rgba(96, 165, 250, 0.5),
+    0 0 50px rgba(96, 165, 250, 0.35),
+    0 0 80px rgba(96, 165, 250, 0.28),
+    inset 0 0 8px rgba(255, 255, 255, 0.22),
+    var(--liquid-shadow) !important;
+}
+@keyframes neon-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.85; }
+}
+/* 移动端无 hover，关闭脉冲动画省电 */
+@media (hover: none) {
+  [data-slot='card']:hover,
+  .bg-card:hover,
+  [data-slot='data-table-card']:hover {
+    animation: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-slot='card']:hover,
+  .bg-card:hover,
+  [data-slot='data-table-card']:hover {
+    animation: none;
+  }
+}
