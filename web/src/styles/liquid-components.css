@@ -466,3 +466,35 @@ section > div {
     inset 0 0 6px rgba(255, 255, 255, 0.18),
     var(--liquid-shadow) !important;
 }
+
+/* ---------- 25. 液态玻璃偏好开关（body data 属性驱动）---------- */
+body[data-liquid-glass='off'] [data-slot='card'],
+body[data-liquid-glass='off'] .bg-card,
+body[data-liquid-glass='off'] [data-slot='popover-content'],
+body[data-liquid-glass='off'] [data-slot='dropdown-menu-content'],
+body[data-liquid-glass='off'] [data-slot='select-content'],
+body[data-liquid-glass='off'] [data-slot='dialog-content'],
+body[data-liquid-glass='off'] [data-slot='alert-dialog-content'],
+body[data-liquid-glass='off'] [data-slot='sheet-content'],
+body[data-liquid-glass='off'] [data-slot='sidebar-inner'],
+body[data-liquid-glass='off'] [data-slot='sidebar-inset'],
+body[data-liquid-glass='off'] [data-slot='data-table-card'],
+body[data-liquid-glass='off'] .bg-popover {
+  background: var(--card) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08) !important;
+  border-color: var(--border) !important;
+}
+body[data-liquid-glass='off'] {
+  background-image: none !important;
+}
+body[data-liquid-glass='off']::before {
+  display: none !important;
+}
+body[data-glass-pulse='off'] [data-slot='card']:hover,
+body[data-glass-pulse='off'] .bg-card:hover,
+body[data-glass-pulse='off'] [data-slot='data-table-card']:hover {
+  animation: none !important;
+  box-shadow: var(--liquid-highlight), var(--liquid-shadow) !important;
+}

@@ -29,6 +29,7 @@ import { useEffect } from 'react'
 
 import { NavigationProgress } from '@/components/navigation-progress'
 import { Toaster } from '@/components/ui/sonner'
+import { GlassPreferenceProvider } from '@/context/glass-preference-provider'
 import { ThemeCustomizationProvider } from '@/context/theme-customization-provider'
 import { saveAffiliateCode } from '@/features/auth/lib/storage'
 import { GeneralError } from '@/features/errors/general-error'
@@ -93,7 +94,8 @@ function RootComponent() {
   )
 
   return (
-    <ThemeCustomizationProvider>
+    <GlassPreferenceProvider>
+      <ThemeCustomizationProvider>
       <NavigationProgress />
       <Outlet />
       <Toaster closeButton duration={5000} position='top-center' richColors />
@@ -103,7 +105,8 @@ function RootComponent() {
           <TanStackRouterDevtools position='bottom-right' />
         </>
       )}
-    </ThemeCustomizationProvider>
+      </ThemeCustomizationProvider>
+    </GlassPreferenceProvider>
   )
 }
 
