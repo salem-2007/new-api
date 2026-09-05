@@ -3,7 +3,6 @@ package router
 import (
 	"embed"
 	"net/http"
-	"os"
 	"path/filepath"
 	"strings"
 
