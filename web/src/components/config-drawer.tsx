@@ -50,7 +50,12 @@ import {
 } from '@/components/ui/sheet'
 import { useDirection } from '@/context/direction-provider'
 import { type Collapsible, useLayout } from '@/context/layout-provider'
+import {
+  DEFAULT_GLASS_PREFERENCE,
+  useGlassPreference,
+} from '@/context/glass-preference-provider'
 import { useThemeCustomization } from '@/context/theme-customization-provider'
+import { Switch } from '@/components/ui/switch'
 import { useTheme } from '@/context/theme-provider'
 import {
   type ContentLayout,
@@ -106,6 +111,7 @@ export function ConfigDrawer() {
         </SheetHeader>
         <div className={sideDrawerFormClassName()}>
           <ThemeConfig />
+          <GlassConfig />
           <PresetConfig />
           <FontConfig />
           <RadiusConfig />
@@ -208,6 +214,67 @@ function RadioGroupItem(props: {
         {props.item.label}
       </div>
     </Item>
+  )
+}
+
+function GlassConfig() {
+  const { t } = useTranslation()
+  const { preference, setLiquidGlass, setGlassPulse, resetGlass } =
+    useGlassPreference()
+  const showReset =
+    preference.liquidGlass !== DEFAULT_GLASS_PREFERENCE.liquidGlass ||
+    preference.glassPulse !== DEFAULT_GLASS_PREFERENCE.glassPulse
+
+  return (
+    <div className='space-y-3'>
+      <SectionTitle
+        title={t('Liquid Glass')}
+        showReset={showReset}
+        onReset={resetGlass}
+      />
+
+      <div className='space-y-1'>
+        <div className='flex items-center justify-between gap-3'>
+          <div className='min-w-0'>
+            <div className='text-sm font-medium'>
+              {t('Liquid Glass Effect')}
+            </div>
+            <p className='text-muted-foreground text-xs'>
+              {t(
+                'Translucent panels, blurred wallpaper, and glass refraction'
+              )}
+            </p>
+          </div>
+          <Switch
+            checked={preference.liquidGlass}
+            onCheckedChange={setLiquidGlass}
+            aria-label={t('Toggle liquid glass effect')}
+          />
+        </div>
+
+        <div
+          className={cn(
+            'flex items-center justify-between gap-3 transition-opacity',
+            !preference.liquidGlass && 'pointer-events-none opacity-50'
+          )}
+        >
+          <div className='min-w-0'>
+            <div className='text-sm font-medium'>
+              {t('Card Pulse Glow')}
+            </div>
+            <p className='text-muted-foreground text-xs'>
+              {t('Breathing neon glow when hovering cards')}
+            </p>
+          </div>
+          <Switch
+            checked={preference.glassPulse}
+            onCheckedChange={setGlassPulse}
+            disabled={!preference.liquidGlass}
+            aria-label={t('Toggle card pulse glow')}
+          />
+        </div>
+      </div>
+    </div>
   )
 }
 
