@@ -22,7 +22,8 @@ For commercial licensing, please contact support@quantumnous.com
  * - glassPulse: 卡片 hover 脉冲发光开关
  */
 
-export type WallpaperOption = 'default' | 'day-shinji' | 'day-asuka' | 'night-eva' | 'night-rei'
+export type WallpaperOption =
+  | 'custom-url' | 'default' | 'day-shinji' | 'day-asuka' | 'night-eva' | 'night-rei'
 export type MouseEffect = 'firework' | 'heart' | 'text' | 'particle'
 
 export type GlassPreference = {
