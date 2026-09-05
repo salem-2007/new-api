@@ -51,7 +51,12 @@ import {
 import { useDirection } from '@/context/direction-provider'
 import { type Collapsible, useLayout } from '@/context/layout-provider'
 import { useGlassPreference } from '@/context/glass-preference-provider'
-import { DEFAULT_GLASS_PREFERENCE } from '@/lib/glass-preference'
+import {
+  DEFAULT_GLASS_PREFERENCE,
+  type MouseEffect,
+  type WallpaperOption,
+  type GlassPreference,
+} from '@/lib/glass-preference'
 import { useThemeCustomization } from '@/context/theme-customization-provider'
 import { Switch } from '@/components/ui/switch'
 import { useTheme } from '@/context/theme-provider'
@@ -215,16 +220,78 @@ function RadioGroupItem(props: {
   )
 }
 
+type GlassConfigFont = GlassPreference['font']
+
+const WALLPAPER_CHOICES: {
+  value: WallpaperOption
+  label: string
+  scope: 'day' | 'night' | 'both'
+  preview?: string
+}[] = [
+  { value: 'default', label: '默认', scope: 'both' },
+  { value: 'day-shinji', label: '真嗣·日落', scope: 'day', preview: '/wallpapers/day-shinji.jpg' },
+  { value: 'day-asuka', label: '明日香', scope: 'day', preview: '/wallpapers/day-asuka.jpg' },
+  { value: 'night-eva', label: '初号机·黄昏', scope: 'night', preview: '/wallpapers/night-eva.jpg' },
+  { value: 'night-rei', label: '绫波丽·霓虹', scope: 'night', preview: '/wallpapers/night-rei.jpg' },
+  { value: 'custom', label: '自定义 URL', scope: 'both' },
+]
+
+const MOUSE_EFFECT_CHOICES: { value: MouseEffect; label: string }[] = [
+  { value: 'particle', label: '粒子拖尾' },
+  { value: 'firework', label: '点击烟花' },
+  { value: 'heart', label: '滑动爱心' },
+  { value: 'text', label: '点击文字' },
+]
+
+function WallpaperPicker(props: {
+  scope: 'day' | 'night'
+  value: WallpaperOption
+  onChange: (v: WallpaperOption) => void
+}) {
+  const { t } = useTranslation()
+  const choices = WALLPAPER_CHOICES.filter(
+    (c) => c.scope === 'both' || c.scope === props.scope
+  )
+  return (
+    <div className='space-y-1.5'>
+      <div className='text-muted-foreground text-xs font-medium'>
+        {props.scope === 'day' ? t('Day wallpaper') : t('Night wallpaper')}
+      </div>
+      <div className='grid grid-cols-3 gap-1.5'>
+        {choices.map((c) => (
+          <button
+            key={c.value}
+            type='button'
+            onClick={() => props.onChange(c.value)}
+            className={cn(
+              'rounded-md border px-1.5 py-1.5 text-[11px] font-medium transition-colors',
+              props.value === c.value
+                ? 'border-primary bg-primary/10 text-primary'
+                : 'border-border hover:bg-muted/50 text-muted-foreground'
+            )}
+          >
+            {t(c.label)}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 function GlassConfig() {
   const { t } = useTranslation()
-  const { preference, setLiquidGlass, setGlassPulse, resetGlass } =
+  const { preference, setLiquidGlass, setGlassPulse, setWallpaper, setCustomWallpaperUrl, setFont, toggleMouseEffect, resetGlass } =
     useGlassPreference()
   const showReset =
     preference.liquidGlass !== DEFAULT_GLASS_PREFERENCE.liquidGlass ||
-    preference.glassPulse !== DEFAULT_GLASS_PREFERENCE.glassPulse
+    preference.glassPulse !== DEFAULT_GLASS_PREFERENCE.glassPulse ||
+    preference.wallpaperDay !== DEFAULT_GLASS_PREFERENCE.wallpaperDay ||
+    preference.wallpaperNight !== DEFAULT_GLASS_PREFERENCE.wallpaperNight ||
+    preference.font !== DEFAULT_GLASS_PREFERENCE.font ||
+    preference.mouseEffects.length !== 0
 
   return (
-    <div className='space-y-3'>
+    <div className='space-y-4'>
       <SectionTitle
         title={t('Liquid Glass')}
         showReset={showReset}
@@ -238,9 +305,7 @@ function GlassConfig() {
               {t('Liquid Glass Effect')}
             </div>
             <p className='text-muted-foreground text-xs'>
-              {t(
-                'Translucent panels, blurred wallpaper, and glass refraction'
-              )}
+              {t('Translucent panels, blurred wallpaper, and glass refraction')}
             </p>
           </div>
           <Switch
@@ -272,6 +337,82 @@ function GlassConfig() {
           />
         </div>
       </div>
+
+      {preference.liquidGlass && (
+        <div className='space-y-3 border-t pt-3'>
+          <WallpaperPicker
+            scope='day'
+            value={preference.wallpaperDay}
+            onChange={(v) => setWallpaper('day', v)}
+          />
+          <WallpaperPicker
+            scope='night'
+            value={preference.wallpaperNight}
+            onChange={(v) => setWallpaper('night', v)}
+          />
+          {preference.wallpaperDay === 'custom' || preference.wallpaperNight === 'custom' ? (
+            <input
+              value={preference.customWallpaperUrl}
+              onChange={(e) => setCustomWallpaperUrl(e.target.value)}
+              placeholder={t('Custom wallpaper URL')}
+              className='border-input bg-background/50 w-full rounded-md border px-2.5 py-1.5 text-xs'
+            />
+          ) : null}
+
+          <div className='space-y-1.5 border-t pt-3'>
+            <div className='text-muted-foreground text-xs font-medium'>
+              {t('Font')}
+            </div>
+            <div className='grid grid-cols-3 gap-1.5'>
+              {[
+                { v: 'default', label: t('Default') },
+                { v: 'awan', label: 'A丸 Sleek' },
+                { v: 'yayuan', label: '浪漫雅圆' },
+              ].map((f) => (
+                <button
+                  key={f.v}
+                  type='button'
+                  onClick={() => setFont(f.v as GlassConfigFont)}
+                  className={cn(
+                    'rounded-md border px-1.5 py-1.5 text-[11px] font-medium transition-colors',
+                    preference.font === f.v
+                      ? 'border-primary bg-primary/10 text-primary'
+                      : 'border-border hover:bg-muted/50 text-muted-foreground'
+                  )}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className='space-y-1.5 border-t pt-3'>
+            <div className='text-muted-foreground text-xs font-medium'>
+              {t('Mouse Effects')}
+            </div>
+            <div className='grid grid-cols-2 gap-1.5'>
+              {MOUSE_EFFECT_CHOICES.map((e) => {
+                const on = preference.mouseEffects.includes(e.value)
+                return (
+                  <button
+                    key={e.value}
+                    type='button'
+                    onClick={() => toggleMouseEffect(e.value, !on)}
+                    className={cn(
+                      'rounded-md border px-1.5 py-1.5 text-[11px] font-medium transition-colors',
+                      on
+                        ? 'border-primary bg-primary/10 text-primary'
+                        : 'border-border hover:bg-muted/50 text-muted-foreground'
+                    )}
+                  >
+                    {e.label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
