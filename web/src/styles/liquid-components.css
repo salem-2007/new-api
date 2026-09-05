@@ -431,3 +431,54 @@ section > div {
     animation: none;
   }
 }
+
+/* ---------- 24. v9.2 修复 ---------- */
+/* ① 首页介绍卡：去掉外围线（glass-3/glass-morphism 的 border 与顶部渐变线） */
+.glass-3,
+.glass-morphism,
+.glass-1, .glass-2, .glass-4, .glass-5 {
+  border: none !important;
+  background: var(--liquid-bg) !important;
+  backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation)) !important;
+  -webkit-backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation)) !important;
+  box-shadow: var(--liquid-highlight), var(--liquid-shadow) !important;
+}
+.glass-3::before,
+.glass-3::after {
+  display: none !important;  /* 顶部渐变 border effect 装饰线 */
+}
+.glass-3:hover,
+.glass-morphism:hover {
+  box-shadow: var(--liquid-highlight), 0 16px 45px rgba(31, 45, 71, 0.22) !important;
+}
+
+/* ② 剩余额度右列：写死渐变 → 与左侧统计卡同色玻璃 */
+[class*='bg-[linear-gradient(135deg,color-mix'] {
+  background: var(--liquid-bg-deep) !important;
+  backdrop-filter: blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation)) !important;
+  -webkit-backdrop-filter: blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation)) !important;
+}
+
+/* ③ 脉冲光晕收缩：80px→36px，15/30px 层减半 */
+[data-slot='card']:hover,
+.bg-card:hover,
+[data-slot='data-table-card']:hover {
+  box-shadow:
+    0 0 4px rgba(255, 255, 255, 0.5),
+    0 0 10px rgba(255, 255, 255, 0.3),
+    0 0 16px rgba(96, 165, 250, 0.4),
+    0 0 26px rgba(96, 165, 250, 0.22),
+    inset 0 0 6px rgba(255, 255, 255, 0.25),
+    var(--liquid-shadow) !important;
+}
+.dark [data-slot='card']:hover,
+.dark .bg-card:hover,
+.dark [data-slot='data-table-card']:hover {
+  box-shadow:
+    0 0 4px rgba(255, 255, 255, 0.4),
+    0 0 10px rgba(165, 214, 255, 0.28),
+    0 0 16px rgba(96, 165, 250, 0.42),
+    0 0 26px rgba(96, 165, 250, 0.25),
+    inset 0 0 6px rgba(255, 255, 255, 0.18),
+    var(--liquid-shadow) !important;
+}
