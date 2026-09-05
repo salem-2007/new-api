@@ -1,0 +1,261 @@
+/*
+Copyright (C) 2023-2026 QuantumNous
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+For commercial licensing, please contact support@quantumnous.com
+*/
+/* ========================================================================
+ * liquid-components.css — 组件细化玻璃样式
+ * 覆盖：Sidebar / Card / Table / Input / Dialog / 布局根 / 数据表格页
+ * 全部基于 liquid-glass.css 的变量，无写死色值（暗/亮主题自适应）
+ * ===================================================================== */
+
+/* ---------- 1. 布局根容器透明（壁纸全站可见） ---------- */
+div.bg-background.text-foreground.relative,
+.group\/sidebar-wrapper,
+[data-slot='sidebar-container'],
+section.bg-background,
+section .bg-background {
+  background: transparent !important;
+}
+
+/* ---------- 2. Sidebar（漂浮玻璃层 data-glass="liquid"） ---------- */
+[data-slot='sidebar'],
+[data-slot='sidebar-header'],
+[data-slot='sidebar-footer'],
+[data-slot='sidebar-group'],
+[data-slot='sidebar-menu-button'] {
+  background: transparent !important;
+  border-color: transparent !important;
+}
+[data-slot='sidebar-inner'] {
+  background: var(--liquid-bg) !important;
+  backdrop-filter: blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation));
+  -webkit-backdrop-filter: blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation));
+  border-right: 1px solid var(--liquid-border) !important;
+  will-change: transform;
+  contain: layout paint;
+}
+[data-slot='sidebar-menu-button']:hover {
+  background: var(--liquid-bg-hover) !important;
+}
+
+/* ---------- 3. 控制台主区（sidebar-inset：轻玻璃露出壁纸） ---------- */
+[data-slot='sidebar-inset'] {
+  background: color-mix(in srgb, var(--glass-tint) calc(var(--glass-alpha) * 55), transparent) !important;
+  backdrop-filter: blur(12px) saturate(var(--liquid-saturation));
+  -webkit-backdrop-filter: blur(12px) saturate(var(--liquid-saturation));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ---------- 4. Card（三档中默认 frosted，页级大面板 liquid） ---------- */
+[data-slot='card'],
+.bg-card {
+  background: var(--liquid-bg) !important;
+  backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation));
+  -webkit-backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation));
+  box-shadow: var(--liquid-highlight), var(--liquid-shadow) !important;
+  border-color: var(--liquid-border) !important;
+  transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+[data-slot='card']:hover,
+.bg-card:hover {
+  background: var(--liquid-bg-hover) !important;
+  border-color: var(--liquid-border-hover) !important;
+  box-shadow: var(--liquid-highlight), 0 16px 45px rgba(31, 45, 71, 0.22) !important;
+}
+/* 页级大面板（main 直下）升级 liquid 档 */
+main .bg-card,
+[data-slot='section-page-layout'] .bg-card {
+  background: var(--liquid-bg-deep) !important;
+  backdrop-filter: blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation));
+  -webkit-backdrop-filter: blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation));
+  box-shadow: var(--liquid-highlight), var(--liquid-shadow-deep) !important;
+}
+/* 图表画布透明 */
+.bg-card .recharts-wrapper,
+.bg-card .recharts-surface {
+  background: transparent !important;
+}
+
+/* ---------- 5. Popover / Dropdown / Select / Tooltip / Command ---------- */
+[data-slot='popover-content'],
+[data-slot='dropdown-menu-content'],
+[data-slot='select-content'],
+[data-slot='tooltip-content'],
+[data-slot='command'],
+[data-slot='hover-card-content'],
+.bg-popover {
+  background: color-mix(in srgb, var(--glass-tint) 92%, transparent) !important;
+  backdrop-filter: blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation));
+  -webkit-backdrop-filter: blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation));
+  border-color: var(--liquid-border) !important;
+  box-shadow: var(--liquid-highlight), var(--liquid-shadow-deep) !important;
+}
+
+/* ---------- 6. Dialog / Sheet（deep 档） ---------- */
+[data-slot='dialog-content'],
+[data-slot='alert-dialog-content'],
+[data-slot='sheet-content'] {
+  background: var(--liquid-bg-deep) !important;
+  backdrop-filter: blur(var(--liquid-blur-deep)) saturate(var(--liquid-saturation));
+  -webkit-backdrop-filter: blur(var(--liquid-blur-deep)) saturate(var(--liquid-saturation));
+  border-color: var(--liquid-border) !important;
+  box-shadow: var(--liquid-highlight), 0 30px 100px rgba(0, 0, 0, 0.35) !important;
+  border-radius: 22px;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  will-change: transform, opacity;
+  contain: layout paint;
+}
+/* 移动端弹窗限高（安全区） */
+@media (max-width: 640px) {
+  [data-slot='dialog-content'] {
+    max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 1rem) !important;
+  }
+  [data-slot='dialog-content'] .overflow-y-auto {
+    max-height: calc(100dvh - 16rem - env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* ---------- 7. Table（数据表格页全玻璃） ---------- */
+.overflow-hidden.rounded-lg.border:has([data-slot='table']) {
+  background: var(--liquid-bg-deep) !important;
+  backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation));
+  -webkit-backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation));
+  border-color: var(--liquid-border) !important;
+  box-shadow: var(--liquid-highlight), var(--liquid-shadow-deep) !important;
+}
+[data-slot='table-header'],
+[data-slot='table-header'] tr {
+  background: rgba(255, 255, 255, 0.28) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.dark [data-slot='table-header'],
+.dark [data-slot='table-header'] tr {
+  background: rgba(255, 255, 255, 0.07) !important;
+}
+[data-slot='table-head'],
+[data-slot='table-cell'] {
+  border-color: rgba(255, 255, 255, 0.35) !important;
+}
+.dark [data-slot='table-head'],
+.dark [data-slot='table-cell'] {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+[data-slot='table-row'] {
+  background: transparent !important;
+}
+[data-slot='table-row']:hover {
+  background: rgba(255, 255, 255, 0.22) !important;
+}
+.dark [data-slot='table-row']:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+/* 弹窗内测试表格行 */
+[data-slot='dialog-content'] [data-slot='table-container'] tr,
+[data-slot='dialog-content'] table tbody tr {
+  background: rgba(255, 255, 255, 0.14) !important;
+  border-color: var(--liquid-border) !important;
+}
+
+/* ---------- 8. Input / Textarea / Select ---------- */
+input,
+textarea,
+[data-slot='select-trigger'],
+[data-slot='input'] {
+  background: var(--liquid-bg) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 12px;
+  border-color: var(--liquid-border) !important;
+}
+input:focus,
+textarea:focus,
+[data-slot='select-trigger']:focus,
+[data-slot='input']:focus {
+  background: var(--liquid-bg-hover) !important;
+  border-color: rgba(140, 120, 255, 0.55) !important;
+  box-shadow: 0 0 0 3px rgba(120, 100, 255, 0.12), 0 0 25px rgba(120, 100, 255, 0.08);
+}
+
+/* ---------- 9. 顶栏（透明无边界；收缩胶囊在 header.tsx 内联类） ---------- */
+header {
+  background: transparent !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
+header [data-slot='card'],
+header .backdrop-blur-2xl,
+header [class*='rounded-2xl'] {
+  box-shadow: var(--liquid-highlight), var(--liquid-shadow-deep) !important;
+}
+.bg-background\/98 {
+  background: color-mix(in srgb, var(--glass-tint) 90%, transparent) !important;
+  backdrop-filter: blur(20px) saturate(var(--liquid-saturation));
+  -webkit-backdrop-filter: blur(20px) saturate(var(--liquid-saturation));
+}
+
+/* ---------- 10. 概览半透明面板（bg-background/NN）统一升级 ---------- */
+[class*='bg-background/'] {
+  background: var(--liquid-bg-deep) !important;
+  backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation));
+  -webkit-backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation));
+  box-shadow: var(--liquid-highlight), var(--liquid-shadow-deep) !important;
+}
+
+/* ---------- 11. 二级页面（关于/协议 Section） ---------- */
+[data-slot='section'] > div,
+section > div {
+  background: color-mix(in srgb, var(--glass-tint) calc(var(--glass-deep-alpha) * 70), transparent) !important;
+  backdrop-filter: blur(calc(var(--liquid-blur-frosted) * 0.8)) saturate(var(--liquid-saturation));
+  -webkit-backdrop-filter: blur(calc(var(--liquid-blur-frosted) * 0.8)) saturate(var(--liquid-saturation));
+  outline: 1px solid var(--liquid-border);
+  outline-offset: -1px;
+  border-radius: var(--liquid-radius);
+}
+
+/* ---------- 12. 主页 hero（徽章 / pill / 终端窗） ---------- */
+.landing-animate-fade-up.rounded-full,
+.group.rounded-full.border-border\/40 {
+  background: var(--liquid-bg-deep) !important;
+  backdrop-filter: blur(14px) saturate(var(--liquid-saturation));
+  -webkit-backdrop-filter: blur(14px) saturate(var(--liquid-saturation));
+  border-color: var(--liquid-border) !important;
+  box-shadow: var(--liquid-highlight), var(--liquid-shadow-deep) !important;
+}
+.rounded-2xl.border.bg-white\/95,
+[class*='bg-[#0b0f17]'] {
+  background: var(--liquid-bg-deep) !important;
+  backdrop-filter: blur(24px) saturate(170%);
+  -webkit-backdrop-filter: blur(24px) saturate(170%);
+  box-shadow: var(--liquid-highlight), var(--liquid-shadow-deep) !important;
+  border-color: var(--liquid-border) !important;
+}
+
+/* ---------- 13. 移动端分页安全区 ---------- */
+@media (max-width: 640px) {
+  [class*='pagination'],
+  [data-slot='pagination'] {
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.5rem);
+  }
+}
+
+/* ---------- 14. 选中态 ---------- */
+::selection {
+  background: rgba(96, 165, 250, 0.3);
+}

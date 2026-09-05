@@ -45,6 +45,14 @@ import { routeTree } from './routeTree.gen'
 // Styles
 import './styles/index.css'
 
+// Liquid Glass: 全局鼠标光晕坐标（仅桌面、pointer 精确设备生效）
+if (window.matchMedia('(pointer: fine)').matches) {
+  document.addEventListener('pointermove', (e) => {
+    document.documentElement.style.setProperty('--mouse-x', `${e.clientX}px`)
+    document.documentElement.style.setProperty('--mouse-y', `${e.clientY}px`)
+  }, { passive: true })
+}
+
 // Ensure VChart theme is initialized before any chart mounts (prevents white default theme flash)
 // VChart theme is driven by our ThemeProvider (html.light/html.dark) via per-chart `theme` prop.
 initializeFrontendCache()
