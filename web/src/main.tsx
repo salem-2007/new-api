@@ -45,6 +45,10 @@ import { routeTree } from './routeTree.gen'
 // Styles
 import './styles/index.css'
 
+// Liquid Glass Switch: 注入共享 SVG 位移 filter（shuding/liquid-glass 移植）
+import { injectLiquidSwitchFilter } from '@/lib/liquid-switch'
+injectLiquidSwitchFilter()
+
 // Liquid Glass: 全局鼠标光晕坐标（仅桌面、pointer 精确设备生效）
 if (window.matchMedia('(pointer: fine)').matches) {
   document.addEventListener('pointermove', (e) => {
