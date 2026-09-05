@@ -24,12 +24,18 @@ import {
   readGlassPreference,
   writeGlassPreference,
   type GlassPreference,
+  type MouseEffect,
+  type WallpaperOption,
 } from '@/lib/glass-preference'
 
 type GlassPreferenceContextType = {
   preference: GlassPreference
   setLiquidGlass: (on: boolean) => void
   setGlassPulse: (on: boolean) => void
+  setWallpaper: (which: 'day' | 'night', option: WallpaperOption) => void
+  setCustomWallpaperUrl: (url: string) => void
+  setFont: (font: GlassPreference['font']) => void
+  toggleMouseEffect: (effect: MouseEffect, on: boolean) => void
   resetGlass: () => void
 }
 
@@ -37,6 +43,10 @@ const FALLBACK: GlassPreferenceContextType = {
   preference: DEFAULT_GLASS_PREFERENCE,
   setLiquidGlass: () => {},
   setGlassPulse: () => {},
+  setWallpaper: () => {},
+  setCustomWallpaperUrl: () => {},
+  setFont: () => {},
+  toggleMouseEffect: () => {},
   resetGlass: () => {},
 }
 
@@ -53,11 +63,36 @@ export function GlassPreferenceProvider(props: { children: React.ReactNode }) {
     writeGlassPreference(preference)
   }, [preference])
 
+  // 主题明暗切换时用同一偏好重新解析壁纸
+  useEffect(() => {
+    const root = document.documentElement
+    const observer = new MutationObserver(() => applyGlassPreference(preference))
+    observer.observe(root, { attributes: true, attributeFilter: ['class'] })
+    return () => observer.disconnect()
+  }, [preference])
+
   const value = useMemo<GlassPreferenceContextType>(
     () => ({
       preference,
       setLiquidGlass: (on) => setPreference((p) => ({ ...p, liquidGlass: on })),
       setGlassPulse: (on) => setPreference((p) => ({ ...p, glassPulse: on })),
+      setWallpaper: (which, option) =>
+        setPreference((p) =>
+          which === 'day'
+            ? { ...p, wallpaperDay: option }
+            : { ...p, wallpaperNight: option }
+        ),
+      setCustomWallpaperUrl: (url) =>
+        setPreference((p) => ({ ...p, customWallpaperUrl: url })),
+      setFont: (font) => setPreference((p) => ({ ...p, font })),
+      toggleMouseEffect: (effect, on) =>
+        setPreference((p) => {
+          const has = p.mouseEffects.includes(effect)
+          const next = on
+            ? [...p.mouseEffects, effect]
+            : p.mouseEffects.filter((e) => e !== effect)
+          return { ...p, mouseEffects: next }
+        }),
       resetGlass: () => setPreference(DEFAULT_GLASS_PREFERENCE),
     }),
     [preference]

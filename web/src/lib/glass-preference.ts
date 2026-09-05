@@ -22,16 +22,37 @@ For commercial licensing, please contact support@quantumnous.com
  * - glassPulse: 卡片 hover 脉冲发光开关
  */
 
+export type WallpaperOption = 'default' | 'day-shinji' | 'day-asuka' | 'night-eva' | 'night-rei' | 'custom'
+export type MouseEffect = 'firework' | 'heart' | 'text' | 'particle'
+
 export type GlassPreference = {
   liquidGlass: boolean
   glassPulse: boolean
+  wallpaperDay: WallpaperOption
+  wallpaperNight: WallpaperOption
+  customWallpaperUrl: string
+  font: 'default' | 'awan' | 'yayuan'
+  mouseEffects: MouseEffect[]
 }
 
 export const GLASS_STORAGE_KEY = 'glass_preference'
 
+export const WALLPAPER_ASSETS: Record<string, { day?: string; night?: string }> = {
+  default: { day: '/wallpapers/day-shinji.jpg', night: '/wallpapers/night-eva.jpg' },
+  'day-shinji': { day: '/wallpapers/day-shinji.jpg' },
+  'day-asuka': { day: '/wallpapers/day-asuka.jpg' },
+  'night-eva': { night: '/wallpapers/night-eva.jpg' },
+  'night-rei': { night: '/wallpapers/night-rei.jpg' },
+}
+
 export const DEFAULT_GLASS_PREFERENCE: GlassPreference = {
   liquidGlass: true,
   glassPulse: true,
+  wallpaperDay: 'default',
+  wallpaperNight: 'default',
+  customWallpaperUrl: '',
+  font: 'default',
+  mouseEffects: [],
 }
 
 export function readGlassPreference(): GlassPreference {
@@ -43,6 +64,11 @@ export function readGlassPreference(): GlassPreference {
     return {
       liquidGlass: parsed.liquidGlass ?? DEFAULT_GLASS_PREFERENCE.liquidGlass,
       glassPulse: parsed.glassPulse ?? DEFAULT_GLASS_PREFERENCE.glassPulse,
+      wallpaperDay: parsed.wallpaperDay ?? 'default',
+      wallpaperNight: parsed.wallpaperNight ?? 'default',
+      customWallpaperUrl: parsed.customWallpaperUrl ?? '',
+      font: parsed.font ?? 'default',
+      mouseEffects: Array.isArray(parsed.mouseEffects) ? parsed.mouseEffects : [],
     }
   } catch {
     return DEFAULT_GLASS_PREFERENCE
@@ -57,10 +83,49 @@ export function writeGlassPreference(pref: GlassPreference) {
   }
 }
 
-/** 把偏好应用到 body data 属性，CSS 据此开关效果 */
+/** 解析当前主题下应使用的壁纸 URL */
+function resolveWallpaper(pref: GlassPreference, isDark: boolean): string {
+  const pick = isDark ? pref.wallpaperNight : pref.wallpaperDay
+  if (pick === 'custom' && pref.customWallpaperUrl) return pref.customWallpaperUrl
+  const asset = WALLPAPER_ASSETS[pick]
+  if (asset) return (isDark ? asset.night : asset.day) ?? asset.day ?? asset.night ?? ''
+  return isDark ? '/wallpapers/night-eva.jpg' : '/wallpapers/day-shinji.jpg'
+}
+
+/** 把偏好应用到 DOM：body data 属性 + 壁纸变量 + 字体 + 鼠标动画 */
 export function applyGlassPreference(pref: GlassPreference) {
   if (typeof document === 'undefined') return
   const body = document.body
   body.setAttribute('data-liquid-glass', pref.liquidGlass ? 'on' : 'off')
   body.setAttribute('data-glass-pulse', pref.glassPulse ? 'on' : 'off')
+
+  // 壁纸：跟随当前主题取对应图
+  const isDark = document.documentElement.classList.contains('dark')
+  const url = resolveWallpaper(pref, isDark)
+  body.style.setProperty('--eva-wallpaper', url ? `url("${url}")` : 'none')
+
+  // 字体
+  if (pref.font === 'awan') {
+    body.style.setProperty('--font-body', "'A Wan Sleek', sans-serif")
+  } else if (pref.font === 'yayuan') {
+    body.style.setProperty('--font-body', "'Romantic YaYuan Pro', sans-serif")
+  } else {
+    body.style.removeProperty('--font-body')
+  }
+  ensureFontFaces()
+
+  // 鼠标动画（单例挂载）
+  import('@/lib/mouse-effects').then((m) => m.syncMouseEffects(pref.mouseEffects))
+}
+let fontFacesInjected = false
+/** 运行时注入自定义字体 @font-face（绕开构建器对 url() 的静态解析） */
+export function ensureFontFaces() {
+  if (fontFacesInjected || typeof document === 'undefined') return
+  fontFacesInjected = true
+  const style = document.createElement('style')
+  style.textContent = `
+    @font-face { font-family: 'A Wan Sleek'; src: url('/fonts/a-wan-sleek.ttf') format('truetype'); font-display: swap; }
+    @font-face { font-family: 'Romantic YaYuan Pro'; src: url('/fonts/romantic-yayuan-pro.ttf') format('truetype'); font-display: swap; }
+  `
+  document.head.appendChild(style)
 }
