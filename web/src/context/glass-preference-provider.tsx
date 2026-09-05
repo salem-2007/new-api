@@ -34,7 +34,6 @@ type GlassPreferenceContextType = {
   setGlassPulse: (on: boolean) => void
   setWallpaper: (which: 'day' | 'night', option: WallpaperOption) => void
   setCustomWallpaperUrl: (url: string) => void
-  setFont: (font: GlassPreference['font']) => void
   toggleMouseEffect: (effect: MouseEffect, on: boolean) => void
   resetGlass: () => void
 }
@@ -45,7 +44,6 @@ const FALLBACK: GlassPreferenceContextType = {
   setGlassPulse: () => {},
   setWallpaper: () => {},
   setCustomWallpaperUrl: () => {},
-  setFont: () => {},
   toggleMouseEffect: () => {},
   resetGlass: () => {},
 }
@@ -84,15 +82,11 @@ export function GlassPreferenceProvider(props: { children: React.ReactNode }) {
         ),
       setCustomWallpaperUrl: (url) =>
         setPreference((p) => ({ ...p, customWallpaperUrl: url })),
-      setFont: (font) => setPreference((p) => ({ ...p, font })),
       toggleMouseEffect: (effect, on) =>
-        setPreference((p) => {
-          const has = p.mouseEffects.includes(effect)
-          const next = on
-            ? [...p.mouseEffects, effect]
-            : p.mouseEffects.filter((e) => e !== effect)
-          return { ...p, mouseEffects: next }
-        }),
+        setPreference((p) => ({
+          ...p,
+          mouseEffects: on ? [effect] : [],
+        })),
       resetGlass: () => setPreference(DEFAULT_GLASS_PREFERENCE),
     }),
     [preference]

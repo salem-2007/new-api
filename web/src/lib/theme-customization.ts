@@ -97,7 +97,7 @@ export type ContentLayout = 'full' | 'centered'
  *   "soul" typography. Inherits across the whole UI; monospace contexts
  *   keep their own family via Tailwind preflight and `.font-mono`.
  */
-export type ThemeFont = 'default' | 'sans' | 'serif'
+export type ThemeFont = 'default' | 'sans' | 'serif' | 'awan' | 'yayuan'
 
 /**
  * The resolved (non-`default`) font value applied to the DOM. The provider
@@ -131,6 +131,8 @@ export const THEME_FONT_VALUES: ReadonlySet<ThemeFont> = new Set([
   'default',
   'sans',
   'serif',
+  'awan',
+  'yayuan',
 ])
 
 export const THEME_RADIUS_VALUES: ReadonlySet<ThemeRadius> = new Set([

@@ -132,3 +132,13 @@ For commercial licensing, please contact support@quantumnous.com
     transition: none;
   }
 }
+
+/* 自定义字体（注册在主题字体区） */
+[data-theme-font='awan'],
+[data-theme-font='awan'] body {
+  --font-body: 'A Wan Sleek', 'Public Sans', sans-serif;
+}
+[data-theme-font='yayuan'],
+[data-theme-font='yayuan'] body {
+  --font-body: 'Romantic YaYuan Pro', 'Public Sans', sans-serif;
+}

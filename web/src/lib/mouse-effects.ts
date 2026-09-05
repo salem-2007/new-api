@@ -169,7 +169,7 @@ function mountHeart(): Cleaner {
 
 /* ---------- 点击随机文字 ---------- */
 function mountText(): Cleaner {
-  const words = ['✨ Omega', '🚀 AI', '⚡ Fast', '🌟 GLM', '💜 Claude', '🔥 GPT']
+  const words = ['OpenAI', 'Claude', 'Gemini', 'DeepSeek', 'GLM', 'Moonshot', 'MiniMax', 'Grok', 'Mistral', 'Kimi', 'Qwen', 'Llama']
   let idx = 0
   const onDown = (e: MouseEvent) => {
     const el = document.createElement('span')
