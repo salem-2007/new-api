@@ -123,7 +123,7 @@ export function AppHeader({
 
   return (
     <>
-      <Header scrolledClass={scrolled ? ''mx-2 mt-2 h-12 rounded-2xl bg-[hsl(210_40%_97%/0.62)] backdrop-blur-2xl shadow-[0_24px_64px_-16px_rgba(31,45,71,0.28),0_8px_24px_-12px_rgba(31,45,71,0.18),inset_0_1px_0_0_rgba(255,255,255,0.9)] ring-1 ring-[rgba(255,255,255,0.55)]' : '' : ''}>
+      <Header scrolledClass={scrolled ? 'mx-2 mt-2 h-12 rounded-2xl bg-[hsl(210_40%_97%/0.62)] backdrop-blur-2xl shadow-[0_24px_64px_-16px_rgba(31,45,71,0.28),0_8px_24px_-12px_rgba(31,45,71,0.18),inset_0_1px_0_0_rgba(255,255,255,0.9)] ring-1 ring-[rgba(255,255,255,0.55)]' : ''}>
         <SystemBrand variant='inline' />
 
         {leftContent ? (
