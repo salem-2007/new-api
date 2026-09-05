@@ -50,10 +50,8 @@ import {
 } from '@/components/ui/sheet'
 import { useDirection } from '@/context/direction-provider'
 import { type Collapsible, useLayout } from '@/context/layout-provider'
-import {
-  DEFAULT_GLASS_PREFERENCE,
-  useGlassPreference,
-} from '@/context/glass-preference-provider'
+import { useGlassPreference } from '@/context/glass-preference-provider'
+import { DEFAULT_GLASS_PREFERENCE } from '@/lib/glass-preference'
 import { useThemeCustomization } from '@/context/theme-customization-provider'
 import { Switch } from '@/components/ui/switch'
 import { useTheme } from '@/context/theme-provider'
