@@ -248,7 +248,6 @@ const WALLPAPER_CHOICES: {
   { value: 'day-asuka', label: '明日香', scope: 'day', preview: '/wallpapers/day-asuka.jpg' },
   { value: 'night-eva', label: '初号机·黄昏', scope: 'night', preview: '/wallpapers/night-eva.jpg' },
   { value: 'night-rei', label: '绫波丽·霓虹', scope: 'night', preview: '/wallpapers/night-rei.jpg' },
-  { value: 'custom', label: '自定义 URL', scope: 'both' },
 ]
 
 const MOUSE_EFFECT_CHOICES: { value: MouseEffect; label: string }[] = [
@@ -307,7 +306,7 @@ function WallpaperPicker(props: {
       <div className='text-muted-foreground text-xs font-medium'>
         {props.scope === 'day' ? t('Day wallpaper') : t('Night wallpaper')}
       </div>
-      <div className='grid grid-cols-2 gap-1.5'>
+      <div className='grid gap-1.5'>
         <button
           type='button'
           onClick={() => props.onChange('default')}
@@ -319,18 +318,6 @@ function WallpaperPicker(props: {
           )}
         >
           {t('默认')}
-        </button>
-        <button
-          type='button'
-          onClick={() => props.onChange('custom')}
-          className={cn(
-            'rounded-md border px-1.5 py-1.5 text-[11px] font-medium transition-colors',
-            props.value === 'custom'
-              ? 'border-primary bg-primary/10 text-primary'
-              : 'border-border text-muted-foreground hover:bg-muted/50'
-          )}
-        >
-          {t('自定义 URL')}
         </button>
       </div>
 
@@ -463,14 +450,6 @@ function GlassConfig() {
             value={preference.wallpaperNight}
             onChange={(v) => setWallpaper('night', v)}
           />
-          {preference.wallpaperDay === 'custom' || preference.wallpaperNight === 'custom' ? (
-            <input
-              value={preference.customWallpaperUrl}
-              onChange={(e) => setCustomWallpaperUrl(e.target.value)}
-              placeholder={t('Custom wallpaper URL')}
-              className='border-input bg-background/50 w-full rounded-md border px-2.5 py-1.5 text-xs'
-            />
-          ) : null}
 
           <div className='space-y-1.5 border-t pt-3'>
             <div className='text-muted-foreground text-xs font-medium'>
