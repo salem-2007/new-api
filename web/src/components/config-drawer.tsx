@@ -237,8 +237,6 @@ function useIsAdmin() {
   return (auth.user?.role ?? 0) >= ROLE.ADMIN
 }
 
-type GlassConfigFont = GlassPreference['font']
-
 const WALLPAPER_CHOICES: {
   value: WallpaperOption
   label: string
@@ -395,7 +393,7 @@ function WallpaperPicker(props: {
 
 function GlassConfig() {
   const { t } = useTranslation()
-  const { preference, setLiquidGlass, setGlassPulse, setWallpaper, setCustomWallpaperUrl, setFont, toggleMouseEffect, resetGlass } =
+  const { preference, setLiquidGlass, setGlassPulse, setWallpaper, setCustomWallpaperUrl, toggleMouseEffect, resetGlass } =
     useGlassPreference()
   const showReset =
     preference.liquidGlass !== DEFAULT_GLASS_PREFERENCE.liquidGlass ||
@@ -473,33 +471,6 @@ function GlassConfig() {
               className='border-input bg-background/50 w-full rounded-md border px-2.5 py-1.5 text-xs'
             />
           ) : null}
-
-          <div className='space-y-1.5 border-t pt-3'>
-            <div className='text-muted-foreground text-xs font-medium'>
-              {t('Font')}
-            </div>
-            <div className='grid grid-cols-3 gap-1.5'>
-              {[
-                { v: 'default', label: t('Default') },
-                { v: 'awan', label: 'A丸 Sleek' },
-                { v: 'yayuan', label: '浪漫雅圆' },
-              ].map((f) => (
-                <button
-                  key={f.v}
-                  type='button'
-                  onClick={() => setFont(f.v as GlassConfigFont)}
-                  className={cn(
-                    'rounded-md border px-1.5 py-1.5 text-[11px] font-medium transition-colors',
-                    preference.font === f.v
-                      ? 'border-primary bg-primary/10 text-primary'
-                      : 'border-border hover:bg-muted/50 text-muted-foreground'
-                  )}
-                >
-                  {f.label}
-                </button>
-              ))}
-            </div>
-          </div>
 
           <div className='space-y-1.5 border-t pt-3'>
             <div className='text-muted-foreground text-xs font-medium'>
@@ -643,6 +614,8 @@ const FONT_OPTIONS: {
   { value: 'default', label: 'Auto', preview: undefined },
   { value: 'sans', label: 'Sans', preview: 'var(--font-sans)' },
   { value: 'serif', label: 'Serif', preview: 'var(--font-serif)' },
+  { value: 'awan', label: 'A丸 Sleek', preview: "'A Wan Sleek', sans-serif" },
+  { value: 'yayuan', label: '浪漫雅圆', preview: "'Romantic YaYuan Pro', sans-serif" },
 ]
 
 function FontConfig() {

@@ -31,7 +31,6 @@ export type GlassPreference = {
   wallpaperDay: WallpaperOption
   wallpaperNight: WallpaperOption
   customWallpaperUrl: string
-  font: 'default' | 'awan' | 'yayuan'
   mouseEffects: MouseEffect[]
 }
 
@@ -51,7 +50,6 @@ export const DEFAULT_GLASS_PREFERENCE: GlassPreference = {
   wallpaperDay: 'default',
   wallpaperNight: 'default',
   customWallpaperUrl: '',
-  font: 'default',
   mouseEffects: [],
 }
 
@@ -67,7 +65,6 @@ export function readGlassPreference(): GlassPreference {
       wallpaperDay: parsed.wallpaperDay ?? 'default',
       wallpaperNight: parsed.wallpaperNight ?? 'default',
       customWallpaperUrl: parsed.customWallpaperUrl ?? '',
-      font: parsed.font ?? 'default',
       mouseEffects: Array.isArray(parsed.mouseEffects) ? parsed.mouseEffects : [],
     }
   } catch {
@@ -104,14 +101,6 @@ export function applyGlassPreference(pref: GlassPreference) {
   const url = resolveWallpaper(pref, isDark)
   body.style.setProperty('--eva-wallpaper', url ? `url("${url}")` : 'none')
 
-  // 字体
-  if (pref.font === 'awan') {
-    body.style.setProperty('--font-body', "'A Wan Sleek', sans-serif")
-  } else if (pref.font === 'yayuan') {
-    body.style.setProperty('--font-body', "'Romantic YaYuan Pro', sans-serif")
-  } else {
-    body.style.removeProperty('--font-body')
-  }
   ensureFontFaces()
 
   // 鼠标动画（单例挂载）
