@@ -51,9 +51,7 @@ import {
 import { useDirection } from '@/context/direction-provider'
 import { type Collapsible, useLayout } from '@/context/layout-provider'
 import { useGlassPreference } from '@/context/glass-preference-provider'
-import { useRef, useState } from 'react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { api } from '@/lib/api'
+import { useState } from 'react'
 import {
   DEFAULT_GLASS_PREFERENCE,
   type MouseEffect,
@@ -263,46 +261,7 @@ function WallpaperPicker(props: {
   onChange: (v: WallpaperOption) => void
 }) {
   const { t } = useTranslation()
-  const queryClient = useQueryClient()
-  const [uploading, setUploading] = useState(false)
-  const fileRef = useRef<HTMLInputElement>(null)
-  const isAdmin = useIsAdmin()
-
-  const library = useQuery<GlassWallpaperEntry[]>({
-    queryKey: ['glass-wallpapers'],
-    queryFn: async () => {
-      const res = await api.get('/api/glass_wallpaper/list')
-      return (res.data?.data || res.data || []) as GlassWallpaperEntry[]
-    },
-    staleTime: 60_000,
-    enabled: isAdmin,
-    retry: false,
-  })
-  const entries = (Array.isArray(library.data) ? library.data : []).filter(
-    (e) => e.scope === props.scope
-  )
-
-  const handleUpload = async (file: File) => {
-    setUploading(true)
-    try {
-      const form = new FormData()
-      form.append('scope', props.scope)
-      form.append('file', file)
-      await api.post('/api/glass_wallpaper/upload', form, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      })
-      await queryClient.invalidateQueries({ queryKey: ['glass-wallpapers'] })
-    } finally {
-      setUploading(false)
-    }
-  }
-
-  const handleDelete = async (name: string) => {
-    await api.delete(
-      `/api/glass_wallpaper/delete?scope=${props.scope}&name=${encodeURIComponent(name)}`
-    )
-    queryClient.invalidateQueries({ queryKey: ['glass-wallpapers'] })
-  }
+  const [customUrl, setCustomUrl] = useState('')
 
   return (
     <div className='space-y-1.5'>
@@ -324,59 +283,23 @@ function WallpaperPicker(props: {
         </button>
       </div>
 
-      {isAdmin && (
-        <div className='space-y-1.5'>
-          <input
-            ref={fileRef}
-            type='file'
-            accept='image/jpeg,image/png,image/webp'
-            className='hidden'
-            onChange={(e) => {
-              const f = e.target.files?.[0]
-              if (f) handleUpload(f)
-              e.target.value = ''
-            }}
-          />
-          <Button
-            variant='outline'
-            size='sm'
-            className='w-full'
-            disabled={uploading}
-            onClick={() => fileRef.current?.click()}
-          >
-            {uploading ? t('Uploading...') : t('Upload wallpaper')}
-          </Button>
-          {entries.length > 0 && (
-            <div className='grid grid-cols-2 gap-1.5'>
-              {entries.map((e) => (
-                <div key={e.url} className='group relative'>
-                  <button
-                    type='button'
-                    onClick={() => props.onChange(`upload:${e.url}` as WallpaperOption)}
-                    className={cn(
-                      'h-14 w-full overflow-hidden rounded-md border transition-all',
-                      props.value === (`upload:${e.url}` as WallpaperOption)
-                        ? 'border-primary ring-1 ring-primary'
-                        : 'border-border hover:border-muted-foreground/50'
-                    )}
-                    title={e.name}
-                  >
-                    <img src={e.url} alt={e.name} className='size-full object-cover' />
-                  </button>
-                  <button
-                    type='button'
-                    onClick={() => handleDelete(e.name)}
-                    className='bg-destructive absolute top-0.5 right-0.5 hidden size-4 items-center justify-center rounded-sm text-[10px] text-white group-hover:flex'
-                    aria-label={t('Delete wallpaper')}
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+      <input
+        value={customUrl}
+        onChange={(e) => setCustomUrl(e.target.value)}
+        placeholder={t('Image URL (https://...)')}
+        className='border-input bg-background/50 w-full rounded-md border px-2.5 py-1.5 text-xs'
+      />
+      <Button
+        variant='outline'
+        size='sm'
+        className='w-full'
+        disabled={!customUrl.trim()}
+        onClick={() => {
+          props.onChange(`custom-url:${customUrl.trim()}` as WallpaperOption)
+        }}
+      >
+        {t('Apply URL')}
+      </Button>
     </div>
   )
 }

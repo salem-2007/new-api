@@ -302,6 +302,13 @@ func findOrCreateOAuthUser(c *gin.Context, provider oauth.Provider, oauthUser *o
 		if user.Id == 0 {
 			return nil, &OAuthUserDeletedError{}
 		}
+		// Sync avatar from provider on each login
+		if oauthUser.AvatarURL != "" && user.AvatarURL != oauthUser.AvatarURL {
+			if err := model.DB.Model(&model.User{}).Where("id = ?", user.Id).
+				Update("avatar_url", oauthUser.AvatarURL).Error; err == nil {
+				user.AvatarURL = oauthUser.AvatarURL
+			}
+		}
 		return user, nil
 	}
 
@@ -348,6 +355,9 @@ func findOrCreateOAuthUser(c *gin.Context, provider oauth.Provider, oauthUser *o
 		user.DisplayName = oauthUser.Username
 	} else {
 		user.DisplayName = provider.GetName() + " User"
+	}
+	if oauthUser.AvatarURL != "" {
+		user.AvatarURL = oauthUser.AvatarURL
 	}
 	if oauthUser.Email != "" {
 		user.Email = model.NormalizeEmail(oauthUser.Email)

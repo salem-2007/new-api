@@ -43,3 +43,8 @@ export function getUserAvatarStyle(name: string): UserAvatarStyle {
 export function getUserAvatarFallback(name: string): string {
   return name.trim().charAt(0).toUpperCase() || '?'
 }
+
+export function getUserAvatarUrl(user?: { avatar_url?: string } | null): string | null {
+  const url = user?.avatar_url?.trim()
+  return url || null
+}
