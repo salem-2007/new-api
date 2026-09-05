@@ -134,11 +134,16 @@ func ListGlassWallpapers(c *gin.Context) {
 			if ext != ".jpg" && ext != ".jpeg" && ext != ".png" && ext != ".webp" {
 				continue
 			}
+			info, _ := f.Info()
+			var size int64
+			if info != nil {
+				size = info.Size()
+			}
 			entries = append(entries, GlassWallpaperEntry{
 				Name:  strings.TrimSuffix(f.Name(), ext),
 				URL:   fmt.Sprintf("/glass-wallpapers/%s/%s", scope, f.Name()),
 				Scope: scope,
-				Size:  f.Size(),
+				Size:  size,
 			})
 		}
 	}
