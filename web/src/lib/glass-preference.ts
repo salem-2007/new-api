@@ -81,6 +81,9 @@ export function writeGlassPreference(pref: GlassPreference) {
 /** 解析当前主题下应使用的壁纸 URL */
 function resolveWallpaper(pref: GlassPreference, isDark: boolean): string {
   const pick = isDark ? pref.wallpaperNight : pref.wallpaperDay
+  if (typeof pick === 'string' && pick.startsWith('custom-url:')) {
+    return pick.slice(11)
+  }
   const asset = WALLPAPER_ASSETS[pick]
   if (asset) return (isDark ? asset.night : asset.day) ?? asset.day ?? asset.night ?? ''
   return isDark ? '/wallpapers/night-eva.jpg' : '/wallpapers/day-shinji.jpg'
