@@ -498,3 +498,27 @@ body[data-glass-pulse='off'] [data-slot='data-table-card']:hover {
   animation: none !important;
   box-shadow: var(--liquid-highlight), var(--liquid-shadow) !important;
 }
+
+/* ---------- 26. 透明度统一到侧边栏档位（v9.3）---------- */
+/* 概览引导/用量卡、剩余额度右列渐变、表格分页条、操作菜单 */
+.bg-card,
+[data-slot='data-table-card'],
+main [data-slot='card'],
+[data-slot='section-page-layout'] [data-slot='card'],
+[class*='bg-[linear-gradient(135deg,color-mix'] {
+  background: var(--liquid-bg) !important;
+  backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation)) !important;
+  -webkit-backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation)) !important;
+}
+/* 底部页脚容器（分页条所在） */
+[data-slot='section-page-layout'] footer,
+.bg-background.shrink-0.border-t {
+  background: var(--liquid-bg) !important;
+  backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation));
+  -webkit-backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation));
+  border-color: var(--liquid-border) !important;
+}
+/* 操作下拉边栏保持深玻璃（浮层要更实） */
+[data-slot='dropdown-menu-content'] {
+  background: color-mix(in srgb, var(--glass-tint) 88%, transparent) !important;
+}
