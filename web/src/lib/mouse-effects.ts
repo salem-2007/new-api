@@ -95,14 +95,14 @@ function makeParticleRenderer(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasE
   const W = () => window.innerWidth
   const H = () => window.innerHeight
 
-  for (let i = 0; i < 24; i++) {
+  for (let i = 0; i < 18; i++) {
     particles.push({
       x: W() / 2, y: H() / 2,
-      radius: Math.random() * 1.8 + 0.8,
+      radius: Math.random() * 1.2 + 0.5,
       color: colors[Math.floor(Math.random() * colors.length)],
       radians: Math.random() * Math.PI * 2,
       velocity: 0.04 + Math.random() * 0.02,
-      distance: 18 + Math.random() * 34,
+      distance: 12 + Math.random() * 20,
       lastMouse: { x: W() / 2, y: H() / 2 },
     })
   }
@@ -124,8 +124,8 @@ function makeParticleRenderer(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasE
         p.radians += p.velocity
         p.lastMouse.x += (mouse.x - p.lastMouse.x) * 0.06
         p.lastMouse.y += (mouse.y - p.lastMouse.y) * 0.06
-        p.x = p.lastMouse.x + Math.cos(p.radians) * (p.distance + Math.sin(p.radians) * 36)
-        p.y = p.lastMouse.y + Math.sin(p.radians) * (p.distance + Math.sin(p.radians) * 36)
+        p.x = p.lastMouse.x + Math.cos(p.radians) * (p.distance + Math.sin(p.radians) * 24)
+        p.y = p.lastMouse.y + Math.sin(p.radians) * (p.distance + Math.sin(p.radians) * 24)
         ctx.strokeStyle = p.color
         ctx.lineWidth = p.radius
         ctx.beginPath()
