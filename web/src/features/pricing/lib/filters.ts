@@ -112,6 +112,47 @@ function getModelPrice(model: PricingModel): number {
   return model.quota_type === 0 ? model.model_ratio : model.model_price || 0
 }
 
+/** Vendor priority for the default smart sort (lower = earlier) */
+const VENDOR_PRIORITY: Record<string, number> = {
+  OpenAI: 0,
+  Anthropic: 1,
+  Google: 2,
+  智谱: 3,
+  'Z.AI': 3,
+  Zhipu: 3,
+  'Zhipu AI': 3,
+  DeepSeek: 4,
+  阿里巴巴: 5,
+  Moonshot: 6,
+  'Moonshot AI': 6,
+  xAI: 7,
+  Meta: 8,
+  Mistral: 9,
+  阿里: 5,
+}
+
+function vendorRank(vendor?: string): number {
+  if (!vendor) return 50
+  return VENDOR_PRIORITY[vendor] ?? 50
+}
+
+/** Extract version tuple from a model name, e.g. gpt-5.6-luna -> [5,6] */
+function versionKey(name: string): number[] {
+  const m = name.match(/(\d+)\.(\d+)(?:\.(\d+))?/)
+  if (!m) return []
+  return [Number(m[1]), Number(m[2]), Number(m[3] ?? 0)]
+}
+
+/** Base family name for grouping variants: gpt-5.6-luna -> gpt-5.6 */
+function familyKey(name: string): string {
+  return name.replace(/-(luna|sol|terra|thinking|high|low|max|medium|mini|nano|flash|pro|exp|preview|nothinking|xhigh|testing|new|vision)$/i, '')
+}
+
+/** Natural compare so gpt-5.10 sorts after gpt-5.9 */
+function naturalCompare(a: string, b: string): number {
+  return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })
+}
+
 /**
  * Sort models by specified option
  */
@@ -124,15 +165,52 @@ export function sortModels(
   switch (sortBy) {
     case SORT_OPTIONS.NAME:
       sorted.sort((a, b) =>
-        (a.model_name || '').localeCompare(b.model_name || '')
+        naturalCompare(a.model_name || '', b.model_name || '')
       )
       break
-    case SORT_OPTIONS.PRICE_LOW:
-      sorted.sort((a, b) => getModelPrice(a) - getModelPrice(b))
+    case SORT_OPTIONS.PRICE_LOW: {
+      // 未定价(0)沉底, 有价按升序
+      sorted.sort((a, b) => {
+        const pa = getModelPrice(a)
+        const pb = getModelPrice(b)
+        if (pa === 0 && pb !== 0) return 1
+        if (pb === 0 && pa !== 0) return -1
+        if (pa !== pb) return pa - pb
+        return naturalCompare(a.model_name || '', b.model_name || '')
+      })
       break
-    case SORT_OPTIONS.PRICE_HIGH:
-      sorted.sort((a, b) => getModelPrice(b) - getModelPrice(a))
+    }
+    case SORT_OPTIONS.PRICE_HIGH: {
+      sorted.sort((a, b) => {
+        const pa = getModelPrice(a)
+        const pb = getModelPrice(b)
+        if (pa === 0 && pb !== 0) return 1
+        if (pb === 0 && pa !== 0) return -1
+        if (pa !== pb) return pb - pa
+        return naturalCompare(a.model_name || '', b.model_name || '')
+      })
       break
+    }
+    default: {
+      // 智能排序(默认): 主流厂商优先 -> 版本新在前 -> 同族变体聚合 -> 名称
+      sorted.sort((a, b) => {
+        const an = a.model_name || ''
+        const bn = b.model_name || ''
+        const vr = vendorRank(a.vendor_name) - vendorRank(b.vendor_name)
+        if (vr !== 0) return vr
+        const va = versionKey(an)
+        const vb = versionKey(bn)
+        for (let i = 0; i < Math.max(va.length, vb.length); i++) {
+          const d = (vb[i] ?? 0) - (va[i] ?? 0)
+          if (d !== 0) return d
+        }
+        const fa = familyKey(an)
+        const fb = familyKey(bn)
+        if (fa !== fb) return naturalCompare(fa, fb)
+        return naturalCompare(an, bn)
+      })
+      break
+    }
   }
 
   return sorted
