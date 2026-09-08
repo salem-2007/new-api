@@ -17,14 +17,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 /* ========================================================================
- * liquid-glass.css — 主题变量 & 通用玻璃类（三档：frosted / liquid / deep）
- * 基色 #F5F7FA（用户指定），日/夜双壁纸由 liquid-background.css 管理
  * ===================================================================== */
 
 :root {
-  /* 基础颜色（透明度）— 亮色主题 */
-  /* 用户指定：基色 #F5F7FA @38%，边框 rgba(255,255,255,0.55)，模糊 20px */
-  /* 基础单色（fallback）；折射叠层版在 liquid-components.css §27 重定义 */
   --liquid-bg-flat:      rgba(245, 247, 250, 0.38);
   --liquid-bg-flat-hover: rgba(245, 247, 250, 0.48);
   --liquid-bg-flat-deep: rgba(245, 247, 250, 0.62);
@@ -33,21 +28,14 @@ For commercial licensing, please contact support@quantumnous.com
   --liquid-bg-deep:      var(--liquid-bg-flat-deep);
   --liquid-border:       rgba(255, 255, 255, 0.55);
   --liquid-border-hover: rgba(255, 255, 255, 0.75);
-
-  /* 三档模糊（用户指定基准 20px） */
-  --liquid-blur-frosted: 20px;   /* 卡片、表格 */
-  --liquid-blur-liquid:  20px;   /* 主要卡片、Sidebar */
-  --liquid-blur-deep:    28px;   /* Modal / Drawer / 高亮层 */
-
+  --liquid-blur-frosted: 20px;     --liquid-blur-liquid:  20px;     --liquid-blur-deep:    28px;   
   --liquid-saturation:   135%;
-  --liquid-radius:       18px;
+  --liquid-radius:       calc(var(--radius, 1rem) * 1.125);
   --liquid-shadow:       0 8px 32px rgba(31, 45, 71, 0.18);
   --liquid-shadow-deep:
     0 24px 64px -16px rgba(31, 45, 71, 0.38),
     0 8px 24px -12px rgba(31, 45, 71, 0.28);
   --liquid-highlight:    inset 0 1px 0 rgba(255, 255, 255, 0.55);
-
-  /* 兼容旧变量名（既有规则引用） */
   --glass-tint: #f5f7fa;
   --glass-alpha: 0.38;
   --glass-blur: var(--liquid-blur-frosted);
@@ -57,15 +45,12 @@ For commercial licensing, please contact support@quantumnous.com
   --glass-shadow: var(--liquid-shadow);
   --glass-deep-alpha: 0.62;
   --glass-deep-shadow: var(--liquid-shadow-deep);
-
-  /* 双壁纸（base64 由构建时注入或变量覆盖） */
   --eva-wallpaper-day: var(--eva-wallpaper-day-asset, none);
   --eva-wallpaper-night: var(--eva-wallpaper-night-asset, none);
   --eva-wallpaper: var(--eva-wallpaper-day);
 }
 
 .dark {
-  /* 夜间：蓝灰深玻璃 */
   --liquid-bg-flat:      rgba(30, 38, 54, 0.42);
   --liquid-bg-flat-hover: rgba(44, 54, 74, 0.52);
   --liquid-bg-flat-deep: rgba(26, 34, 51, 0.60);
@@ -83,8 +68,6 @@ For commercial licensing, please contact support@quantumnous.com
   --glass-alpha: 0.42;
   --eva-wallpaper: var(--eva-wallpaper-night);
 }
-
-/* ---------- 通用玻璃类（三档） ---------- */
 .liquid-glass {
   --liquid-blur: var(--liquid-blur-frosted);
   position: relative;
@@ -103,8 +86,6 @@ For commercial licensing, please contact support@quantumnous.com
   background: var(--liquid-bg-deep);
   box-shadow: var(--liquid-highlight), var(--liquid-shadow-deep);
 }
-
-/* ---------- 鼠标光晕（pointer move 注入 --mouse-x/y） ---------- */
 .liquid-glass::after {
   content: '';
   position: absolute;
@@ -124,11 +105,8 @@ For commercial licensing, please contact support@quantumnous.com
 }
 @media (max-width: 768px) {
   .liquid-glass::after {
-    display: none;   /* 移动端关闭鼠标光晕 */
-  }
+    display: none;     }
 }
-
-/* ---------- 性能护栏 ---------- */
 [data-slot='sidebar-inner'],
 [data-slot='dialog-content'],
 [data-slot='sheet-content'] {
@@ -140,8 +118,6 @@ For commercial licensing, please contact support@quantumnous.com
     transition: none;
   }
 }
-
-/* 自定义字体（注册在主题字体区） */
 [data-theme-font='awan'],
 [data-theme-font='awan'] body {
   --font-body: 'A Wan Sleek', 'Public Sans', sans-serif;

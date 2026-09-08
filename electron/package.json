@@ -30,7 +30,7 @@
   },
   "build": {
     "appId": "com.newapi.desktop",
-    "productName": "New-API-App",
+    "productName": "New API",
     "publish": null,
     "directories": {
       "output": "dist"
@@ -151,7 +151,13 @@
     },
     "nsis": {
       "oneClick": false,
-      "allowToChangeInstallationDirectory": true
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "New API.${ext}",
+      "shortcutName": "New API",
+      "uninstallDisplayName": "New API"
+    },
+    "portable": {
+      "artifactName": "New API-Portable.${ext}"
     }
   },
   "allowScripts": {

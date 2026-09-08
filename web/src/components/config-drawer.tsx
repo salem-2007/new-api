@@ -56,7 +56,6 @@ import {
   DEFAULT_GLASS_PREFERENCE,
   type MouseEffect,
   type WallpaperOption,
-  type GlassPreference,
 } from '@/lib/glass-preference'
 import { ROLE } from '@/lib/roles'
 import { useAuthStore } from '@/stores/auth-store'
@@ -223,30 +222,7 @@ function RadioGroupItem(props: {
   )
 }
 
-type GlassWallpaperEntry = {
-  name: string
-  url: string
-  scope: string
-  size: number
-}
 
-function useIsAdmin() {
-  const auth = useAuthStore()
-  return (auth.user?.role ?? 0) >= ROLE.ADMIN
-}
-
-const WALLPAPER_CHOICES: {
-  value: WallpaperOption
-  label: string
-  scope: 'day' | 'night' | 'both'
-  preview?: string
-}[] = [
-  { value: 'default', label: '默认', scope: 'both' },
-  { value: 'day-shinji', label: '真嗣·日落', scope: 'day', preview: '/wallpapers/day-shinji.jpg' },
-  { value: 'day-asuka', label: '明日香', scope: 'day', preview: '/wallpapers/day-asuka.jpg' },
-  { value: 'night-eva', label: '初号机·黄昏', scope: 'night', preview: '/wallpapers/night-eva.jpg' },
-  { value: 'night-rei', label: '绫波丽·霓虹', scope: 'night', preview: '/wallpapers/night-rei.jpg' },
-]
 
 const MOUSE_EFFECT_CHOICES: { value: MouseEffect; label: string }[] = [
   { value: 'particle', label: '粒子拖尾' },
@@ -308,7 +284,7 @@ function GlassConfig() {
   const { t } = useTranslation()
   const { auth } = useAuthStore()
   const isAdmin = (auth.user?.role ?? 0) >= ROLE.ADMIN
-  const { preference, setLiquidGlass, setGlassPulse, setWallpaper, setCustomWallpaperUrl, toggleMouseEffect, resetGlass } =
+  const { preference, setLiquidGlass, setGlassPulse, setWallpaper, toggleMouseEffect, resetGlass } =
     useGlassPreference()
   const showReset =
     preference.liquidGlass !== DEFAULT_GLASS_PREFERENCE.liquidGlass ||

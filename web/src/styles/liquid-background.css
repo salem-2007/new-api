@@ -17,8 +17,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 /* ========================================================================
- * liquid-background.css — 壁纸遮罩 + Aurora 动态光效
- * 壁纸 URL 由 glass-preference provider 运行时注入 --eva-wallpaper-day/night
  * ===================================================================== */
 
 body {
@@ -37,8 +35,6 @@ body {
     linear-gradient(to bottom, rgba(13, 17, 26, 0.60), rgba(13, 17, 26, 0.74)),
     var(--eva-wallpaper, none);
 }
-
-/* ---------- Aurora 动态光效 ---------- */
 body::before {
   content: '';
   position: fixed;
@@ -64,8 +60,6 @@ body::before {
 @media (max-width: 768px) {
   body { background-attachment: scroll; }
 }
-
-/* ---------- 用户关闭玻璃时（data-liquid-glass=off）壁纸/Aurora 隐藏 ---------- */
 body[data-liquid-glass='off'] {
   background-image: none !important;
 }
