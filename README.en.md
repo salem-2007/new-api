@@ -21,7 +21,7 @@
 **做了什么修改**
 
 - **液态玻璃 UI**：全局玻璃质感面板，支持日 / 夜双模式
-- **自定义壁纸**：日 / 夜壁纸可配置，支持自定义 URL
+- **自定义壁纸**：自定义配置日夜模式壁纸
 - **主题自定义**：圆角 / 字体 / 明暗等设置
 - **桌面客户端（Electron）**：内置 Go 后端，Windows 免装运行
 - **鼠标特效**：可选粒子拖尾 / 点击烟花 / 滑动爱心 / 文字特效
@@ -63,7 +63,7 @@ A personal fork of [QuantumNous/new-api](https://github.com/QuantumNous/new-api)
 **What was changed**
 
 - **Liquid Glass UI**: frosted-glass panels everywhere, light & dark modes
-- **Custom wallpapers**: day / night wallpaper per mode, custom URL supported
+- **Custom wallpapers**: configurable day / night mode wallpapers
 - **Theme customization**: radius / font / light-dark settings
 - **Desktop client (Electron)**: bundles the Go backend, no install needed on Windows
 - **Mouse effects**: particle trail / click fireworks / heart trail / text effects
