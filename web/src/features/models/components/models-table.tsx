@@ -33,6 +33,7 @@ import {
 } from '../constants'
 import { modelsQueryKeys, vendorsQueryKeys } from '../lib'
 import { DataTableBulkActions } from './data-table-bulk-actions'
+import { ModelCard } from './model-card'
 import { useModelsColumns } from './models-columns'
 import { useModels } from './models-provider'
 
@@ -199,6 +200,12 @@ export function ModelsTable() {
         'No models available. Create your first model to get started.'
       )}
       skeletonKeyPrefix='model-skeleton'
+      enableCardView
+      renderCard={(row, { isSelected }) => (
+        <ModelCard row={row} isSelected={isSelected} />
+      )}
+      cardGridClassName='grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-3'
+      showPagination
       applyHeaderSize
       toolbarProps={{
         searchPlaceholder: t('Filter by model name...'),

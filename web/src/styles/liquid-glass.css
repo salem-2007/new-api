@@ -23,16 +23,21 @@ For commercial licensing, please contact support@quantumnous.com
 
 :root {
   /* 基础颜色（透明度）— 亮色主题 */
-  --liquid-bg:           rgba(255, 255, 255, 0.42);
-  --liquid-bg-hover:     rgba(255, 255, 255, 0.55);
-  --liquid-bg-deep:      rgba(245, 247, 250, 0.62);
+  /* 用户指定：基色 #F5F7FA @38%，边框 rgba(255,255,255,0.55)，模糊 20px */
+  /* 基础单色（fallback）；折射叠层版在 liquid-components.css §27 重定义 */
+  --liquid-bg-flat:      rgba(245, 247, 250, 0.38);
+  --liquid-bg-flat-hover: rgba(245, 247, 250, 0.48);
+  --liquid-bg-flat-deep: rgba(245, 247, 250, 0.62);
+  --liquid-bg:           var(--liquid-bg-flat);
+  --liquid-bg-hover:     var(--liquid-bg-flat-hover);
+  --liquid-bg-deep:      var(--liquid-bg-flat-deep);
   --liquid-border:       rgba(255, 255, 255, 0.55);
   --liquid-border-hover: rgba(255, 255, 255, 0.75);
 
-  /* 三档模糊 */
-  --liquid-blur-frosted: 18px;   /* 卡片、表格 */
-  --liquid-blur-liquid:  28px;   /* 主要卡片、Sidebar */
-  --liquid-blur-deep:    40px;   /* Modal / Drawer / 高亮层 */
+  /* 三档模糊（用户指定基准 20px） */
+  --liquid-blur-frosted: 20px;   /* 卡片、表格 */
+  --liquid-blur-liquid:  20px;   /* 主要卡片、Sidebar */
+  --liquid-blur-deep:    28px;   /* Modal / Drawer / 高亮层 */
 
   --liquid-saturation:   135%;
   --liquid-radius:       18px;
@@ -61,9 +66,12 @@ For commercial licensing, please contact support@quantumnous.com
 
 .dark {
   /* 夜间：蓝灰深玻璃 */
-  --liquid-bg:           rgba(30, 38, 54, 0.42);
-  --liquid-bg-hover:     rgba(44, 54, 74, 0.55);
-  --liquid-bg-deep:      rgba(26, 34, 51, 0.58);
+  --liquid-bg-flat:      rgba(30, 38, 54, 0.42);
+  --liquid-bg-flat-hover: rgba(44, 54, 74, 0.52);
+  --liquid-bg-flat-deep: rgba(26, 34, 51, 0.60);
+  --liquid-bg:           var(--liquid-bg-flat);
+  --liquid-bg-hover:     var(--liquid-bg-flat-hover);
+  --liquid-bg-deep:      var(--liquid-bg-flat-deep);
   --liquid-border:       rgba(255, 255, 255, 0.14);
   --liquid-border-hover: rgba(255, 255, 255, 0.24);
   --liquid-shadow:       0 8px 32px rgba(0, 0, 0, 0.45);

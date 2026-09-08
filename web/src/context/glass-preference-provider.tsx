@@ -20,6 +20,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 
 import {
   applyGlassPreference,
+  mergeServerWallpaper,
   DEFAULT_GLASS_PREFERENCE,
   readGlassPreference,
   writeGlassPreference,
@@ -28,6 +29,7 @@ import {
   type WallpaperOption,
 } from '@/lib/glass-preference'
 import { attachGlobalResize } from '@/lib/mouse-effects'
+import { api } from '@/lib/api'
 
 type GlassPreferenceContextType = {
   preference: GlassPreference
@@ -65,6 +67,31 @@ export function GlassPreferenceProvider(props: {
     attachGlobalResize()
   }, [preference])
 
+  // 跨设备壁纸同步：启动时从服务端拉取管理员保存的壁纸偏好（/api/status 公开字段），
+  // 服务端值存在时覆盖本地壁纸设置（主题偏好里仅壁纸走全局，其余仍存本地）
+  useEffect(() => {
+    let cancelled = false
+    void (async () => {
+      try {
+        const res = await fetch('/api/status')
+        if (!res.ok) return
+        const json = await res.json()
+        const serverPref = json?.data?.theme_preference
+        if (!serverPref) return
+        setPreference((current) => {
+          const merged = mergeServerWallpaper(current, serverPref)
+          return merged === current ? current : merged
+        })
+      } catch {
+        // 拉取失败（离线等）静默使用本地偏好
+      }
+      if (cancelled) return
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
   // 主题明暗切换时用同一偏好重新解析壁纸
   useEffect(() => {
     const root = document.documentElement
@@ -78,12 +105,32 @@ export function GlassPreferenceProvider(props: {
       preference,
       setLiquidGlass: (on) => setPreference((p) => ({ ...p, liquidGlass: on })),
       setGlassPulse: (on) => setPreference((p) => ({ ...p, glassPulse: on })),
-      setWallpaper: (which, option) =>
+      setWallpaper: (which, option) => {
         setPreference((p) =>
           which === 'day'
             ? { ...p, wallpaperDay: option }
             : { ...p, wallpaperNight: option }
-        ),
+        )
+        // 跨设备同步：把最新壁纸偏好写入服务端（仅 root/admin 有权限，普通用户静默降级为本地）
+        void (async () => {
+          try {
+            const latest = {
+              wallpaperDay:
+                which === 'day' ? option : readGlassPreference().wallpaperDay,
+              wallpaperNight:
+                which === 'night'
+                  ? option
+                  : readGlassPreference().wallpaperNight,
+            }
+            await api.put('/api/option/', {
+              key: 'ThemePreference',
+              value: JSON.stringify(latest),
+            })
+          } catch {
+            // 非管理员无权限写 option，壁纸仅本地生效
+          }
+        })()
+      },
       setFont: (font) => setPreference((p) => ({ ...p, font })),
       toggleMouseEffect: (effect, on) =>
         setPreference((p) => ({

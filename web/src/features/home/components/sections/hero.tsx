@@ -174,59 +174,73 @@ export function Hero(props: HeroProps) {
             className='landing-animate-fade-up mt-10 w-full max-w-xl opacity-0'
             style={{ animationDelay: '240ms' }}
           >
-            <div className='mb-4 flex flex-col gap-1'>
-              <span className='text-muted-foreground/50 text-[10px] font-bold tracking-[0.15em] uppercase'>
-                {t('Supported Applications')}
-              </span>
-              <p className='text-muted-foreground/60 text-xs leading-relaxed'>
-                {t(
-                  'Supports one-click configuration and perfectly adapts to NewAPI multi-protocol configuration.'
-                )}
-              </p>
-            </div>
-            <div className='flex flex-wrap items-center gap-3'>
-              {/* Cherry Studio */}
-              <a
-                href='https://cherry-ai.com'
-                target='_blank'
-                rel='noopener noreferrer'
-                className='group border-border/40 bg-muted/15 text-foreground/80 hover:border-border hover:bg-muted/30 hover:text-foreground flex items-center gap-3 rounded-full border px-5 py-2.5 text-sm font-medium shadow-[0_1px_2.5px_rgba(0,0,0,0.01)] backdrop-blur-xs transition-all duration-300 hover:scale-[1.02]'
-              >
-                <CherryStudio.Color size={24} className='shrink-0' />
-                <span>Cherry Studio</span>
-              </a>
-
-              {/* CC Switch */}
-              <a
-                href='https://ccswitch.io'
-                target='_blank'
-                rel='noopener noreferrer'
-                className='group border-border/40 bg-muted/15 text-foreground/80 hover:border-border hover:bg-muted/30 hover:text-foreground flex items-center gap-3 rounded-full border px-5 py-2.5 text-sm font-medium shadow-[0_1px_2.5px_rgba(0,0,0,0.01)] backdrop-blur-xs transition-all duration-300 hover:scale-[1.02]'
-              >
-                <img
-                  src='https://ccswitch.io/favicon.png'
-                  alt='CC Switch'
-                  className='size-6 shrink-0 rounded-md object-contain'
-                  onError={(e) => {
-                    // Fallback to a styled text avatar if the remote favicon fails to load in sandbox or local environments
-                    e.currentTarget.style.display = 'none'
-                    const fallback = e.currentTarget.nextSibling as HTMLElement
-                    if (fallback) fallback.style.display = 'flex'
-                  }}
-                />
-                <span
-                  style={{ display: 'none' }}
-                  className='size-6 shrink-0 items-center justify-center rounded-md bg-blue-500/10 text-[10px] font-bold text-blue-600 dark:bg-blue-400/10 dark:text-blue-400'
-                >
-                  CC
+            <div
+              className='rounded-2xl border p-5'
+              style={{
+                backgroundImage:
+                  'linear-gradient(180deg, rgba(255,255,255,0.42) 0%, rgba(255,255,255,0.10) 14%, rgba(255,255,255,0) 30%), linear-gradient(125deg, rgba(255,255,255,0.20) 0%, rgba(200,220,255,0.08) 34%, rgba(178,190,255,0.06) 52%, rgba(255,255,255,0) 74%)',
+                backgroundColor: 'color-mix(in srgb, var(--glass-tint) 38%, transparent)',
+                borderColor: 'rgba(255, 255, 255, 0.55)',
+                backdropFilter: 'blur(20px) saturate(135%)',
+                WebkitBackdropFilter: 'blur(20px) saturate(135%)',
+                boxShadow:
+                  'inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 8px 32px rgba(31, 45, 71, 0.18)',
+              }}
+            >
+              <div className='mb-4 flex flex-col gap-1'>
+                <span className='text-muted-foreground/70 text-[10px] font-bold tracking-[0.15em] uppercase'>
+                  {t('Supported Applications')}
                 </span>
-                <span>CC Switch</span>
-              </a>
+                <p className='text-muted-foreground/70 text-xs leading-relaxed'>
+                  {t(
+                    'Supports one-click configuration and perfectly adapts to NewAPI multi-protocol configuration.'
+                  )}
+                </p>
+              </div>
+              <div className='flex flex-wrap items-center gap-3'>
+                {/* Cherry Studio */}
+                <a
+                  href='https://cherry-ai.com'
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className='group border-border/40 bg-muted/15 text-foreground/80 hover:border-border hover:bg-muted/30 hover:text-foreground flex items-center gap-3 rounded-full border px-5 py-2.5 text-sm font-medium shadow-[0_1px_2.5px_rgba(0,0,0,0.01)] backdrop-blur-xs transition-all duration-300 hover:scale-[1.02]'
+                >
+                  <CherryStudio.Color size={24} className='shrink-0' />
+                  <span>Cherry Studio</span>
+                </a>
 
-              {/* "更多" */}
-              <div className='group border-border/40 bg-muted/15 text-foreground/55 hover:border-border hover:bg-muted/30 hover:text-foreground flex cursor-default items-center gap-2.5 rounded-full border px-5 py-2.5 text-sm font-medium shadow-[0_1px_2.5px_rgba(0,0,0,0.01)] backdrop-blur-xs transition-all duration-300 hover:scale-[1.02]'>
-                <MoreIcon />
-                <span>{t('More Apps')}</span>
+                {/* CC Switch */}
+                <a
+                  href='https://ccswitch.io'
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className='group border-border/40 bg-muted/15 text-foreground/80 hover:border-border hover:bg-muted/30 hover:text-foreground flex items-center gap-3 rounded-full border px-5 py-2.5 text-sm font-medium shadow-[0_1px_2.5px_rgba(0,0,0,0.01)] backdrop-blur-xs transition-all duration-300 hover:scale-[1.02]'
+                >
+                  <img
+                    src='https://ccswitch.io/favicon.png'
+                    alt='CC Switch'
+                    className='size-6 shrink-0 rounded-md object-contain'
+                    onError={(e) => {
+                      // Fallback to a styled text avatar if the remote favicon fails to load in sandbox or local environments
+                      e.currentTarget.style.display = 'none'
+                      const fallback = e.currentTarget.nextSibling as HTMLElement
+                      if (fallback) fallback.style.display = 'flex'
+                    }}
+                  />
+                  <span
+                    style={{ display: 'none' }}
+                    className='size-6 shrink-0 items-center justify-center rounded-md bg-blue-500/10 text-[10px] font-bold text-blue-600 dark:bg-blue-400/10 dark:text-blue-400'
+                  >
+                    CC
+                  </span>
+                  <span>CC Switch</span>
+                </a>
+
+                {/* "更多" */}
+                <div className='group border-border/40 bg-muted/15 text-foreground/55 hover:border-border hover:bg-muted/30 hover:text-foreground flex cursor-default items-center gap-2.5 rounded-full border px-5 py-2.5 text-sm font-medium shadow-[0_1px_2.5px_rgba(0,0,0,0.01)] backdrop-blur-xs transition-all duration-300 hover:scale-[1.02]'>
+                  <MoreIcon />
+                  <span>{t('More Apps')}</span>
+                </div>
               </div>
             </div>
           </div>
