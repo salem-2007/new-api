@@ -30,8 +30,6 @@ type Cleaner = () => void
 const active = new Map<MouseEffect, Cleaner>()
 const isDesktop = () =>
   typeof window !== 'undefined' && window.matchMedia('(pointer: fine)').matches
-
-// 共享渲染上下文
 let sharedCanvas: HTMLCanvasElement | null = null
 let sharedCtx: CanvasRenderingContext2D | null = null
 let sharedRaf = 0
@@ -83,8 +81,7 @@ function onResize(cb: () => void): Cleaner {
   return () => window.removeEventListener('resize', cb)
 }
 
-/* ---------- 轨道拖尾（particle） ---------- */
-function makeParticleRenderer(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
+function makeParticleRenderer(ctx: CanvasRenderingContext2D, _canvas: HTMLCanvasElement) {
   const colors = ['#00bdff', '#4d39ce', '#088eff']
   const mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 }
   const particles: {
@@ -114,7 +111,6 @@ function makeParticleRenderer(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasE
     onResize: () => {},
     cleanup: () => window.removeEventListener('mousemove', onMove),
     frame: () => {
-      // 拖尾：隔帧擦除（省一半填充），alpha 稍高保持连贯
       ctx.globalCompositeOperation = 'destination-out'
       ctx.fillStyle = 'rgba(0,0,0,0.16)'
       ctx.fillRect(0, 0, W(), H())
@@ -137,7 +133,6 @@ function makeParticleRenderer(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasE
   }
 }
 
-/* ---------- 点击烟花（firework） ---------- */
 function makeFireworkRenderer(ctx: CanvasRenderingContext2D) {
   const sparks: { x: number; y: number; vx: number; vy: number; life: number; color: string }[] = []
   const MAX = 240
@@ -174,7 +169,6 @@ function makeFireworkRenderer(ctx: CanvasRenderingContext2D) {
   }
 }
 
-/* ---------- 滑动爱心（heart） ---------- */
 function makeHeartRenderer(ctx: CanvasRenderingContext2D) {
   const hearts: { x: number; y: number; size: number; life: number; hue: number }[] = []
   let last = 0
@@ -211,7 +205,6 @@ function makeHeartRenderer(ctx: CanvasRenderingContext2D) {
   }
 }
 
-/* ---------- 点击文字（text）— 供应商名 ---------- */
 function makeTextRenderer() {
   const words = ['OpenAI', 'Claude', 'Gemini', 'DeepSeek', 'GLM', 'Moonshot', 'MiniMax', 'Grok', 'Mistral', 'Kimi', 'Qwen', 'Llama']
   let idx = 0
@@ -237,17 +230,15 @@ const FACTORIES: Record<MouseEffect, (ctx: CanvasRenderingContext2D, canvas: HTM
   particle: makeParticleRenderer,
   firework: makeFireworkRenderer,
   heart: makeHeartRenderer,
-  text: () => makeTextRenderer(),
+  text: (_ctx: CanvasRenderingContext2D, _canvas: HTMLCanvasElement) => makeTextRenderer(),
 }
 
 /** 按偏好同步效果开关状态（幂等；单选语义由调用方保证 wanted 最多 1 个 canvas 效果） */
 export function syncMouseEffects(wanted: MouseEffect[]) {
   if (!isDesktop()) wanted = []
-  // 卸载不再需要的
   for (const [name, clean] of active) {
     if (!wanted.includes(name)) { clean(); active.delete(name) }
   }
-  // 挂载新启用的
   const canvasNeeded = wanted.filter((w) => w !== 'text')
   if (canvasNeeded.length > 0 && !sharedCanvas) {
     const { canvas, ctx } = getShared()
@@ -256,7 +247,7 @@ export function syncMouseEffects(wanted: MouseEffect[]) {
   for (const name of wanted) {
     if (active.has(name)) continue
     if (name === 'text') {
-      const r = FACTORIES.text()
+      const r = FACTORIES.text(sharedCtx!, sharedCanvas!)
       active.set(name, r.cleanup); renderers.add(r.frame)
     } else {
       if (!sharedCanvas || !sharedCtx) continue
@@ -268,8 +259,6 @@ export function syncMouseEffects(wanted: MouseEffect[]) {
   if (active.size > 0) ensureLoop()
   else stopLoopIfIdle()
 }
-
-// 窗口尺寸变化：重设共享画布
 let resizeCleaner: Cleaner | null = null
 export function attachGlobalResize() {
   if (resizeCleaner || typeof window === 'undefined') return

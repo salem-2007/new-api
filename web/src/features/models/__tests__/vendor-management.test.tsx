@@ -259,7 +259,7 @@ describe('vendor management', () => {
     const get = vi
       .spyOn(api, 'get')
       .mockImplementation(async (_url, config) => {
-        if (config?.params?.p === 2) {
+        if ((config?.params as Record<string, unknown> | undefined)?.['p'] === 2) {
           return new Promise((resolve) => {
             finishPage = resolve
           })

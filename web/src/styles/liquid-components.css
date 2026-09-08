@@ -1,3 +1,8 @@
+
+body[data-glass-font='a-wan-sleek'] {
+  --font-sans: 'A Wan Sleek', 'Public Sans Variable', sans-serif;
+  font-family: var(--font-sans);
+}
 /*
 Copyright (C) 2023-2026 QuantumNous
 
@@ -17,12 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 /* ========================================================================
- * liquid-components.css — 组件细化玻璃样式
- * 覆盖：Sidebar / Card / Table / Input / Dialog / 布局根 / 数据表格页
- * 全部基于 liquid-glass.css 的变量，无写死色值（暗/亮主题自适应）
  * ===================================================================== */
-
-/* ---------- 1. 布局根容器透明（壁纸全站可见） ---------- */
 div.bg-background.text-foreground.relative,
 .group\/sidebar-wrapper,
 [data-slot='sidebar-container'],
@@ -30,8 +30,6 @@ section.bg-background,
 section .bg-background {
   background: transparent !important;
 }
-
-/* ---------- 2. Sidebar（漂浮玻璃层 data-glass="liquid"） ---------- */
 [data-slot='sidebar'],
 [data-slot='sidebar-header'],
 [data-slot='sidebar-footer'],
@@ -51,16 +49,12 @@ section .bg-background {
 [data-slot='sidebar-menu-button']:hover {
   background: var(--liquid-bg-hover) !important;
 }
-
-/* ---------- 3. 控制台主区（sidebar-inset：轻玻璃露出壁纸） ---------- */
 [data-slot='sidebar-inset'] {
   background: color-mix(in srgb, var(--glass-tint) calc(var(--glass-alpha) * 55), transparent) !important;
   backdrop-filter: blur(12px) saturate(var(--liquid-saturation));
   -webkit-backdrop-filter: blur(12px) saturate(var(--liquid-saturation));
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
-
-/* ---------- 4. Card（三档中默认 frosted，页级大面板 liquid） ---------- */
 [data-slot='card'],
 .bg-card {
   background: var(--liquid-bg) !important;
@@ -76,7 +70,6 @@ section .bg-background {
   border-color: var(--liquid-border-hover) !important;
   box-shadow: var(--liquid-highlight), 0 16px 45px rgba(31, 45, 71, 0.22) !important;
 }
-/* 页级大面板（main 直下）升级 liquid 档 */
 main .bg-card,
 [data-slot='section-page-layout'] .bg-card {
   background: var(--liquid-bg-deep) !important;
@@ -84,7 +77,6 @@ main .bg-card,
   -webkit-backdrop-filter: blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation));
   box-shadow: var(--liquid-highlight), var(--liquid-shadow-deep) !important;
 }
-/* 图表画布透明 */
 .bg-card .recharts-wrapper,
 .bg-card .recharts-surface {
   background: transparent !important;
@@ -104,8 +96,6 @@ main .bg-card,
   border-color: var(--liquid-border) !important;
   box-shadow: var(--liquid-highlight), var(--liquid-shadow-deep) !important;
 }
-
-/* ---------- 6. Dialog / Sheet（deep 档） ---------- */
 [data-slot='dialog-content'],
 [data-slot='alert-dialog-content'],
 [data-slot='sheet-content'] {
@@ -114,12 +104,11 @@ main .bg-card,
   -webkit-backdrop-filter: blur(var(--liquid-blur-deep)) saturate(var(--liquid-saturation));
   border-color: var(--liquid-border) !important;
   box-shadow: var(--liquid-highlight), 0 30px 100px rgba(0, 0, 0, 0.35) !important;
-  border-radius: 22px;
+  border-radius: var(--radius-xl, 1.4rem);
   padding-bottom: env(safe-area-inset-bottom, 0px);
   will-change: transform, opacity;
   contain: layout paint;
 }
-/* 移动端弹窗限高（安全区） */
 @media (max-width: 640px) {
   [data-slot='dialog-content'] {
     max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 1rem) !important;
@@ -128,8 +117,6 @@ main .bg-card,
     max-height: calc(100dvh - 16rem - env(safe-area-inset-bottom, 0px));
   }
 }
-
-/* ---------- 7. Table（数据表格页全玻璃） ---------- */
 .overflow-hidden.rounded-lg.border:has([data-slot='table']) {
   background: var(--liquid-bg-deep) !important;
   backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation));
@@ -164,7 +151,6 @@ main .bg-card,
 .dark [data-slot='table-row']:hover {
   background: rgba(255, 255, 255, 0.06) !important;
 }
-/* 弹窗内测试表格行 */
 [data-slot='dialog-content'] [data-slot='table-container'] tr,
 [data-slot='dialog-content'] table tbody tr {
   background: rgba(255, 255, 255, 0.14) !important;
@@ -179,7 +165,7 @@ textarea,
   background: var(--liquid-bg) !important;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-radius: 12px;
+  border-radius: var(--radius-md, 0.8rem);
   border-color: var(--liquid-border) !important;
 }
 input:focus,
@@ -190,8 +176,6 @@ textarea:focus,
   border-color: rgba(140, 120, 255, 0.55) !important;
   box-shadow: 0 0 0 3px rgba(120, 100, 255, 0.12), 0 0 25px rgba(120, 100, 255, 0.08);
 }
-
-/* ---------- 9. 顶栏（透明无边界；收缩胶囊在 header.tsx 内联类） ---------- */
 header {
   background: transparent !important;
   backdrop-filter: none;
@@ -209,16 +193,12 @@ header [class*='rounded-2xl'] {
   backdrop-filter: blur(20px) saturate(var(--liquid-saturation));
   -webkit-backdrop-filter: blur(20px) saturate(var(--liquid-saturation));
 }
-
-/* ---------- 10. 概览半透明面板（bg-background/NN）统一升级 ---------- */
 [class*='bg-background/'] {
   background: var(--liquid-bg-deep) !important;
   backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation));
   -webkit-backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation));
   box-shadow: var(--liquid-highlight), var(--liquid-shadow-deep) !important;
 }
-
-/* ---------- 11. 二级页面（关于/协议 Section） ---------- */
 [data-slot='section'] > div,
 section > div {
   background: color-mix(in srgb, var(--glass-tint) calc(var(--glass-deep-alpha) * 70), transparent) !important;
@@ -228,8 +208,6 @@ section > div {
   outline-offset: -1px;
   border-radius: var(--liquid-radius);
 }
-
-/* ---------- 12. 主页 hero（徽章 / pill / 终端窗） ---------- */
 .landing-animate-fade-up.rounded-full,
 .group.rounded-full.border-border\/40 {
   background: var(--liquid-bg-deep) !important;
@@ -246,22 +224,15 @@ section > div {
   box-shadow: var(--liquid-highlight), var(--liquid-shadow-deep) !important;
   border-color: var(--liquid-border) !important;
 }
-
-/* ---------- 13. 移动端分页安全区 ---------- */
 @media (max-width: 640px) {
   [class*='pagination'],
   [data-slot='pagination'] {
     padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.5rem);
   }
 }
-
-/* ---------- 14. 选中态 ---------- */
 ::selection {
   background: rgba(96, 165, 250, 0.3);
 }
-
-/* ---------- 21. v9.1 修复 ---------- */
-/* ① data-glass 显式挂档（CSS 侧通过 data-slot 直接映射三档，组件无需改动） */
 [data-slot='dialog-content'],
 [data-slot='alert-dialog-content'],
 [data-slot='sheet-content'] {
@@ -270,8 +241,6 @@ section > div {
 [data-slot='sidebar-inner'] {
   --liquid-blur: var(--liquid-blur-liquid);
 }
-
-/* ② 渠道卡片（data-table-card）玻璃化 —— 之前漏掉的选择器 */
 [data-slot='data-table-card'] {
   background: var(--liquid-bg) !important;
   backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation));
@@ -287,7 +256,7 @@ section > div {
   border-color: rgba(120, 100, 255, 0.55) !important;
 }
 
-/* ④ Switch 修复：防全局背景/输入规则污染，恢复明确开关形态 */
+/* ④ Switch */
 [data-slot='switch'] {
   background: transparent !important;
   border: none !important;
@@ -296,7 +265,7 @@ section > div {
   box-shadow: none !important;
 }
 [data-slot='switch'][data-unchecked] {
-  background: color-mix(in srgb, var(--muted-foreground) 35%, transparent) !important;
+  background: var(--input) !important;
 }
 [data-slot='switch'][data-checked] {
   background: var(--primary) !important;
@@ -308,14 +277,9 @@ section > div {
 .dark [data-slot='switch-thumb'] {
   background: #f5f7fa !important;
 }
-
-/* ⑤ 设置页所有开关行容器不受宽口径 bg-background/ 规则误伤 */
 [data-slot='switch'] [class*='bg-background/'] {
   background: transparent !important;
 }
-
-/* ---------- 22. 鼠标滑动液态流光（v9.1）---------- */
-/* 双层：::after = 跟随鼠标的柔光（已有），::before = 斜向流光扫过 */
 .liquid-glass::before {
   content: '';
   position: absolute;
@@ -355,8 +319,6 @@ section > div {
   );
   background-size: 250% 250%;
 }
-
-/* 鼠标柔光增强：双层径向（中心亮 + 外圈色散） */
 .liquid-glass::after {
   width: 220px;
   height: 220px;
@@ -371,9 +333,6 @@ section > div {
     radial-gradient(circle, rgba(255, 255, 255, 0.07), transparent 60%),
     radial-gradient(circle, rgba(120, 100, 255, 0.14), transparent 70%);
 }
-
-/* overflow 豁免：光晕/流光不能被 overflow:hidden 父级裁剪时需 visible，
-   但卡片多为 rounded+hidden——流光 inset:0 自适应圆角，无需改 */
 @media (prefers-reduced-motion: reduce) {
   .liquid-glass:hover::before {
     animation: none;
@@ -381,8 +340,6 @@ section > div {
     background-position: 50% 50%;
   }
 }
-
-/* ---------- 23. 卡片 hover 脉冲发光（neon-pulse 适配）---------- */
 [data-slot='card']:hover,
 .bg-card:hover,
 [data-slot='data-table-card']:hover {
@@ -400,7 +357,6 @@ section > div {
   0%, 100% { opacity: 1; }
   50%      { opacity: 0.85; }
 }
-/* 移动端无 hover，关闭脉冲动画省电 */
 @media (hover: none) {
   [data-slot='card']:hover,
   .bg-card:hover,
@@ -415,9 +371,6 @@ section > div {
     animation: none;
   }
 }
-
-/* ---------- 24. v9.2 修复 ---------- */
-/* ① 首页介绍卡：去掉外围线（glass-3/glass-morphism 的 border 与顶部渐变线） */
 .glass-3,
 .glass-morphism,
 .glass-1, .glass-2, .glass-4, .glass-5 {
@@ -429,21 +382,16 @@ section > div {
 }
 .glass-3::before,
 .glass-3::after {
-  display: none !important;  /* 顶部渐变 border effect 装饰线 */
-}
+  display: none !important;  }
 .glass-3:hover,
 .glass-morphism:hover {
   box-shadow: var(--liquid-highlight), 0 16px 45px rgba(31, 45, 71, 0.22) !important;
 }
-
-/* ② 剩余额度右列：写死渐变 → 与左侧统计卡同色玻璃 */
 [class*='bg-[linear-gradient(135deg,color-mix'] {
   background: var(--liquid-bg-deep) !important;
   backdrop-filter: blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation)) !important;
   -webkit-backdrop-filter: blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation)) !important;
 }
-
-/* ③ 脉冲光晕收缩：80px→36px，15/30px 层减半 */
 [data-slot='card']:hover,
 .bg-card:hover,
 [data-slot='data-table-card']:hover {
@@ -466,9 +414,6 @@ section > div {
     inset 0 0 6px rgba(255, 255, 255, 0.18),
     var(--liquid-shadow) !important;
 }
-
-/* ---------- 27. 全局折射光泽（v9.4 用户指定：#F5F7FA@38% + 折射感，日夜适配）---------- */
-/* 亮色：顶缘白光 + 斜向双色折射渐变（一次烘焙进 background，所有引用 liquid 变量的卡片自动生效） */
 :root {
   --liquid-refraction:
     linear-gradient(180deg, rgba(255, 255, 255, 0.42) 0%, rgba(255, 255, 255, 0.10) 14%, rgba(255, 255, 255, 0) 30%),
@@ -497,14 +442,10 @@ section > div {
   --liquid-bg-hover: var(--liquid-refraction), var(--liquid-flat-hover), var(--liquid-bg-flat-hover);
   --liquid-bg-deep: var(--liquid-refraction), var(--liquid-flat-deep), var(--liquid-bg-flat-deep);
 }
-
-/* 所有引用点补折射（color-mix 写底的引用点单独加渐变叠层） */
 [data-slot='sidebar-inset'],
 [class*='bg-[linear-gradient(135deg,color-mix'] {
   background-image: var(--liquid-refraction) !important;
 }
-
-/* 二级/三级页面卡片统一折射底色（覆盖浅色写死与 color-mix 引用点） */
 [data-slot='card'],
 .bg-card,
 [data-slot='data-table-card'],
@@ -520,9 +461,6 @@ main .bg-card,
 [data-slot='section-page-layout'] .bg-card {
   background-color: var(--liquid-bg-flat-deep) !important;
 }
-
-/* ---------- 28. 悬停气泡可读性（tooltip/popover/dropdown/select/command）---------- */
-/* 浮层统一提高底色实度（88-92%），日夜都保证文字对比度 */
 [data-slot='tooltip-content'],
 [data-slot='popover-content'],
 [data-slot='dropdown-menu-content'],
@@ -548,7 +486,6 @@ main .bg-card,
   color: rgb(226, 232, 240) !important;
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.55) !important;
 }
-/* 气泡内弱化文字在实底下恢复可读对比 */
 [data-slot='tooltip-content'] .text-muted-foreground,
 [data-slot='popover-content'] .text-muted-foreground,
 [data-slot='dropdown-menu-content'] .text-muted-foreground {
@@ -559,7 +496,6 @@ main .bg-card,
 .dark [data-slot='dropdown-menu-content'] .text-muted-foreground {
   color: rgba(203, 213, 225, 0.92) !important;
 }
-/* tooltip 箭头与底色同步 */
 [data-slot='tooltip-content'] [data-slot='tooltip-arrow'],
 [data-slot='tooltip-arrow'] {
   fill: color-mix(in srgb, var(--glass-tint) 96%, transparent);
@@ -567,8 +503,6 @@ main .bg-card,
 .dark [data-slot='tooltip-arrow'] {
   fill: #1a2233;
 }
-
-/* ---------- 29. 液态玻璃偏好开关（body data 属性驱动）---------- */
 body[data-liquid-glass='off'] [data-slot='card'],
 body[data-liquid-glass='off'] .bg-card,
 body[data-liquid-glass='off'] [data-slot='popover-content'],
@@ -599,9 +533,6 @@ body[data-glass-pulse='off'] [data-slot='data-table-card']:hover {
   animation: none !important;
   box-shadow: var(--liquid-highlight), var(--liquid-shadow) !important;
 }
-
-/* ---------- 30. 透明度统一到侧边栏档位（v9.3）---------- */
-/* 概览引导/用量卡、剩余额度右列渐变、表格分页条、操作菜单 */
 .bg-card,
 [data-slot='data-table-card'],
 main [data-slot='card'],
@@ -611,7 +542,6 @@ main [data-slot='card'],
   backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation)) !important;
   -webkit-backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation)) !important;
 }
-/* 底部页脚容器（分页条所在） */
 [data-slot='section-page-layout'] footer,
 .bg-background.shrink-0.border-t {
   background: var(--liquid-bg) !important;
@@ -619,18 +549,13 @@ main [data-slot='card'],
   -webkit-backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation));
   border-color: var(--liquid-border) !important;
 }
-/* 操作下拉边栏保持深玻璃（浮层要更实） */
 [data-slot='dropdown-menu-content'] {
   background: color-mix(in srgb, var(--glass-tint) 88%, transparent) !important;
 }
-
-/* ---------- 31. 主容器圆角几何保障（inset/floating 变体）---------- */
-/* 背景/玻璃规则引入后，主容器自身与最末子元素必须被圆角裁剪，且页脚玻璃不得溢出圆角 */
 [data-slot='sidebar-inset'] {
   overflow: hidden;
   isolation: isolate;
 }
-/* inset 变体：跟随模板原圆角（--radius*1.4 = rounded-xl 档） */
 @media (min-width: 768px) {
   [data-slot='sidebar-inset']:is(
       :where(.peer)[data-variant='inset'] ~ *
@@ -639,25 +564,18 @@ main [data-slot='card'],
     box-shadow: var(--liquid-highlight), var(--liquid-shadow);
   }
 }
-/* 圆角裁剪对 Chrome/Safari 需要 overflow ≠ visible；Tailwind overflow-hidden 已有，这里兜底 */
 [data-slot='sidebar-inset']:is(:where(.peer)[data-variant='inset'] ~ *) {
   overflow: hidden;
 }
-/* 浮动/内嵌变体下，主容器内部滚动容器继承圆角底部裁剪 */
 [data-slot='sidebar-inset'] [data-slot='section-page-layout'],
 [data-slot='sidebar-inset'] main,
 [data-slot='sidebar-inset'] > div {
   min-width: 0;
 }
-/* 页脚玻璃在圆角容器内自然被裁 —— 无需额外处理；
-   但 data-table 卡片网格底部 padding 保证最后一排卡片不贴死圆角 */
 [data-slot='sidebar-inset'] [data-slot='section-page-layout'] > div:last-child {
   border-bottom-left-radius: inherit;
   border-bottom-right-radius: inherit;
 }
-
-/* ---------- 32. 分页条可见性保障 ---------- */
-/* 防 footer 玻璃/容器层叠把分页吞掉：保证 portal 容器与分页内容正常参与布局 */
 [data-slot='section-page-layout'] .bg-background.shrink-0.border-t {
   position: relative;
   z-index: 1;
@@ -666,10 +584,6 @@ main [data-slot='card'],
 [data-slot='section-page-layout'] .bg-background.shrink-0.border-t:empty {
   display: none;
 }
-
-
-/* ---------- 33. 全变体圆角统一（用户指定：开启圆角后所有变体都有圆角）---------- */
-/* 默认 sidebar / floating 变体在 md+ 下套用 inset 同款几何：主容器四周留缝 + 圆角 + 玻璃阴影 */
 @media (min-width: 768px) {
   [data-slot='sidebar-inset']:is(
       :where(.peer)[data-variant='sidebar'] ~ *
@@ -679,7 +593,6 @@ main [data-slot='card'],
     ) {
     margin: calc(var(--spacing) * 2);
     margin-left: 0;
-    /* 高度补偿：抵消上下 margin，避免撑出 body 滚动条带动 sticky header */
     height: calc(
       100svh - var(--app-header-height, 0px) - (var(--spacing) * 4)
     );
@@ -699,9 +612,6 @@ main [data-slot='card'],
     margin-left: calc(var(--spacing) * 2);
   }
 }
-
-
-/* ---------- 34. 暗色卡片玻璃对比度增强（模型广场/渠道卡片可见轮廓）---------- */
 .dark [data-slot='data-table-card'],
 .dark [data-slot='card'],
 .dark .bg-card {
@@ -714,17 +624,12 @@ main [data-slot='card'],
 .dark [data-slot='data-table-card'] {
   background-color: rgba(38, 48, 68, 0.55) !important;
 }
-
-
-/* ---------- 35. 模型/渠道卡片玻璃实度提升（用户指定：透明度调高）---------- */
-/* data-table-card 亮色 0.55 / 暗色 0.68，卡片不再透到壁纸 */
 [data-slot='data-table-card'] {
   background-color: rgba(245, 247, 250, 0.55) !important;
 }
 .dark [data-slot='data-table-card'] {
   background-color: rgba(38, 48, 68, 0.68) !important;
 }
-/* 详情弹层（Dialog/Sheet）同步加实：0.62 → 0.74/0.80 */
 [data-slot='dialog-content'],
 [data-slot='sheet-content'] {
   background-color: rgba(245, 247, 250, 0.74) !important;
@@ -733,18 +638,10 @@ main [data-slot='card'],
 .dark [data-slot='sheet-content'] {
   background-color: rgba(26, 34, 51, 0.80) !important;
 }
-
-
-/* ---------- 36. 页脚分页条防遮挡 ---------- */
-/* 页数选择器贴视口底缘被裁：footer 保持可见高度 + 下拉向上弹出 */
 [data-slot='section-page-layout'] .bg-background.shrink-0.border-t {
   min-height: 3.25rem;
   padding-bottom: max(0.625rem, env(safe-area-inset-bottom, 0px));
 }
-
-
-/* ---------- 37. 模型广场（/pricing）卡片液态玻璃 ---------- */
-/* 公开模型广场的卡片壳原本透明，统一挂 data-slot=pricing-model-card 上玻璃 */
 [data-slot='pricing-model-card'] {
   background-color: rgba(245, 247, 250, 0.5) !important;
   border-color: var(--liquid-border) !important;
@@ -766,7 +663,6 @@ main [data-slot='card'],
   background-color: rgba(44, 54, 74, 0.7) !important;
   border-color: rgba(255, 255, 255, 0.24) !important;
 }
-/* 筛选侧边栏内容一次性全显（去内部滚动后仍保持玻璃面板） */
 [data-slot='pricing-sidebar'] {
   background-color: rgba(245, 247, 250, 0.5) !important;
   border-color: var(--liquid-border) !important;

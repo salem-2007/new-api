@@ -16,19 +16,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-/**
- * Liquid Glass 用户偏好：持久化到 localStorage，body data 属性驱动 CSS。
- * - liquidGlass: 玻璃效果总开关（关闭 = 所有面板回退实色）
- * - glassPulse: 卡片 hover 脉冲发光开关
- */
 
 export type WallpaperOption =
   | 'custom-url' | 'default' | 'day-shinji' | 'day-asuka' | 'night-eva' | 'night-rei'
 export type MouseEffect = 'firework' | 'heart' | 'text' | 'particle'
 
+export type GlassFontOption = 'default' | 'a-wan-sleek'
+
 export type GlassPreference = {
   liquidGlass: boolean
   glassPulse: boolean
+  font: GlassFontOption
   wallpaperDay: WallpaperOption
   wallpaperNight: WallpaperOption
   mouseEffects: MouseEffect[]
@@ -37,16 +35,20 @@ export type GlassPreference = {
 export const GLASS_STORAGE_KEY = 'glass_preference'
 
 export const WALLPAPER_ASSETS: Record<string, { day?: string; night?: string }> = {
-  default: { day: '/wallpapers/day-shinji.jpg', night: '/wallpapers/night-eva.jpg' },
-  'day-shinji': { day: '/wallpapers/day-shinji.jpg' },
-  'day-asuka': { day: '/wallpapers/day-asuka.jpg' },
-  'night-eva': { night: '/wallpapers/night-eva.jpg' },
-  'night-rei': { night: '/wallpapers/night-rei.jpg' },
+  default: {
+    day: 'https://img.cdn1.vip/i/6a9cb42a5b2e7_1788654634.webp',
+    night: 'https://img.cdn1.vip/i/6a9cb42a5b2e7_1788654634.webp',
+  },
+  'day-shinji': { day: 'https://img.cdn1.vip/i/6a9cb42a5b2e7_1788654634.webp' },
+  'day-asuka': { day: 'https://img.cdn1.vip/i/6a9cb42a5b2e7_1788654634.webp' },
+  'night-eva': { night: 'https://img.cdn1.vip/i/6a9cb42a5b2e7_1788654634.webp' },
+  'night-rei': { night: 'https://img.cdn1.vip/i/6a9cb42a5b2e7_1788654634.webp' },
 }
 
 export const DEFAULT_GLASS_PREFERENCE: GlassPreference = {
   liquidGlass: true,
   glassPulse: true,
+  font: 'default',
   wallpaperDay: 'default',
   wallpaperNight: 'default',
   mouseEffects: [],
@@ -61,6 +63,7 @@ export function readGlassPreference(): GlassPreference {
     return {
       liquidGlass: parsed.liquidGlass ?? DEFAULT_GLASS_PREFERENCE.liquidGlass,
       glassPulse: parsed.glassPulse ?? DEFAULT_GLASS_PREFERENCE.glassPulse,
+      font: parsed.font ?? DEFAULT_GLASS_PREFERENCE.font,
       wallpaperDay: parsed.wallpaperDay ?? 'default',
       wallpaperNight: parsed.wallpaperNight ?? 'default',
       mouseEffects: Array.isArray(parsed.mouseEffects) ? parsed.mouseEffects : [],
@@ -74,7 +77,6 @@ export function writeGlassPreference(pref: GlassPreference) {
   try {
     localStorage.setItem(GLASS_STORAGE_KEY, JSON.stringify(pref))
   } catch {
-    // 隐私模式等写入失败时静默降级（会话内仍生效）
   }
 }
 
@@ -86,7 +88,7 @@ function resolveWallpaper(pref: GlassPreference, isDark: boolean): string {
   }
   const asset = WALLPAPER_ASSETS[pick]
   if (asset) return (isDark ? asset.night : asset.day) ?? asset.day ?? asset.night ?? ''
-  return isDark ? '/wallpapers/night-eva.jpg' : '/wallpapers/day-shinji.jpg'
+  return 'https://img.cdn1.vip/i/6a9cb42a5b2e7_1788654634.webp'
 }
 
 /** 把偏好应用到 DOM：body data 属性 + 壁纸变量 + 字体 + 鼠标动画 */
@@ -111,15 +113,11 @@ export function applyGlassPreference(pref: GlassPreference) {
   const body = document.body
   body.setAttribute('data-liquid-glass', pref.liquidGlass ? 'on' : 'off')
   body.setAttribute('data-glass-pulse', pref.glassPulse ? 'on' : 'off')
-
-  // 壁纸：跟随当前主题取对应图
   const isDark = document.documentElement.classList.contains('dark')
   const url = resolveWallpaper(pref, isDark)
   body.style.setProperty('--eva-wallpaper', url ? `url("${url}")` : 'none')
 
   ensureFontFaces()
-
-  // 鼠标动画（单例挂载）
   import('@/lib/mouse-effects').then((m) => m.syncMouseEffects(pref.mouseEffects))
 }
 let fontFacesInjected = false

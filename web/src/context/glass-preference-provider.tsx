@@ -66,9 +66,6 @@ export function GlassPreferenceProvider(props: {
     writeGlassPreference(preference)
     attachGlobalResize()
   }, [preference])
-
-  // 跨设备壁纸同步：启动时从服务端拉取管理员保存的壁纸偏好（/api/status 公开字段），
-  // 服务端值存在时覆盖本地壁纸设置（主题偏好里仅壁纸走全局，其余仍存本地）
   useEffect(() => {
     let cancelled = false
     void (async () => {
@@ -83,7 +80,6 @@ export function GlassPreferenceProvider(props: {
           return merged === current ? current : merged
         })
       } catch {
-        // 拉取失败（离线等）静默使用本地偏好
       }
       if (cancelled) return
     })()
@@ -91,8 +87,6 @@ export function GlassPreferenceProvider(props: {
       cancelled = true
     }
   }, [])
-
-  // 主题明暗切换时用同一偏好重新解析壁纸
   useEffect(() => {
     const root = document.documentElement
     const observer = new MutationObserver(() => applyGlassPreference(preference))
@@ -111,7 +105,6 @@ export function GlassPreferenceProvider(props: {
             ? { ...p, wallpaperDay: option }
             : { ...p, wallpaperNight: option }
         )
-        // 跨设备同步：把最新壁纸偏好写入服务端（仅 root/admin 有权限，普通用户静默降级为本地）
         void (async () => {
           try {
             const latest = {
@@ -127,7 +120,6 @@ export function GlassPreferenceProvider(props: {
               value: JSON.stringify(latest),
             })
           } catch {
-            // 非管理员无权限写 option，壁纸仅本地生效
           }
         })()
       },

@@ -47,11 +47,9 @@ let injected = false
 export function injectLiquidSwitchFilter() {
   if (injected || typeof document === 'undefined') return
   injected = true
-
-  // 尊重用户偏好与低能力设备
   if (window.matchMedia('(prefers-reduced-transparency: reduce)').matches) return
 
-  const SIZE = 64 // 贴图分辨率（开关很小，64 足够平滑）
+  const SIZE = 64 
 
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
   svg.setAttribute('width', '0')
@@ -85,8 +83,6 @@ export function injectLiquidSwitchFilter() {
   defs.appendChild(filter)
   svg.appendChild(defs)
   document.body.appendChild(svg)
-
-  // 生成位移贴图：胶囊形 SDF，边缘向内折射（凸透镜）
   const canvas = document.createElement('canvas')
   canvas.width = SIZE
   canvas.height = SIZE
@@ -96,12 +92,9 @@ export function injectLiquidSwitchFilter() {
   for (let i = 0; i < imageData.data.length; i += 4) {
     const x = ((i / 4) % SIZE) / SIZE - 0.5
     const y = Math.floor(i / 4 / SIZE) / SIZE - 0.5
-    // 胶囊 SDF（开关形状 32:18.4 ≈ 宽半径 0.36 高 0.21）
     const d = roundedRectSDF(x, y, 0.36, 0.20, 0.19)
-    // 边缘 0.14 带宽内折射，越靠边越强
     const displacement = smoothStep(0.6, 0, d - 0.08)
     const scaled = smoothStep(0, 1, displacement)
-    // 位移向量：指向中心收缩（凸透镜折射）
     const dx = x * scaled
     const dy = y * scaled
     imageData.data[i] = (dx * 2 + 0.5) * 255

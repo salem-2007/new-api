@@ -261,7 +261,7 @@ function startServer() {
       fs.mkdirSync(dataDir, { recursive: true });
     }
 
-    env.SQLITE_PATH = path.join(dataDir, 'new-api.db');
+    env.SQLITE_PATH = path.join(dataDir, 'one-api.db');
     
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log('📁 您的数据存储位置：');
@@ -445,12 +445,12 @@ function createWindow() {
       label: '帮助',
       submenu: [
         {
-          label: '关于 New-API-App',
+          label: '关于 New API',
           click: () => {
             dialog.showMessageBox({
               type: 'info',
-              title: '关于 New-API-App',
-              message: 'New-API-App v1.0.0-rc.35',
+              title: '关于 New API',
+              message: 'New API v1.0.0-rc.36',
               detail: 'AI 模型网关桌面应用\n基于 Electron + Go'
             });
           }
@@ -462,6 +462,35 @@ function createWindow() {
   Menu.setApplicationMenu(menu);
 
   mainWindow.loadURL(`http://127.0.0.1:${loadPort}`);
+
+  // 右键菜单：输入框/可编辑区/选中文字时弹出对应操作
+  mainWindow.webContents.on('context-menu', (event, params) => {
+    const template = [];
+    if (params.isEditable) {
+      template.push(
+        { role: 'undo', label: '撤销' },
+        { role: 'redo', label: '重做' },
+        { type: 'separator' },
+        { role: 'cut', label: '剪切' },
+        { role: 'copy', label: '复制' },
+        { role: 'paste', label: '粘贴' },
+        { role: 'selectAll', label: '全选' }
+      );
+    } else if (params.selectionText && params.selectionText.trim().length > 0) {
+      template.push(
+        { role: 'copy', label: '复制' },
+        { type: 'separator' },
+        { role: 'selectAll', label: '全选' }
+      );
+    } else if (params.linkURL) {
+      template.push(
+        { label: '复制链接地址', role: 'copyLink' }
+      );
+    }
+    if (template.length > 0) {
+      Menu.buildFromTemplate(template).popup({ window: mainWindow });
+    }
+  });
   
   console.log(`Loading from: http://127.0.0.1:${loadPort}`);
 
