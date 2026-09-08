@@ -20,11 +20,10 @@
 
 **做了什么修改**
 
-- **液态玻璃 UI**：全局玻璃质感面板（侧边栏 / 卡片 / 弹窗 / 输入框），支持日 / 夜双模式
-- **自定义壁纸**：日 / 夜壁纸可配置，支持自定义 URL，管理员设置后跨设备同步（普通用户不可见）
-- **主题自定义**：圆角 / 字体 / 明暗等设置全链路生效（侧边栏内嵌 / 侧边栏 / 悬浮三种布局模式均跟随主题圆角）
-- **桌面客户端（Electron）**：内置 Go 后端，Windows 免装运行；中文菜单栏（文件 / 编辑 / 查看 / 窗口 / 帮助）、右键菜单（复制 / 粘贴等）、托盘最小化、数据独立存储于 `%AppData%\new-api-electron\data\one-api.db`
-- **头像同步**：OAuth（GitHub 等）登录时自动同步头像
+- **液态玻璃 UI**：全局玻璃质感面板，支持日 / 夜双模式
+- **自定义壁纸**：日 / 夜壁纸可配置，支持自定义 URL
+- **主题自定义**：圆角 / 字体 / 明暗等设置
+- **桌面客户端（Electron）**：内置 Go 后端，Windows 免装运行
 - **鼠标特效**：可选粒子拖尾 / 点击烟花 / 滑动爱心 / 文字特效
 
 **构建产物**
@@ -63,11 +62,10 @@ A personal fork of [QuantumNous/new-api](https://github.com/QuantumNous/new-api)
 
 **What was changed**
 
-- **Liquid Glass UI**: frosted-glass panels everywhere (sidebar / cards / dialogs / inputs), light & dark modes
-- **Custom wallpapers**: day / night wallpaper per mode, custom URL supported; admin-set wallpaper syncs across devices (hidden from regular users)
-- **Theme customization**: radius / font / light-dark settings apply everywhere — all three sidebar layout modes (inset / sidebar / floating) follow the theme radius
-- **Desktop client (Electron)**: bundles the Go backend, no install needed on Windows; Chinese menu bar (File / Edit / View / Window / Help), right-click context menu, tray minimize; data stored at `%AppData%\new-api-electron\data\one-api.db`
-- **Avatar sync**: OAuth (GitHub etc.) login syncs avatar automatically
+- **Liquid Glass UI**: frosted-glass panels everywhere, light & dark modes
+- **Custom wallpapers**: day / night wallpaper per mode, custom URL supported
+- **Theme customization**: radius / font / light-dark settings
+- **Desktop client (Electron)**: bundles the Go backend, no install needed on Windows
 - **Mouse effects**: particle trail / click fireworks / heart trail / text effects
 
 **Build artifacts**
