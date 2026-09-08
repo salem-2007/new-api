@@ -306,6 +306,8 @@ function WallpaperPicker(props: {
 
 function GlassConfig() {
   const { t } = useTranslation()
+  const { auth } = useAuthStore()
+  const isAdmin = (auth.user?.role ?? 0) >= ROLE.ADMIN
   const { preference, setLiquidGlass, setGlassPulse, setWallpaper, setCustomWallpaperUrl, toggleMouseEffect, resetGlass } =
     useGlassPreference()
   const showReset =
@@ -364,17 +366,20 @@ function GlassConfig() {
         </div>
       </div>
 
-              <div className='space-y-3 border-t pt-3'>
-          <WallpaperPicker
-            scope='day'
-            value={preference.wallpaperDay}
-            onChange={(v) => setWallpaper('day', v)}
-          />
-          <WallpaperPicker
-            scope='night'
-            value={preference.wallpaperNight}
-            onChange={(v) => setWallpaper('night', v)}
-          />
+              {isAdmin && (
+                <div className='space-y-3 border-t pt-3'>
+                  <WallpaperPicker
+                    scope='day'
+                    value={preference.wallpaperDay}
+                    onChange={(v) => setWallpaper('day', v)}
+                  />
+                  <WallpaperPicker
+                    scope='night'
+                    value={preference.wallpaperNight}
+                    onChange={(v) => setWallpaper('night', v)}
+                  />
+                </div>
+              )}
 
           <div className='space-y-1.5 border-t pt-3'>
             <div className='text-muted-foreground text-xs font-medium'>
@@ -402,7 +407,6 @@ function GlassConfig() {
             </div>
           </div>
         </div>
-    </div>
   )
 }
 

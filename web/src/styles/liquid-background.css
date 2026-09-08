@@ -48,7 +48,7 @@ body::before {
   background:
     radial-gradient(ellipse at 30% 40%, rgba(100, 80, 255, 0.10), transparent 45%),
     radial-gradient(ellipse at 70% 60%, rgba(0, 200, 255, 0.08), transparent 45%);
-  filter: blur(80px);
+
   animation: aurora 18s ease-in-out infinite alternate;
 }
 

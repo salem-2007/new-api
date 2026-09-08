@@ -210,10 +210,13 @@ export function HeroTerminalDemo(props: HeroTerminalDemoProps) {
     <div className={cn('mx-auto w-full max-w-2xl', props.className)}>
       <div
         className={cn(
-          'overflow-hidden rounded-2xl border backdrop-blur-sm',
-          'border-border/60 bg-white/95 shadow-[0_20px_50px_-25px_rgba(15,23,42,0.18)]',
-          'dark:border-white/[0.06] dark:bg-[#0b0f17]/95 dark:shadow-[0_20px_60px_-25px_rgba(0,0,0,0.7)]'
+          'overflow-hidden rounded-2xl border backdrop-blur-[20px] backdrop-saturate-[135%]',
+          'shadow-[0_20px_50px_-25px_rgba(15,23,42,0.18),inset_0_1px_0_rgba(255,255,255,0.55)]',
+          'dark:shadow-[0_20px_60px_-25px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.10)]'
         )}
+        style={{
+          backgroundColor: 'color-mix(in srgb, var(--glass-tint) 38%, transparent)',
+        }}
       >
         {/* Tab strip */}
         <div

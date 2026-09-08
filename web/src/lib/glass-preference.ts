@@ -90,6 +90,22 @@ function resolveWallpaper(pref: GlassPreference, isDark: boolean): string {
 }
 
 /** 把偏好应用到 DOM：body data 属性 + 壁纸变量 + 字体 + 鼠标动画 */
+/** 合并服务端下发的壁纸偏好（跨设备同步：手机/电脑以服务端保存的壁纸为准） */
+export function mergeServerWallpaper(
+  pref: GlassPreference,
+  serverThemePreference: unknown
+): GlassPreference {
+  if (!serverThemePreference || typeof serverThemePreference !== 'object')
+    return pref
+  const srv = serverThemePreference as Partial<GlassPreference>
+  const next: GlassPreference = { ...pref }
+  if (typeof srv.wallpaperDay === 'string' && srv.wallpaperDay)
+    next.wallpaperDay = srv.wallpaperDay as WallpaperOption
+  if (typeof srv.wallpaperNight === 'string' && srv.wallpaperNight)
+    next.wallpaperNight = srv.wallpaperNight as WallpaperOption
+  return next
+}
+
 export function applyGlassPreference(pref: GlassPreference) {
   if (typeof document === 'undefined') return
   const body = document.body
