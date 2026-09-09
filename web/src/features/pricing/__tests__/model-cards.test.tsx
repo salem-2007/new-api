@@ -382,7 +382,7 @@ describe('model cards', () => {
       success: true,
       data: { models: [] },
     })
-    const models = Array.from({ length: 21 }, (_, index) =>
+    const models = Array.from({ length: 12 }, (_, index) =>
       pricingModel({ id: index + 1, model_name: `model-${index + 1}` })
     )
     const user = userEvent.setup()
@@ -392,10 +392,10 @@ describe('model cards', () => {
       </QueryClientProvider>
     )
     expect(screen.getByRole('button', { name: 'Previous page' })).toBeDisabled()
-    expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(20)
+    expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(9)
     await user.click(screen.getByRole('button', { name: 'Next page' }))
-    expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(1)
-    expect(screen.getByRole('heading', { name: 'model-21' })).toBeVisible()
+    expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(3)
+    expect(screen.getByRole('heading', { name: 'model-12' })).toBeVisible()
     expect(screen.getByRole('button', { name: 'Next page' })).toBeDisabled()
     await user.click(screen.getByRole('button', { name: 'Previous page' }))
     expect(screen.getByRole('heading', { name: 'model-1' })).toBeVisible()
