@@ -33,6 +33,27 @@
 | `New API.exe` | Windows 安装版（NSIS） |
 | `New API-Portable.exe` | Windows 便携版（免安装） |
 
+**Docker 部署**
+
+镜像已发布到 GHCR（public）：
+
+```bash
+docker pull ghcr.io/salem-2007/new-api:latest
+```
+
+```bash
+docker run -d --name new-api \
+  --network host \
+  -v /your/data:/data \
+  -e PORT=3000 \
+  -e TZ=Asia/Shanghai \
+  ghcr.io/salem-2007/new-api:latest
+```
+
+启动后访问 `http://localhost:3000`。数据（SQLite：`one-api.db`）存放在挂载的 `/data` 目录，升级镜像不丢数据。
+
+其他可用 tag：`ghcr.io/salem-2007/new-api:liquid-glass`
+
 ---
 
 ## English
@@ -55,6 +76,27 @@ A personal fork of [QuantumNous/new-api](https://github.com/QuantumNous/new-api)
 | `new-api-windows-amd64.exe` | Windows backend single binary (amd64, CGO off) |
 | `New API.exe` | Windows installer (NSIS) |
 | `New API-Portable.exe` | Windows portable (no install) |
+
+**Docker deployment**
+
+Image published to GHCR (public):
+
+```bash
+docker pull ghcr.io/salem-2007/new-api:latest
+```
+
+```bash
+docker run -d --name new-api \
+  --network host \
+  -v /your/data:/data \
+  -e PORT=3000 \
+  -e TZ=Asia/Shanghai \
+  ghcr.io/salem-2007/new-api:latest
+```
+
+Visit `http://localhost:3000` after start. Data (SQLite: `one-api.db`) lives in the mounted `/data` directory — upgrading the image keeps your data.
+
+Other tags: `ghcr.io/salem-2007/new-api:liquid-glass`
 
 ---
 

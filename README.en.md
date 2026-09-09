@@ -22,7 +22,6 @@
 
 - **液态玻璃 UI**：全局玻璃质感面板，支持日 / 夜双模式
 - **自定义壁纸**：自定义配置日夜模式壁纸
-- **主题自定义**：圆角 / 字体 / 明暗等设置
 - **桌面客户端（Electron）**：内置 Go 后端，Windows 免装运行
 - **鼠标特效**：可选粒子拖尾 / 点击烟花 / 滑动爱心 / 文字特效
 
@@ -33,6 +32,27 @@
 | `new-api-windows-amd64.exe` | Windows 后端单文件（amd64，CGO off） |
 | `New API.exe` | Windows 安装版（NSIS） |
 | `New API-Portable.exe` | Windows 便携版（免安装） |
+
+**Docker 部署**
+
+镜像已发布到 GHCR（public）：
+
+```bash
+docker pull ghcr.io/salem-2007/new-api:latest
+```
+
+```bash
+docker run -d --name new-api \
+  --network host \
+  -v /your/data:/data \
+  -e PORT=3000 \
+  -e TZ=Asia/Shanghai \
+  ghcr.io/salem-2007/new-api:latest
+```
+
+启动后访问 `http://localhost:3000`。数据（SQLite：`one-api.db`）存放在挂载的 `/data` 目录，升级镜像不丢数据。
+
+其他可用 tag：`ghcr.io/salem-2007/new-api:liquid-glass`
 
 ---
 
@@ -46,7 +66,6 @@ A personal fork of [QuantumNous/new-api](https://github.com/QuantumNous/new-api)
 
 - **Liquid Glass UI**: frosted-glass panels everywhere, light & dark modes
 - **Custom wallpapers**: configurable day / night mode wallpapers
-- **Theme customization**: radius / font / light-dark settings
 - **Desktop client (Electron)**: bundles the Go backend, no install needed on Windows
 - **Mouse effects**: particle trail / click fireworks / heart trail / text effects
 
@@ -57,6 +76,27 @@ A personal fork of [QuantumNous/new-api](https://github.com/QuantumNous/new-api)
 | `new-api-windows-amd64.exe` | Windows backend single binary (amd64, CGO off) |
 | `New API.exe` | Windows installer (NSIS) |
 | `New API-Portable.exe` | Windows portable (no install) |
+
+**Docker deployment**
+
+Image published to GHCR (public):
+
+```bash
+docker pull ghcr.io/salem-2007/new-api:latest
+```
+
+```bash
+docker run -d --name new-api \
+  --network host \
+  -v /your/data:/data \
+  -e PORT=3000 \
+  -e TZ=Asia/Shanghai \
+  ghcr.io/salem-2007/new-api:latest
+```
+
+Visit `http://localhost:3000` after start. Data (SQLite: `one-api.db`) lives in the mounted `/data` directory — upgrading the image keeps your data.
+
+Other tags: `ghcr.io/salem-2007/new-api:liquid-glass`
 
 ---
 
