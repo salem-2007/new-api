@@ -42,7 +42,7 @@ export interface ModelCardGridProps {
 export function ModelCardGrid(props: ModelCardGridProps) {
   const { t } = useTranslation()
   const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState<number>(DEFAULT_PRICING_PAGE_SIZE)
+  const pageSize = DEFAULT_PRICING_PAGE_SIZE
   const tokenUnit = props.tokenUnit ?? DEFAULT_TOKEN_UNIT
   const totalPages = Math.max(1, Math.ceil(props.models.length / pageSize))
   const currentPage = Math.min(page, totalPages)
@@ -104,26 +104,6 @@ export function ModelCardGrid(props: ModelCardGridProps) {
             </span>
           </div>
           <div className='flex items-center gap-2'>
-            <div className='flex shrink-0 items-center gap-1.5'>
-              <p className='text-muted-foreground/80 hidden text-sm font-medium whitespace-nowrap sm:block'>
-                {t('Rows per page')}
-              </p>
-              <select
-                value={pageSize}
-                onChange={(e) => {
-                  setPageSize(Number(e.target.value))
-                  setPage(1)
-                }}
-                className='border-input bg-transparent dark:bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 h-8 w-[70px] rounded-lg border px-2 text-sm font-medium tabular-nums outline-none focus-visible:ring-3'
-                aria-label={t('Rows per page')}
-              >
-                {[10, 20, 30, 40, 50, 100].map((size) => (
-                  <option key={size} value={size}>
-                    {size}
-                  </option>
-                ))}
-              </select>
-            </div>
             <Button
               type='button'
               variant='outline'
