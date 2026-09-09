@@ -34,24 +34,6 @@
 | `New API.exe` | Windows 安装版（NSIS） |
 | `New API-Portable.exe` | Windows 便携版（免安装） |
 
-**构建方式**
-
-```bash
-# 前端（pnpm）
-cd web && pnpm install && pnpm run build
-
-# 后端交叉编译（Docker）
-docker build --network host \
-  --build-arg http_proxy=http://127.0.0.1:7897 \
-  --build-arg GOPROXY=https://goproxy.cn,direct \
-  --build-arg APP_VERSION=rc36 \
-  --output type=local,dest=/tmp/out \
-  -f /path/to/go-only.Dockerfile .
-
-# 桌面端打包（需 wine）
-cd electron && npm install && npm run build:win
-```
-
 ---
 
 ## English
@@ -75,24 +57,6 @@ A personal fork of [QuantumNous/new-api](https://github.com/QuantumNous/new-api)
 | `new-api-windows-amd64.exe` | Windows backend single binary (amd64, CGO off) |
 | `New API.exe` | Windows installer (NSIS) |
 | `New API-Portable.exe` | Windows portable (no install) |
-
-**How to build**
-
-```bash
-# Frontend (pnpm)
-cd web && pnpm install && pnpm run build
-
-# Backend cross-compile (Docker)
-docker build --network host \
-  --build-arg http_proxy=http://127.0.0.1:7897 \
-  --build-arg GOPROXY=https://goproxy.cn,direct \
-  --build-arg APP_VERSION=rc36 \
-  --output type=local,dest=/tmp/out \
-  -f /path/to/go-only.Dockerfile .
-
-# Desktop packaging (requires wine)
-cd electron && npm install && npm run build:win
-```
 
 ---
 
