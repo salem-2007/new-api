@@ -21,6 +21,7 @@ import { RadioGroup as Radio } from '@base-ui/react/radio-group'
 import { CircleCheck, Palette, RotateCcw } from 'lucide-react'
 import type { SVGProps } from 'react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 
 import { IconDir } from '@/assets/custom/icon-dir'
 import { IconLayoutCompact } from '@/assets/custom/icon-layout-compact'
@@ -51,12 +52,13 @@ import {
 import { useDirection } from '@/context/direction-provider'
 import { type Collapsible, useLayout } from '@/context/layout-provider'
 import { useGlassPreference } from '@/context/glass-preference-provider'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import {
   DEFAULT_GLASS_PREFERENCE,
   type MouseEffect,
   type WallpaperOption,
 } from '@/lib/glass-preference'
+import { api } from '@/lib/api'
 import { ROLE } from '@/lib/roles'
 import { useAuthStore } from '@/stores/auth-store'
 import { useThemeCustomization } from '@/context/theme-customization-provider'
@@ -237,7 +239,36 @@ function WallpaperPicker(props: {
   onChange: (v: WallpaperOption) => void
 }) {
   const { t } = useTranslation()
+  const { auth } = useAuthStore()
+  const isAdmin = (auth.user?.role ?? 0) >= ROLE.ADMIN
   const [customUrl, setCustomUrl] = useState('')
+  const [uploading, setUploading] = useState(false)
+  const uploadInputRef = useRef<HTMLInputElement>(null)
+
+  const handleUpload = async (file: File) => {
+    setUploading(true)
+    try {
+      const form = new FormData()
+      form.append('scope', props.scope)
+      form.append('file', file)
+      const response = await api.post('/glass-wallpaper/upload', form)
+      const payload = response.data as {
+        success: boolean
+        message?: string
+        data?: { url: string }
+      }
+      if (payload.success && payload.data?.url) {
+        toast.success(t('Wallpaper uploaded'))
+        props.onChange(`custom-url:${payload.data.url}` as WallpaperOption)
+      } else {
+        toast.error(payload.message || t('Upload failed'))
+      }
+    } catch {
+      toast.error(t('Upload failed'))
+    } finally {
+      setUploading(false)
+    }
+  }
 
   return (
     <div className='space-y-1.5'>
@@ -276,6 +307,31 @@ function WallpaperPicker(props: {
       >
         {t('Apply URL')}
       </Button>
+
+      {isAdmin && (
+        <div className='space-y-1.5'>
+          <input
+            ref={uploadInputRef}
+            type='file'
+            accept='.jpg,.jpeg,.png,.webp'
+            className='hidden'
+            onChange={(e) => {
+              const file = e.target.files?.[0]
+              if (file) handleUpload(file)
+              e.target.value = ''
+            }}
+          />
+          <Button
+            variant='outline'
+            size='sm'
+            className='w-full'
+            disabled={uploading}
+            onClick={() => uploadInputRef.current?.click()}
+          >
+            {uploading ? t('Uploading...') : t('Upload from device')}
+          </Button>
+        </div>
+      )}
     </div>
   )
 }

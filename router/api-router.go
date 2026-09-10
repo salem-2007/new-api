@@ -101,8 +101,9 @@ func SetApiRouter(router *gin.Engine) {
 				selfRoute.GET("/self/groups", controller.GetUserGroups)
 				selfRoute.GET("/self", controller.GetSelf)
 				selfRoute.POST("/self/avatar", middleware.CriticalRateLimit(), middleware.DisableCache(), controller.UpdateSelfAvatar)
-				selfRoute.POST("/self/avatar/refresh", middleware.DisableCache(), controller.RefreshSelfAvatar)
-				selfRoute.DELETE("/self/oauth/github", middleware.CriticalRateLimit(), middleware.DisableCache(), controller.UnbindSelfGitHub)
+				selfRoute.POST("/self/avatar/refresh", middleware.DisableCache(), controller.RefreshSelfAvatarSync)
+				selfRoute.GET("/self/oauth/binding_status", middleware.DisableCache(), controller.GetSelfBindings)
+				selfRoute.DELETE("/self/oauth/:provider", middleware.CriticalRateLimit(), middleware.DisableCache(), controller.UnbindSelfProvider)
 				selfRoute.GET("/models", controller.GetUserModels)
 				selfRoute.PUT("/self", middleware.CriticalRateLimit(), middleware.DisableCache(), controller.UpdateSelf)
 				selfRoute.DELETE("/self", middleware.DisableCache(), controller.DeleteSelf)
@@ -164,6 +165,7 @@ func SetApiRouter(router *gin.Engine) {
 				adminRoute.PUT("/", controller.UpdateUser)
 				adminRoute.DELETE("/:id", controller.DeleteUser)
 				adminRoute.DELETE("/:id/reset_passkey", controller.AdminResetPasskey)
+				adminRoute.POST("/wallpaper/upload", middleware.CriticalRateLimit(), controller.UploadWallpaper)
 
 				// Admin 2FA routes
 				adminRoute.GET("/2fa/stats", controller.Admin2FAStats)

@@ -844,6 +844,22 @@ func UpdateSelf(c *gin.Context) {
 		return
 	}
 
+	// 用户名改动查重(唯一索引报错对用户不友好)
+	if user.Username != "" {
+		exist, existErr := model.CheckUserExistOrDeleted(user.Username, "")
+		if existErr != nil {
+			common.ApiError(c, existErr)
+			return
+		}
+		if exist {
+			current, curErr := model.GetUserById(c.GetInt("id"), true)
+			if curErr == nil && current.Username != user.Username {
+				common.ApiErrorMsg(c, "用户名已被占用")
+				return
+			}
+		}
+	}
+
 	cleanUser := model.User{
 		Id:          c.GetInt("id"),
 		Username:    user.Username,

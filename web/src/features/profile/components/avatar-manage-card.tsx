@@ -16,7 +16,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { api } from '@/lib/api'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
@@ -30,12 +31,14 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { Skeleton } from '@/components/ui/skeleton'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import {
   refreshSelfAvatar,
-  unbindSelfGitHub,
+  unbindSelfProvider,
   updateSelfAvatar,
+  getSelfBindings,
 } from '../api'
 import type { UserProfile } from '../types'
 
@@ -43,14 +46,36 @@ type AvatarManageCardProps = {
   profile: UserProfile
 }
 
+const PROVIDER_LABELS: Record<string, string> = {
+  github: 'GitHub',
+  discord: 'Discord',
+  oidc: 'OIDC',
+  wechat: '微信',
+  telegram: 'Telegram',
+  linuxdo: 'LinuxDO',
+}
+
 export function AvatarManageCard({ profile }: AvatarManageCardProps) {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const [avatarUrlInput, setAvatarUrlInput] = useState('')
+  const [username, setUsername] = useState(profile.username)
+  const [displayName, setDisplayName] = useState(profile.display_name ?? '')
+
+  useEffect(() => {
+    setUsername(profile.username)
+    setDisplayName(profile.display_name ?? '')
+  }, [profile.username, profile.display_name])
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ['user-self'] })
+    queryClient.invalidateQueries({ queryKey: ['self-binding-status'] })
   }
+
+  const bindingsQuery = useQuery({
+    queryKey: ['self-binding-status'],
+    queryFn: getSelfBindings,
+  })
 
   const updateUrlMutation = useMutation({
     mutationFn: () => updateSelfAvatar(avatarUrlInput.trim()),
@@ -70,7 +95,7 @@ export function AvatarManageCard({ profile }: AvatarManageCardProps) {
     mutationFn: refreshSelfAvatar,
     onSuccess: (res) => {
       if (res.success) {
-        toast.success(res.message || t('Avatar synced from GitHub'))
+        toast.success(res.message || t('Avatar synced'))
         invalidate()
       } else {
         toast.error(res.message || t('Failed to sync avatar'))
@@ -80,30 +105,82 @@ export function AvatarManageCard({ profile }: AvatarManageCardProps) {
   })
 
   const unbindMutation = useMutation({
-    mutationFn: unbindSelfGitHub,
+    mutationFn: (provider: string) => unbindSelfProvider(provider),
     onSuccess: (res) => {
       if (res.success) {
-        toast.success(res.message || t('GitHub unbound'))
+        toast.success(res.message || t('Provider unbound'))
         invalidate()
       } else {
-        toast.error(res.message || t('Failed to unbind GitHub'))
+        toast.error(res.message || t('Failed to unbind'))
       }
     },
-    onError: () => toast.error(t('Failed to unbind GitHub')),
+    onError: () => toast.error(t('Failed to unbind')),
   })
 
-  const hasGithub = Boolean(profile.github_id)
+  const profileMutation = useMutation({
+    mutationFn: async () => {
+      const response = await api.put('/user/self', {
+        username: username.trim(),
+        display_name: displayName.trim(),
+      })
+      return response.data as { success: boolean; message?: string }
+    },
+    onSuccess: (res) => {
+      if (res.success) {
+        toast.success(t('Profile updated'))
+        invalidate()
+      } else {
+        toast.error(res.message || t('Failed to update profile'))
+      }
+    },
+    onError: () => toast.error(t('Failed to update profile')),
+  })
+
+  const bindings: Array<{ provider: string; bound: boolean }> | undefined =
+    bindingsQuery.data?.data as Array<{ provider: string; bound: boolean }> | undefined
+  const dirty =
+    username.trim() !== profile.username ||
+    displayName.trim() !== (profile.display_name ?? '')
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t('Avatar')}</CardTitle>
+        <CardTitle>{t('Profile & Avatar')}</CardTitle>
         <CardDescription>
-          {t('Manage your profile picture and GitHub binding.')}
+          {t('Update your username, display name, avatar and linked sign-in providers.')}
         </CardDescription>
       </CardHeader>
-      <CardContent className='space-y-4'>
-        <div className='grid gap-2'>
+      <CardContent className='space-y-5'>
+        <div className='grid gap-3 sm:grid-cols-2'>
+          <div className='grid gap-2'>
+            <Label htmlFor='profile-username'>{t('Username')}</Label>
+            <Input
+              id='profile-username'
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              maxLength={20}
+            />
+          </div>
+          <div className='grid gap-2'>
+            <Label htmlFor='profile-display-name'>{t('Display Name')}</Label>
+            <Input
+              id='profile-display-name'
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              maxLength={20}
+            />
+          </div>
+        </div>
+        <Button
+          type='button'
+          size='sm'
+          disabled={!dirty || profileMutation.isPending}
+          onClick={() => profileMutation.mutate()}
+        >
+          {profileMutation.isPending ? t('Saving...') : t('Save profile')}
+        </Button>
+
+        <div className='grid gap-2 border-t pt-4'>
           <Label htmlFor='avatar-url'>{t('Custom avatar URL')}</Label>
           <div className='flex gap-2'>
             <Input
@@ -124,43 +201,68 @@ export function AvatarManageCard({ profile }: AvatarManageCardProps) {
               {updateUrlMutation.isPending ? t('Saving...') : t('Save')}
             </Button>
           </div>
-        </div>
-
-        <div className='flex flex-wrap items-center gap-2'>
           <Button
             type='button'
             variant='outline'
             size='sm'
-            disabled={!hasGithub || refreshMutation.isPending}
+            className='w-fit'
+            disabled={refreshMutation.isPending}
             onClick={() => refreshMutation.mutate()}
           >
             {refreshMutation.isPending
               ? t('Syncing...')
-              : t('Sync from GitHub')}
+              : t('Sync avatar from linked provider')}
           </Button>
-          {hasGithub && (
-            <Button
-              type='button'
-              variant='destructive'
-              size='sm'
-              disabled={unbindMutation.isPending}
-              onClick={() => {
-                if (
-                  window.confirm(
-                    t(
-                      'Unlink GitHub? You will need a password to sign in afterwards.'
-                    )
-                  )
-                ) {
-                  unbindMutation.mutate()
-                }
-              }}
-            >
-              {unbindMutation.isPending ? t('Unbinding...') : t('Unbind GitHub')}
-            </Button>
+        </div>
+
+        <div className='space-y-2 border-t pt-4'>
+          <Label>{t('Linked sign-in providers')}</Label>
+          {bindingsQuery.isLoading ? (
+            <Skeleton className='h-10 w-full' />
+          ) : (
+            <div className='space-y-2'>
+              {(bindings ?? []).map((binding) => (
+                <div
+                  key={binding.provider}
+                  className='flex items-center justify-between gap-2 rounded-lg border px-3 py-2'
+                >
+                  <span className='text-sm'>
+                    {PROVIDER_LABELS[binding.provider] ?? binding.provider}
+                  </span>
+                  {binding.bound ? (
+                    <Button
+                      type='button'
+                      variant='destructive'
+                      size='xs'
+                      disabled={unbindMutation.isPending}
+                      onClick={() => {
+                        if (
+                          window.confirm(
+                            t(
+                              'Unbind this provider? Make sure you have a password or another provider to sign in.'
+                            )
+                          )
+                        ) {
+                          unbindMutation.mutate(binding.provider)
+                        }
+                      }}
+                    >
+                      {t('Unbind')}
+                    </Button>
+                  ) : (
+                    <span className='text-muted-foreground text-xs'>
+                      {t('Not linked')}
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </CardContent>
     </Card>
   )
 }
+
+
+

@@ -14,6 +14,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// 支持解绑的内置 OAuth 渠道及对应的 users 表列
+var unbindableProviders = map[string]string{
+	"github":   "github_id",
+	"discord":  "discord_id",
+	"oidc":     "oidc_id",
+	"wechat":   "wechat_id",
+	"telegram": "telegram_id",
+	"linuxdo":  "linux_do_id",
+}
+
+type bindingStatus struct {
+	Provider string `json:"provider"`
+	Bound    bool   `json:"bound"`
+}
+
+
 const githubUserAPI = "https://api.github.com/user/%s"
 
 type githubPublicUser struct {
@@ -102,15 +118,153 @@ func UpdateSelfAvatar(c *gin.Context) {
 	buildAvatarResponse(c, user, "头像已更新")
 }
 
-// RefreshSelfAvatar re-syncs the avatar from the linked GitHub account.
-func RefreshSelfAvatar(c *gin.Context) {
+func countBoundProviders(user *model.User) int {
+	n := 0
+	for _, col := range unbindableProviders {
+		switch col {
+		case "github_id":
+			if user.GitHubId != "" {
+				n++
+			}
+		case "discord_id":
+			if user.DiscordId != "" {
+				n++
+			}
+		case "oidc_id":
+			if user.OidcId != "" {
+				n++
+			}
+		case "wechat_id":
+			if user.WeChatId != "" {
+				n++
+			}
+		case "telegram_id":
+			if user.TelegramId != "" {
+				n++
+			}
+		case "linux_do_id":
+			if user.LinuxDOId != "" {
+				n++
+			}
+		}
+	}
+	return n
+}
+
+// GetSelfBindings returns the binding status of every supported OAuth provider.
+func GetSelfBindings(c *gin.Context) {
 	id := c.GetInt("id")
 	user, err := model.GetUserById(id, false)
 	if err != nil {
 		common.ApiError(c, err)
 		return
 	}
-	avatarURL, err := fetchGitHubAvatarByAPI(user.GitHubId)
+	bindings := make([]bindingStatus, 0, len(unbindableProviders))
+	for provider := range unbindableProviders {
+		bound := false
+		switch unbindableProviders[provider] {
+		case "github_id":
+			bound = user.GitHubId != ""
+		case "discord_id":
+			bound = user.DiscordId != ""
+		case "oidc_id":
+			bound = user.OidcId != ""
+		case "wechat_id":
+			bound = user.WeChatId != ""
+		case "telegram_id":
+			bound = user.TelegramId != ""
+		case "linux_do_id":
+			bound = user.LinuxDOId != ""
+		}
+		bindings = append(bindings, bindingStatus{Provider: provider, Bound: bound})
+	}
+	c.JSON(http.StatusOK, gin.H{"success": true, "data": bindings})
+}
+
+// UnbindSelfProvider removes the binding of the given OAuth provider for the
+// current user. Refuses when doing so would leave the account without any
+// sign-in method (no password and no remaining binding).
+func UnbindSelfProvider(c *gin.Context) {
+	provider := strings.ToLower(strings.TrimSpace(c.Param("provider")))
+	column, ok := unbindableProviders[provider]
+	if !ok {
+		common.ApiErrorMsg(c, "不支持的登录渠道")
+		return
+	}
+	id := c.GetInt("id")
+	user, err := model.GetUserById(id, false)
+	if err != nil {
+		common.ApiError(c, err)
+		return
+	}
+	if countBoundProviders(user) == 0 {
+		common.ApiErrorMsg(c, "该账号没有绑定任何登录渠道")
+		return
+	}
+	// 解绑后必须仍保留至少一种登录方式
+	remaining := countBoundProviders(user) - 1
+	if user.Password == "" && remaining == 0 {
+		common.ApiErrorMsg(c, "解绑后将无法登录：请先设置密码或绑定其他渠道")
+		return
+	}
+	if err := model.DB.Model(&model.User{}).Where("id = ?", id).Update(column, "").Error; err != nil {
+		common.ApiError(c, err)
+		return
+	}
+	switch column {
+	case "github_id":
+		user.GitHubId = ""
+		if strings.Contains(user.AvatarURL, "avatars.githubusercontent.com") {
+			_ = model.DB.Model(&model.User{}).Where("id = ?", id).Update("avatar_url", "").Error
+			user.AvatarURL = ""
+		}
+	case "discord_id":
+		user.DiscordId = ""
+	case "oidc_id":
+		user.OidcId = ""
+	case "wechat_id":
+		user.WeChatId = ""
+	case "telegram_id":
+		user.TelegramId = ""
+	case "linux_do_id":
+		user.LinuxDOId = ""
+	}
+	recordUserSecurityAudit(c, id, "user.binding_unbind", map[string]interface{}{
+		"provider": provider, "success": true,
+	})
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": fmt.Sprintf("已解绑 %s", provider),
+		"data":    buildSelfUserData(user),
+	})
+}
+
+// fetchProviderAvatar tries to fetch the latest avatar for the user from any
+// provider that supports public avatar lookup. Currently only GitHub exposes a
+// public, tokenless API keyed by numeric id.
+func fetchProviderAvatar(user *model.User) (string, string, error) {
+	if user.GitHubId != "" {
+		url, err := fetchGitHubAvatarByAPI(user.GitHubId)
+		if err == nil {
+			return url, "github", nil
+		}
+	}
+	return "", "", errors.New("当前登录渠道不支持自动同步头像, 请重新通过该渠道登录以更新头像, 或手动填写头像 URL")
+}
+
+// RefreshSelfAvatarSync syncs the avatar from the currently bound provider.
+func RefreshSelfAvatarSync(c *gin.Context) {
+	id := c.GetInt("id")
+	user, err := model.GetUserById(id, false)
+	if err != nil {
+		common.ApiError(c, err)
+		return
+	}
+	if countBoundProviders(user) == 0 {
+		common.ApiErrorMsg(c, "当前账号使用密码/邮箱登录, 请在下方手动填写头像 URL")
+		return
+	}
+	avatarURL, provider, err := fetchProviderAvatar(user)
 	if err != nil {
 		common.ApiError(c, err)
 		return
@@ -122,34 +276,11 @@ func RefreshSelfAvatar(c *gin.Context) {
 		}
 	}
 	user.AvatarURL = avatarURL
-	buildAvatarResponse(c, user, "已从 GitHub 同步最新头像")
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": fmt.Sprintf("已从 %s 同步最新头像", provider),
+		"data":    buildSelfUserData(user),
+	})
 }
 
-// UnbindSelfGitHub removes the GitHub binding of the current user.
-func UnbindSelfGitHub(c *gin.Context) {
-	id := c.GetInt("id")
-	user, err := model.GetUserById(id, false)
-	if err != nil {
-		common.ApiError(c, err)
-		return
-	}
-	if user.GitHubId == "" {
-		common.ApiError(c, errors.New("account is not linked to GitHub"))
-		return
-	}
-	// 防御: 没设密码且无其他登录方式的账号解绑后将无法登录
-	if user.Password == "" {
-		common.ApiError(c, errors.New("请先设置密码后再解绑 GitHub, 否则将无法登录"))
-		return
-	}
-	if err := model.DB.Model(&model.User{}).Where("id = ?", id).Updates(map[string]interface{}{
-		"github_id":  "",
-		"avatar_url": "",
-	}).Error; err != nil {
-		common.ApiError(c, err)
-		return
-	}
-	user.GitHubId = ""
-	user.AvatarURL = ""
-	buildAvatarResponse(c, user, "已解绑 GitHub")
-}
+var _ = time.Second // keep time import if unused later

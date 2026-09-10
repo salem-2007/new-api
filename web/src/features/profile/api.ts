@@ -321,7 +321,12 @@ export async function refreshSelfAvatar(): Promise<ApiResponse> {
   return response.data as ApiResponse
 }
 
-export async function unbindSelfGitHub(): Promise<ApiResponse> {
-  const response = await api.delete('/user/self/oauth/github')
+export async function unbindSelfProvider(provider: string): Promise<ApiResponse> {
+  const response = await api.delete(`/user/self/oauth/${provider}`)
+  return response.data as ApiResponse
+}
+
+export async function getSelfBindings(): Promise<ApiResponse> {
+  const response = await api.get('/user/self/oauth/binding_status')
   return response.data as ApiResponse
 }
