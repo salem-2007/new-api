@@ -563,7 +563,22 @@ function createTray() {
   });
 }
 
-app.whenReady().then(async () => {
+// 单实例锁：防止双进程并发写坏 SQLite（database disk image is malformed）
+const gotTheLock = app.requestSingleInstanceLock();
+if (!gotTheLock) {
+  app.quit();
+} else {
+  app.on('second-instance', () => {
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.show();
+      mainWindow.focus();
+    } else {
+      createWindow();
+    }
+  });
+
+  app.whenReady().then(async () => {
   try {
     await startServer();
     createTray();
@@ -677,3 +692,4 @@ app.on('before-quit', (event) => {
     });
   }
 });
+}
