@@ -23,7 +23,6 @@ import { useDebounce } from '@/hooks/use-debounce'
 
 import {
   FILTER_ALL,
-  SORT_OPTIONS,
   QUOTA_TYPES,
   ENDPOINT_TYPES,
   DEFAULT_TOKEN_UNIT,
