@@ -27,6 +27,7 @@ import { useAuthStore } from '@/stores/auth-store'
 import { CheckinCalendarCard } from './components/checkin-calendar-card'
 import { LanguagePreferencesCard } from './components/language-preferences-card'
 import { ProfileHeader } from './components/profile-header'
+import { AvatarManageCard } from './components/avatar-manage-card'
 import { ProfileSettingsCard } from './components/profile-settings-card'
 import { SidebarModulesCard } from './components/sidebar-modules-card'
 import { useProfile } from './hooks'
@@ -49,6 +50,10 @@ export function Profile() {
         <CardStaggerContainer className='mx-auto flex w-full max-w-7xl flex-col gap-4 sm:gap-6'>
           <CardStaggerItem>
             <ProfileHeader profile={profile} loading={loading} />
+          </CardStaggerItem>
+
+          <CardStaggerItem>
+            {profile && <AvatarManageCard profile={profile} />}
           </CardStaggerItem>
 
           <CardStaggerItem>

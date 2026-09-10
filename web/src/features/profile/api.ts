@@ -305,3 +305,23 @@ export async function performCheckin(
   const res = await api.post(url)
   return res.data
 }
+
+
+// ============================================================================
+// Avatar & GitHub Binding APIs
+// ============================================================================
+
+export async function updateSelfAvatar(url: string): Promise<ApiResponse> {
+  const response = await api.post('/user/self/avatar', { url })
+  return response.data as ApiResponse
+}
+
+export async function refreshSelfAvatar(): Promise<ApiResponse> {
+  const response = await api.post('/user/self/avatar/refresh')
+  return response.data as ApiResponse
+}
+
+export async function unbindSelfGitHub(): Promise<ApiResponse> {
+  const response = await api.delete('/user/self/oauth/github')
+  return response.data as ApiResponse
+}
