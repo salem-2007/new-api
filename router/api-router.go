@@ -100,7 +100,7 @@ func SetApiRouter(router *gin.Engine) {
 				selfRoute.POST("/sessions/revoke-others", middleware.DisableCache(), controller.RevokeOtherLoginSessions)
 				selfRoute.GET("/self/groups", controller.GetUserGroups)
 				selfRoute.GET("/self", controller.GetSelf)
-				selfRoute.POST("/self/avatar", middleware.CriticalRateLimit(), middleware.DisableCache(), controller.UpdateSelfAvatar)
+				selfRoute.POST("/self/avatar/upload", middleware.CriticalRateLimit(), controller.UploadSelfAvatar)
 				selfRoute.POST("/self/avatar/refresh", middleware.DisableCache(), controller.RefreshSelfAvatarSync)
 				selfRoute.GET("/self/oauth/binding_status", middleware.DisableCache(), controller.GetSelfBindings)
 				selfRoute.DELETE("/self/oauth/:provider", middleware.CriticalRateLimit(), middleware.DisableCache(), controller.UnbindSelfProvider)

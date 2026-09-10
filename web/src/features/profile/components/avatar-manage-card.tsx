@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { api } from '@/lib/api'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
@@ -37,9 +37,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   refreshSelfAvatar,
   unbindSelfProvider,
-  updateSelfAvatar,
   getSelfBindings,
 } from '../api'
+import type { ApiResponse } from '../types'
 import type { UserProfile } from '../types'
 
 type AvatarManageCardProps = {
@@ -58,7 +58,7 @@ const PROVIDER_LABELS: Record<string, string> = {
 export function AvatarManageCard({ profile }: AvatarManageCardProps) {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
-  const [avatarUrlInput, setAvatarUrlInput] = useState('')
+  const uploadInputRef = useRef<HTMLInputElement>(null)
   const [username, setUsername] = useState(profile.username)
   const [displayName, setDisplayName] = useState(profile.display_name ?? '')
 
@@ -77,12 +77,16 @@ export function AvatarManageCard({ profile }: AvatarManageCardProps) {
     queryFn: getSelfBindings,
   })
 
-  const updateUrlMutation = useMutation({
-    mutationFn: () => updateSelfAvatar(avatarUrlInput.trim()),
+  const uploadMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const form = new FormData()
+      form.append('file', file)
+      const response = await api.post('/user/self/avatar/upload', form)
+      return response.data as ApiResponse
+    },
     onSuccess: (res) => {
       if (res.success) {
-        toast.success(t('Avatar updated'))
-        setAvatarUrlInput('')
+        toast.success(res.message || t('Avatar updated'))
         invalidate()
       } else {
         toast.error(res.message || t('Failed to update avatar'))
@@ -180,39 +184,44 @@ export function AvatarManageCard({ profile }: AvatarManageCardProps) {
           {profileMutation.isPending ? t('Saving...') : t('Save profile')}
         </Button>
 
-        <div className='grid gap-2 border-t pt-4'>
-          <Label htmlFor='avatar-url'>{t('Custom avatar URL')}</Label>
-          <div className='flex gap-2'>
-            <Input
-              id='avatar-url'
-              value={avatarUrlInput}
-              onChange={(e) => setAvatarUrlInput(e.target.value)}
-              placeholder='https://...'
+        <div className='space-y-2 border-t pt-4'>
+          <Label htmlFor='avatar-upload'>{t('Avatar')}</Label>
+          <div className='flex items-center gap-3'>
+            <input
+              ref={uploadInputRef}
+              id='avatar-upload'
+              type='file'
+              accept='.jpg,.jpeg,.png,.webp'
+              className='hidden'
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (file) uploadMutation.mutate(file)
+                e.target.value = ''
+              }}
             />
             <Button
               type='button'
+              variant='outline'
               size='sm'
-              disabled={
-                updateUrlMutation.isPending ||
-                avatarUrlInput.trim().length === 0
-              }
-              onClick={() => updateUrlMutation.mutate()}
+              disabled={uploadMutation.isPending}
+              onClick={() => uploadInputRef.current?.click()}
             >
-              {updateUrlMutation.isPending ? t('Saving...') : t('Save')}
+              {uploadMutation.isPending ? t('Uploading...') : t('Upload avatar')}
             </Button>
+            {profile.avatar_url && (
+              <Button
+                type='button'
+                variant='ghost'
+                size='sm'
+                disabled={refreshMutation.isPending}
+                onClick={() => refreshMutation.mutate()}
+              >
+                {refreshMutation.isPending
+                  ? t('Syncing...')
+                  : t('Sync from provider')}
+              </Button>
+            )}
           </div>
-          <Button
-            type='button'
-            variant='outline'
-            size='sm'
-            className='w-fit'
-            disabled={refreshMutation.isPending}
-            onClick={() => refreshMutation.mutate()}
-          >
-            {refreshMutation.isPending
-              ? t('Syncing...')
-              : t('Sync avatar from linked provider')}
-          </Button>
         </div>
 
         <div className='space-y-2 border-t pt-4'>

@@ -24,6 +24,15 @@ func SetWebRouter(router *gin.Engine, assets WebAssets, pluginDispatcher gin.Han
 	frontendFS := common.EmbedFolder(assets.BuildFS, "web/dist")
 
 	// 液态玻璃壁纸（管理员上传，存于 data/glass-wallpapers）
+	router.GET("/user-avatars/:name", func(c *gin.Context) {
+		name := c.Param("name")
+		if strings.Contains(name, "..") || strings.Contains(name, "/") {
+			c.Status(http.StatusNotFound)
+			return
+		}
+		c.File(filepath.Join(filepath.Dir(common.SQLitePath), "user-avatars", name))
+	})
+
 	router.GET("/glass-wallpapers/:scope/:name", func(c *gin.Context) {
 		scope := c.Param("scope")
 		name := c.Param("name")

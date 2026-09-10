@@ -6255,6 +6255,8 @@
     "Failed to update avatar": "更新头像失败",
     "Upload from device": "从本地上传",
     "Wallpaper uploaded": "壁纸已上传",
-    "Upload failed": "上传失败"
+    "Upload failed": "上传失败",
+    "Upload avatar": "上传头像",
+    "Sync from provider": "从渠道同步"
   }
 }
