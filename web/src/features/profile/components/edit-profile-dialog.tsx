@@ -53,7 +53,8 @@ interface EditProfileDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   profile: UserProfile
-  onProfileUpdate?: () => void | Promise<void>
+  /** Receives the fresh server snapshot returned by avatar mutations. */
+  onProfileUpdate?: (snapshot?: UserProfile) => void | Promise<void>
 }
 
 export function EditProfileDialog({
@@ -64,10 +65,10 @@ export function EditProfileDialog({
 }: EditProfileDialogProps) {
   const queryClient = useQueryClient()
 
-  const refreshProfile = async () => {
+  const refreshProfile = async (snapshot?: UserProfile) => {
     await queryClient.invalidateQueries({ queryKey: ['user-self'] })
     await queryClient.invalidateQueries({ queryKey: ['self-binding-status'] })
-    await onProfileUpdate?.()
+    await onProfileUpdate?.(snapshot)
   }
 
   const handleOpenChange = (nextOpen: boolean) => {
@@ -79,10 +80,7 @@ export function EditProfileDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className='sm:max-w-md'>
-        <EditProfileForm
-          profile={profile}
-          onProfileUpdate={refreshProfile}
-        />
+        <EditProfileForm profile={profile} onProfileUpdate={refreshProfile} />
       </DialogContent>
     </Dialog>
   )
@@ -90,7 +88,7 @@ export function EditProfileDialog({
 
 interface EditProfileFormProps {
   profile: UserProfile
-  onProfileUpdate: () => Promise<void>
+  onProfileUpdate: (snapshot?: UserProfile) => Promise<void>
 }
 
 // The form only exists while the dialog is open, so its fields can be seeded
@@ -106,9 +104,9 @@ function EditProfileForm({ profile, onProfileUpdate }: EditProfileFormProps) {
     queryKey: ['self-binding-status'],
     queryFn: getSelfBindings,
   })
-  const canSyncAvatar = (bindingsQuery.data?.data ?? []).some(
-    (binding) => binding.bound
-  )
+  const bindingRows = bindingsQuery.data?.data
+  const canSyncAvatar =
+    Array.isArray(bindingRows) && bindingRows.some((binding) => binding.bound)
 
   const saveMutation = useMutation({
     mutationFn: () =>
@@ -127,6 +125,9 @@ function EditProfileForm({ profile, onProfileUpdate }: EditProfileFormProps) {
     onError: () => toast.error(t('Failed to update profile')),
   })
 
+  // Avatar mutations answer with the refreshed self user, so the header (and
+  // the account menu, through the auth store) updates without waiting for the
+  // follow-up profile read.
   const uploadMutation = useMutation({
     mutationFn: uploadSelfAvatar,
     onSuccess: async (response) => {
@@ -135,7 +136,7 @@ function EditProfileForm({ profile, onProfileUpdate }: EditProfileFormProps) {
         return
       }
       toast.success(response.message || t('Avatar updated'))
-      await onProfileUpdate()
+      await onProfileUpdate(response.data)
     },
     onError: () => toast.error(t('Failed to update avatar')),
   })
@@ -148,7 +149,7 @@ function EditProfileForm({ profile, onProfileUpdate }: EditProfileFormProps) {
         return
       }
       toast.success(response.message || t('Avatar synced'))
-      await onProfileUpdate()
+      await onProfileUpdate(response.data)
     },
     onError: () => toast.error(t('Failed to sync avatar')),
   })

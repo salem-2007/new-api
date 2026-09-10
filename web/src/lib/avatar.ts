@@ -44,7 +44,14 @@ export function getUserAvatarFallback(name: string): string {
   return name.trim().charAt(0).toUpperCase() || '?'
 }
 
-export function getUserAvatarUrl(user?: { avatar_url?: string } | null): string | null {
+export function getUserAvatarUrl(
+  user?: { avatar_url?: string } | null
+): string | null {
   const url = user?.avatar_url?.trim()
-  return url || null
+  if (!url) return null
+  // Hosted avatars (uploads, provider syncs) are served from the site root. A
+  // relative value such as `user-avatars/u1-1.png` would otherwise resolve
+  // against the current route and 404, leaving the letter fallback on screen.
+  if (/^(?:[a-z][a-z0-9+.-]*:|\/\/|\/)/i.test(url)) return url
+  return `/${url}`
 }

@@ -223,7 +223,7 @@ export function Features(_props: FeaturesProps) {
               key={f.title}
               delay={i * 100}
               animation='fade-up'
-              className='flex flex-col items-center text-center'
+              className='group flex flex-col items-center text-center'
             >
               <div className='text-muted-foreground border-border/50 bg-muted/30 group-hover:text-foreground mb-3 flex size-12 items-center justify-center rounded-xl border transition-colors'>
                 {f.icon}

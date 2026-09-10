@@ -23,6 +23,7 @@ import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
 import { useStatus } from '@/hooks/use-status'
+import { cn } from '@/lib/utils'
 
 import { HeroTerminalDemo } from '../hero-terminal-demo'
 
@@ -30,6 +31,14 @@ interface HeroProps {
   className?: string
   isAuthenticated?: boolean
 }
+
+/**
+ * Geometry shared by the application pills. `min-w-0` allows the pill to shrink
+ * below its content width on narrow viewports, which is what lets the label
+ * truncate instead of pushing the row out of the glass card.
+ */
+const APP_PILL_BASE =
+  'group flex max-w-full min-w-0 items-center gap-3 rounded-full border border-border/40 bg-muted/15 px-4 py-2.5 text-sm font-medium shadow-[0_1px_2.5px_rgba(0,0,0,0.01)] backdrop-blur-xs transition-all duration-300 sm:px-5'
 
 // Stylized three-dots indicator representing "More"
 const MoreIcon = () => (
@@ -175,17 +184,19 @@ export function Hero(props: HeroProps) {
             style={{ animationDelay: '240ms' }}
           >
             <div
-              className='rounded-2xl border p-5'
-              style={{
-                backgroundImage:
-                  'linear-gradient(180deg, rgba(255,255,255,0.42) 0%, rgba(255,255,255,0.10) 14%, rgba(255,255,255,0) 30%), linear-gradient(125deg, rgba(255,255,255,0.20) 0%, rgba(200,220,255,0.08) 34%, rgba(178,190,255,0.06) 52%, rgba(255,255,255,0) 74%)',
-                backgroundColor: 'color-mix(in srgb, var(--glass-tint) 38%, transparent)',
-                borderColor: 'rgba(255, 255, 255, 0.55)',
-                backdropFilter: 'blur(20px) saturate(135%)',
-                WebkitBackdropFilter: 'blur(20px) saturate(135%)',
-                boxShadow:
-                  'inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 8px 32px rgba(31, 45, 71, 0.18)',
-              }}
+              className={cn(
+                'rounded-2xl border p-5',
+                // The rim and the inset highlight are theme-aware: a 55% white
+                // edge is a highlight on the light card but reads as a seam on
+                // the dark one, so dark mode keeps a faint frost instead.
+                'border-white/[0.55] dark:border-white/10',
+                'backdrop-blur-[20px] backdrop-saturate-[135%]',
+                'bg-[color-mix(in_srgb,var(--glass-tint)_38%,transparent)]',
+                'bg-[linear-gradient(180deg,rgba(255,255,255,0.42)_0%,rgba(255,255,255,0.10)_14%,rgba(255,255,255,0)_30%),linear-gradient(125deg,rgba(255,255,255,0.20)_0%,rgba(200,220,255,0.08)_34%,rgba(178,190,255,0.06)_52%,rgba(255,255,255,0)_74%)]',
+                'dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.10)_0%,rgba(255,255,255,0.04)_14%,rgba(255,255,255,0)_30%),linear-gradient(125deg,rgba(255,255,255,0.06)_0%,rgba(160,190,255,0.05)_34%,rgba(178,190,255,0.04)_52%,rgba(255,255,255,0)_74%)]',
+                'shadow-[inset_0_1px_0_rgba(255,255,255,0.55),0_8px_32px_rgba(31,45,71,0.18)]',
+                'dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_8px_32px_rgba(0,0,0,0.45)]'
+              )}
             >
               <div className='mb-4 flex flex-col gap-1'>
                 <span className='text-muted-foreground/70 text-[10px] font-bold tracking-[0.15em] uppercase'>
@@ -197,16 +208,19 @@ export function Hero(props: HeroProps) {
                   )}
                 </p>
               </div>
-              <div className='flex flex-wrap items-center gap-3'>
+              <div className='flex min-w-0 flex-wrap items-center gap-2.5 sm:gap-3'>
                 {/* Cherry Studio */}
                 <a
                   href='https://cherry-ai.com'
                   target='_blank'
                   rel='noopener noreferrer'
-                  className='group border-border/40 bg-muted/15 text-foreground/80 hover:border-border hover:bg-muted/30 hover:text-foreground flex items-center gap-3 rounded-full border px-5 py-2.5 text-sm font-medium shadow-[0_1px_2.5px_rgba(0,0,0,0.01)] backdrop-blur-xs transition-all duration-300 hover:scale-[1.02]'
+                  className={cn(
+                    APP_PILL_BASE,
+                    'text-foreground/80 hover:border-border hover:bg-muted/30 hover:text-foreground hover:scale-[1.02] focus-visible:ring-ring/50 focus-visible:ring-2 focus-visible:outline-none'
+                  )}
                 >
                   <CherryStudio.Color size={24} className='shrink-0' />
-                  <span>Cherry Studio</span>
+                  <span className='truncate'>Cherry Studio</span>
                 </a>
 
                 {/* CC Switch */}
@@ -214,7 +228,10 @@ export function Hero(props: HeroProps) {
                   href='https://ccswitch.io'
                   target='_blank'
                   rel='noopener noreferrer'
-                  className='group border-border/40 bg-muted/15 text-foreground/80 hover:border-border hover:bg-muted/30 hover:text-foreground flex items-center gap-3 rounded-full border px-5 py-2.5 text-sm font-medium shadow-[0_1px_2.5px_rgba(0,0,0,0.01)] backdrop-blur-xs transition-all duration-300 hover:scale-[1.02]'
+                  className={cn(
+                    APP_PILL_BASE,
+                    'text-foreground/80 hover:border-border hover:bg-muted/30 hover:text-foreground hover:scale-[1.02] focus-visible:ring-ring/50 focus-visible:ring-2 focus-visible:outline-none'
+                  )}
                 >
                   <img
                     src='https://ccswitch.io/favicon.png'
@@ -233,13 +250,18 @@ export function Hero(props: HeroProps) {
                   >
                     CC
                   </span>
-                  <span>CC Switch</span>
+                  <span className='truncate'>CC Switch</span>
                 </a>
 
                 {/* "更多" */}
-                <div className='group border-border/40 bg-muted/15 text-foreground/55 hover:border-border hover:bg-muted/30 hover:text-foreground flex cursor-default items-center gap-2.5 rounded-full border px-5 py-2.5 text-sm font-medium shadow-[0_1px_2.5px_rgba(0,0,0,0.01)] backdrop-blur-xs transition-all duration-300 hover:scale-[1.02]'>
+                <div
+                  className={cn(
+                    APP_PILL_BASE,
+                    'text-foreground/55 cursor-default hover:border-border hover:bg-muted/30 hover:text-foreground'
+                  )}
+                >
                   <MoreIcon />
-                  <span>{t('More Apps')}</span>
+                  <span className='truncate'>{t('More Apps')}</span>
                 </div>
               </div>
             </div>

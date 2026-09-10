@@ -59,6 +59,7 @@ import {
   type WallpaperOption,
 } from '@/lib/glass-preference'
 import { api } from '@/lib/api'
+import { getServerErrorMessage } from '@/lib/server-error-message'
 import { ROLE } from '@/lib/roles'
 import { useAuthStore } from '@/stores/auth-store'
 import { useThemeCustomization } from '@/context/theme-customization-provider'
@@ -246,12 +247,21 @@ function WallpaperPicker(props: {
   const uploadInputRef = useRef<HTMLInputElement>(null)
 
   const handleUpload = async (file: File) => {
+    if (!isAdmin) {
+      toast.error(t('Only administrators can upload wallpapers'))
+      return
+    }
     setUploading(true)
     try {
       const form = new FormData()
       form.append('scope', props.scope)
       form.append('file', file)
-      const response = await api.post('/glass-wallpaper/upload', form)
+      // The backend group is /api/glass_wallpaper (underscore) and the client
+      // baseURL is empty, so the /api prefix belongs in the path.
+      const response = await api.post('/api/glass_wallpaper/upload', form, {
+        // Keep the browser-generated multipart boundary instead of JSON.
+        headers: { 'Content-Type': null },
+      })
       const payload = response.data as {
         success: boolean
         message?: string
@@ -263,8 +273,8 @@ function WallpaperPicker(props: {
       } else {
         toast.error(payload.message || t('Upload failed'))
       }
-    } catch {
-      toast.error(t('Upload failed'))
+    } catch (error) {
+      toast.error(getServerErrorMessage(error, t('Upload failed')))
     } finally {
       setUploading(false)
     }

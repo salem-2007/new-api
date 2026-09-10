@@ -41,7 +41,8 @@ import { EditProfileDialog } from './edit-profile-dialog'
 interface ProfileHeaderProps {
   profile: UserProfile | null
   loading: boolean
-  onProfileUpdate?: () => void | Promise<void>
+  /** Accepts the fresh server snapshot returned by avatar mutations. */
+  onProfileUpdate?: (snapshot?: UserProfile) => void | Promise<void>
 }
 
 export function ProfileHeader({
@@ -129,7 +130,16 @@ export function ProfileHeader({
       <CardContent className='p-3 sm:p-5'>
         <div className='flex items-center gap-3 text-left sm:gap-4'>
           <Avatar className='ring-background h-12 w-12 rounded-xl text-sm ring-2 sm:h-16 sm:w-16 sm:rounded-2xl sm:text-lg sm:ring-4'>
-            {avatarUrl && <AvatarImage src={avatarUrl} alt={avatarFallback} />}
+            {avatarUrl && (
+              <AvatarImage
+                src={avatarUrl}
+                alt={avatarFallback}
+                // Follow the frame of the fallback avatar instead of the
+                // component default circle, so the image does not change shape
+                // once it finishes loading.
+                className='rounded-xl sm:rounded-2xl'
+              />
+            )}
             <AvatarFallback
               className='rounded-xl font-semibold text-white sm:rounded-2xl'
               style={avatarFallbackStyle}

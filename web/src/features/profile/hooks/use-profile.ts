@@ -23,6 +23,7 @@ import { toast } from 'sonner'
 import { handleServerError } from '@/lib/handle-server-error'
 
 import { getUserProfile, updateUserProfile, updateUserSettings } from '../api'
+import { syncAuthUserFromProfile } from '../lib/profile-sync'
 import type {
   UserProfile,
   UpdateUserRequest,
@@ -48,6 +49,8 @@ export function useProfile() {
 
       if (response.success && response.data) {
         setProfile(response.data)
+        // Keep the global header (avatar, display name) in step with the page.
+        syncAuthUserFromProfile(response.data)
       } else if (!silent) {
         handleServerError(response, i18next.t('Failed to load profile'))
       }
@@ -62,10 +65,19 @@ export function useProfile() {
     }
   }, [])
 
-  // Refresh profile silently (without loading state)
-  const refreshProfile = useCallback(async () => {
-    await fetchProfile(true)
-  }, [fetchProfile])
+  // Refresh profile silently (without loading state). Callers that already hold
+  // a fresh server snapshot (avatar upload for example) can hand it over so the
+  // page updates before the follow-up read completes.
+  const refreshProfile = useCallback(
+    async (snapshot?: UserProfile) => {
+      if (snapshot) {
+        setProfile(snapshot)
+        syncAuthUserFromProfile(snapshot)
+      }
+      await fetchProfile(true)
+    },
+    [fetchProfile]
+  )
 
   // Update user profile
   const updateProfile = useCallback(

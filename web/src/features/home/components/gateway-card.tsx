@@ -48,22 +48,23 @@ export function GatewayCard({ logo, systemName }: GatewayCardProps) {
           <img
             src={logo}
             alt={systemName}
-            className='h-12 w-12 rounded-lg object-cover'
+            className='h-12 w-12 shrink-0 rounded-lg object-contain'
           />
           <h3 className='from-foreground to-foreground/70 bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent'>
             {systemName}
           </h3>
         </div>
 
-        {/* Features Grid */}
-        <div className='grid grid-cols-2 gap-3'>
+        {/* Features Grid — single column on phones, where long labels cannot
+            share a row without overflowing the card */}
+        <div className='grid grid-cols-1 gap-3 sm:grid-cols-2'>
           {features.map((feature, i) => (
             <div
               key={i}
-              className='glass-morphism group/item border-border/40 dark:border-border/20 relative overflow-hidden rounded-xl border px-4 py-3.5 text-center shadow-sm transition-all duration-300 hover:scale-[1.02] hover:border-amber-500/40 hover:shadow-md'
+              className='glass-morphism group/item border-border/40 dark:border-border/20 relative flex min-w-0 items-center justify-center overflow-hidden rounded-xl border px-4 py-3.5 text-center shadow-sm transition-all duration-300 hover:scale-[1.02] hover:border-amber-500/40 hover:shadow-md'
             >
               <div className='absolute inset-0 bg-gradient-to-br from-amber-500/0 to-amber-500/0 transition-all duration-300 group-hover/item:from-amber-500/10' />
-              <span className='text-foreground/90 group-hover/item:text-foreground relative text-sm font-medium'>
+              <span className='text-foreground/90 group-hover/item:text-foreground relative min-w-0 text-sm font-medium text-pretty break-words'>
                 {feature}
               </span>
             </div>

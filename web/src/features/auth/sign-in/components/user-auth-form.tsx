@@ -29,6 +29,7 @@ import { Dialog } from '@/components/dialog'
 import { PasswordInput } from '@/components/password-input'
 import { Turnstile } from '@/components/turnstile'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Form,
   FormControl,
@@ -45,6 +46,11 @@ import { OAuthProviders } from '@/features/auth/components/oauth-providers'
 import { loginFormSchema } from '@/features/auth/constants'
 import { useAuthRedirect } from '@/features/auth/hooks/use-auth-redirect'
 import { useTurnstile } from '@/features/auth/hooks/use-turnstile'
+import {
+  clearRememberedCredentials,
+  readRememberedCredentials,
+  saveRememberedCredentials,
+} from '@/features/auth/lib/remembered-credentials'
 import { beginPasskeyLogin, finishPasskeyLogin } from '@/features/auth/passkey'
 import type { AuthFormProps } from '@/features/auth/types'
 import { useStatus } from '@/hooks/use-status'
@@ -67,6 +73,7 @@ export function UserAuthForm({
   const [isLoading, setIsLoading] = useState(false)
   const [wechatCode, setWeChatCode] = useState('')
   const [agreedToLegal, setAgreedToLegal] = useState(false)
+  const [rememberPassword, setRememberPassword] = useState(false)
   const [passkeySupported, setPasskeySupported] = useState(false)
   const [isPasskeyLoading, setIsPasskeyLoading] = useState(false)
   const [isWeChatDialogOpen, setIsWeChatDialogOpen] = useState(false)
@@ -137,6 +144,24 @@ export function UserAuthForm({
     },
   })
 
+  // Restore the locally remembered credentials once password login is known to
+  // be available. It only fills empty fields, so a late `/api/status` response
+  // never overwrites what the user has already typed.
+  useEffect(() => {
+    if (!passwordLoginEnabled) return
+    let cancelled = false
+    void readRememberedCredentials().then((saved) => {
+      if (cancelled || !saved) return
+      const current = form.getValues()
+      if (current.username || current.password) return
+      setRememberPassword(true)
+      form.reset(saved, { keepDefaultValues: true })
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [form, passwordLoginEnabled])
+
   const wechatQrCodeUrl = useMemo(() => {
     return (
       status?.wechat_qrcode ||
@@ -176,6 +201,16 @@ export function UserAuthForm({
 
       if (res.success) {
         form.setValue('password', '')
+        // Persist before the redirect: navigating away would otherwise cancel
+        // storage writes started from this handler.
+        if (rememberPassword) {
+          await saveRememberedCredentials({
+            username: data.username,
+            password: data.password,
+          })
+        } else {
+          clearRememberedCredentials()
+        }
         if (await handleLoginResult(res.data, redirectTo)) {
           toast.success(t('Welcome back!'))
         }
@@ -389,6 +424,23 @@ export function UserAuthForm({
                 </FormItem>
               )}
             />
+
+            {/* Remember Password */}
+            <div className='flex items-center gap-2'>
+              <Checkbox
+                id='remember-password'
+                checked={rememberPassword}
+                onCheckedChange={(checked) =>
+                  setRememberPassword(checked === true)
+                }
+              />
+              <Label
+                htmlFor='remember-password'
+                className='text-muted-foreground cursor-pointer text-sm font-normal'
+              >
+                {t('Remember password')}
+              </Label>
+            </div>
 
             {/* Submit Button */}
             <Button

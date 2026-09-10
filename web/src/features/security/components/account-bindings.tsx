@@ -16,6 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Mail, Shield, Send, Link2, Unlink } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -33,7 +34,12 @@ import {
 } from '@/features/auth/lib/oauth-popup'
 import { SecureVerificationDialog } from '@/features/auth/secure-verification'
 import type { CustomOAuthProviderInfo } from '@/features/auth/types'
-import { getSelfOAuthBindings, unbindCustomOAuth } from '@/features/profile/api'
+import {
+  getSelfOAuthBindings,
+  unbindCustomOAuth,
+  getSelfBindings,
+  unbindSelfProvider,
+} from '@/features/profile/api'
 import type {
   UserProfile,
   BindingItem,
@@ -42,6 +48,7 @@ import type {
 import { useDialogs } from '@/hooks/use-dialog'
 import { useStatus } from '@/hooks/use-status'
 import { api } from '@/lib/api'
+import { handleServerError } from '@/lib/handle-server-error'
 import {
   buildOAuthAuthorizationUrl,
   indexCustomOAuthBindings,
@@ -74,20 +81,64 @@ type PreparedOAuthBinding = AccountSecurityResult & {
   url: string
 }
 
+// Built-in sign-in channels and the profile field that records their binding.
+// The binding-status endpoint is authoritative; these fields keep the list
+// usable on servers that predate it.
+const BUILT_IN_PROVIDER_COLUMNS = {
+  github: 'github_id',
+  discord: 'discord_id',
+  oidc: 'oidc_id',
+  wechat: 'wechat_id',
+  telegram: 'telegram_id',
+  linuxdo: 'linux_do_id',
+} as const
+
+type BuiltInProvider = keyof typeof BUILT_IN_PROVIDER_COLUMNS
+
+type AccountBindingItem = BindingItem & { provider?: BuiltInProvider }
+
+function readProfileBinding(
+  profile: UserProfile | null,
+  provider: BuiltInProvider
+): string | undefined {
+  if (!profile) return undefined
+  const value = profile[BUILT_IN_PROVIDER_COLUMNS[provider]]
+  return typeof value === 'string' && value ? value : undefined
+}
+
 export function AccountBindings({ profile, onUpdate }: AccountBindingsProps) {
   const { t } = useTranslation()
+  const queryClient = useQueryClient()
   const dialogs = useDialogs<DialogKey>()
   const { status, loading } = useStatus()
   const [customBindings, setCustomBindings] = useState<CustomOAuthBinding[]>([])
   const [unbindTarget, setUnbindTarget] = useState<CustomOAuthBinding | null>(
     null
   )
+  const [unbindingProvider, setUnbindingProvider] =
+    useState<BuiltInProvider | null>(null)
   const security = useAccountSecurity()
   const unbinding = security.pending
   const [preparedBinding, setPreparedBinding] =
     useState<PreparedOAuthBinding | null>(null)
   const bindingsLocked =
     security.pending || Boolean(preparedBinding) || dialogs.hasAnyOpen
+
+  // Server-side binding status for the built-in sign-in channels. It is shared
+  // with the profile edit dialog, so unbinding here refreshes both views.
+  const bindingsQuery = useQuery({
+    queryKey: ['self-binding-status'],
+    queryFn: getSelfBindings,
+  })
+  const boundByProvider = useMemo(() => {
+    const map = new Map<string, boolean>()
+    const rows = bindingsQuery.data?.data
+    if (!Array.isArray(rows)) return map
+    for (const item of rows) {
+      if (item?.provider) map.set(item.provider, Boolean(item.bound))
+    }
+    return map
+  }, [bindingsQuery.data])
 
   const customProviders = status?.custom_oauth_providers as
     | CustomOAuthProviderInfo[]
@@ -133,6 +184,33 @@ export function AccountBindings({ profile, onUpdate }: AccountBindingsProps) {
       )
       await fetchCustomBindings()
       onUpdate()
+    }
+  }
+
+  // Built-in channels carry no verification ceremony: the server refuses the
+  // unbind when it would leave the account without any way to sign in, so a
+  // plain confirmation is enough.
+  const handleUnbindProvider = async (provider: BuiltInProvider) => {
+    const confirmed = window.confirm(
+      t(
+        'Unbind this provider? Make sure you have a password or another provider to sign in.'
+      )
+    )
+    if (!confirmed) return
+    setUnbindingProvider(provider)
+    try {
+      const response = await unbindSelfProvider(provider)
+      if (!response.success) {
+        toast.error(response.message || t('Failed to unbind'))
+        return
+      }
+      toast.success(response.message || t('Provider unbound'))
+      await queryClient.invalidateQueries({ queryKey: ['self-binding-status'] })
+      onUpdate()
+    } catch (error) {
+      handleServerError(error, t('Failed to unbind'))
+    } finally {
+      setUnbindingProvider(null)
     }
   }
 
@@ -220,12 +298,24 @@ export function AccountBindings({ profile, onUpdate }: AccountBindingsProps) {
   useEffect(() => {
     setPreparedBinding(null)
     setUnbindTarget(null)
+    setUnbindingProvider(null)
     closeDialogs()
   }, [security.sessionKey, closeDialogs])
 
   if (!profile || !status || loading) return null
 
-  const bindings: BindingItem[] = [
+  // Server status wins; the profile field is the fallback for older servers.
+  const resolveBinding = (provider: BuiltInProvider) => {
+    const value = readProfileBinding(profile, provider)
+    return {
+      value,
+      isBound: boundByProvider.get(provider) ?? Boolean(value),
+    }
+  }
+
+  // Typed before `.filter` runs: without a contextual type the literal
+  // `provider` values widen to `string` and stop matching `BuiltInProvider`.
+  const bindingItems: AccountBindingItem[] = [
     {
       id: 'email',
       label: t('Email'),
@@ -239,10 +329,8 @@ export function AccountBindings({ profile, onUpdate }: AccountBindingsProps) {
       id: 'wechat',
       label: t('WeChat'),
       icon: SiWechat as React.ComponentType<{ className?: string }>,
-      value: undefined,
-      isBound: Boolean(
-        (profile as unknown as Record<string, unknown>).wechat_id
-      ),
+      provider: 'wechat',
+      ...resolveBinding('wechat'),
       isEnabled: status?.wechat_login || false,
       onBind: () => dialogs.open('wechat'),
     },
@@ -250,12 +338,8 @@ export function AccountBindings({ profile, onUpdate }: AccountBindingsProps) {
       id: 'github',
       label: t('GitHub'),
       icon: SiGithub,
-      value: (profile as unknown as Record<string, unknown>).github_id as
-        | string
-        | undefined,
-      isBound: Boolean(
-        (profile as unknown as Record<string, unknown>).github_id
-      ),
+      provider: 'github',
+      ...resolveBinding('github'),
       isEnabled: status?.github_oauth || false,
       onBind: () => void startOAuthBinding('github'),
     },
@@ -263,12 +347,8 @@ export function AccountBindings({ profile, onUpdate }: AccountBindingsProps) {
       id: 'discord',
       label: t('Discord'),
       icon: IconDiscord,
-      value: (profile as unknown as Record<string, unknown>).discord_id as
-        | string
-        | undefined,
-      isBound: Boolean(
-        (profile as unknown as Record<string, unknown>).discord_id
-      ),
+      provider: 'discord',
+      ...resolveBinding('discord'),
       isEnabled: status?.discord_oauth || false,
       onBind: () => void startOAuthBinding('discord'),
     },
@@ -276,10 +356,8 @@ export function AccountBindings({ profile, onUpdate }: AccountBindingsProps) {
       id: 'oidc',
       label: t('OIDC'),
       icon: Shield,
-      value: (profile as unknown as Record<string, unknown>).oidc_id as
-        | string
-        | undefined,
-      isBound: Boolean((profile as unknown as Record<string, unknown>).oidc_id),
+      provider: 'oidc',
+      ...resolveBinding('oidc'),
       isEnabled: status?.oidc_enabled || false,
       onBind: () => void startOAuthBinding('oidc'),
     },
@@ -287,12 +365,8 @@ export function AccountBindings({ profile, onUpdate }: AccountBindingsProps) {
       id: 'telegram',
       label: t('Telegram'),
       icon: Send,
-      value: (profile as unknown as Record<string, unknown>).telegram_id as
-        | string
-        | undefined,
-      isBound: Boolean(
-        (profile as unknown as Record<string, unknown>).telegram_id
-      ),
+      provider: 'telegram',
+      ...resolveBinding('telegram'),
       isEnabled: status?.telegram_oauth || false,
       onBind: () => void startOAuthBinding('telegram'),
     },
@@ -300,16 +374,14 @@ export function AccountBindings({ profile, onUpdate }: AccountBindingsProps) {
       id: 'linuxdo',
       label: t('LinuxDO'),
       icon: SiLinux as React.ComponentType<{ className?: string }>,
-      value: (profile as unknown as Record<string, unknown>).linux_do_id as
-        | string
-        | undefined,
-      isBound: Boolean(
-        (profile as unknown as Record<string, unknown>).linux_do_id
-      ),
+      provider: 'linuxdo',
+      ...resolveBinding('linuxdo'),
       isEnabled: status?.linuxdo_oauth || false,
       onBind: () => void startOAuthBinding('linuxdo'),
     },
-  ].filter((binding) => binding.isEnabled)
+  ]
+
+  const bindings = bindingItems.filter((binding) => binding.isEnabled)
 
   return (
     <>
@@ -318,6 +390,10 @@ export function AccountBindings({ profile, onUpdate }: AccountBindingsProps) {
         className='grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3'
       >
         {bindings.map((binding) => {
+          // Only bound rows are unbindable, and only the built-in channels
+          // carry a provider. Narrowing once here keeps `handleUnbindProvider`
+          // typed without a non-null assertion in the click handler.
+          const boundProvider = binding.isBound ? binding.provider : undefined
           let actionLabel = t('Bind')
           if (binding.isBound && binding.id === 'email') {
             actionLabel = t('Change')
@@ -351,21 +427,39 @@ export function AccountBindings({ profile, onUpdate }: AccountBindingsProps) {
                     )}
                   </div>
                   <p className='text-muted-foreground truncate text-xs'>
-                    {binding.value || t('Not bound')}
+                    {binding.value ||
+                      (binding.isBound ? t('Bound') : t('Not bound'))}
                   </p>
                 </div>
               </div>
-              <Button
-                variant='outline'
-                size='sm'
-                className='h-7 shrink-0 px-2.5 text-xs'
-                onClick={binding.onBind}
-                disabled={
-                  bindingsLocked || (binding.isBound && binding.id !== 'email')
-                }
-              >
-                {actionLabel}
-              </Button>
+              {boundProvider ? (
+                <Button
+                  type='button'
+                  variant='ghost'
+                  size='sm'
+                  className='text-destructive h-7 shrink-0 px-2.5 text-xs'
+                  onClick={() => void handleUnbindProvider(boundProvider)}
+                  disabled={
+                    bindingsLocked || unbindingProvider === boundProvider
+                  }
+                >
+                  <Unlink className='mr-1 h-3 w-3' />
+                  {t('Unbind')}
+                </Button>
+              ) : (
+                <Button
+                  variant='outline'
+                  size='sm'
+                  className='h-7 shrink-0 px-2.5 text-xs'
+                  onClick={binding.onBind}
+                  disabled={
+                    bindingsLocked ||
+                    (binding.isBound && binding.id !== 'email')
+                  }
+                >
+                  {actionLabel}
+                </Button>
+              )}
             </li>
           )
         })}

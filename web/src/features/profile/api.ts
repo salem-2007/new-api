@@ -313,21 +313,27 @@ export async function performCheckin(
 // ============================================================================
 
 /**
- * Upload a local image as the current user's avatar
+ * Upload a local image as the current user's avatar. The response carries the
+ * refreshed self user (including the new `avatar_url`).
  */
-export async function uploadSelfAvatar(file: File): Promise<ApiResponse> {
+export async function uploadSelfAvatar(
+  file: File
+): Promise<ApiResponse<UserProfile>> {
   const form = new FormData()
   form.append('file', file)
-  const response = await api.post('/api/user/self/avatar/upload', form)
-  return response.data as ApiResponse
+  const response = await api.post('/api/user/self/avatar/upload', form, {
+    // Keep the browser-generated multipart boundary instead of the JSON default.
+    headers: { 'Content-Type': null },
+  })
+  return response.data as ApiResponse<UserProfile>
 }
 
 /**
  * Sync the avatar from the currently bound login channel
  */
-export async function refreshSelfAvatar(): Promise<ApiResponse> {
+export async function refreshSelfAvatar(): Promise<ApiResponse<UserProfile>> {
   const response = await api.post('/api/user/self/avatar/refresh')
-  return response.data as ApiResponse
+  return response.data as ApiResponse<UserProfile>
 }
 
 /**
@@ -335,11 +341,11 @@ export async function refreshSelfAvatar(): Promise<ApiResponse> {
  */
 export async function unbindSelfProvider(
   provider: string
-): Promise<ApiResponse> {
+): Promise<ApiResponse<UserProfile>> {
   const response = await api.delete(
     `/api/user/self/oauth/${encodeURIComponent(provider)}`
   )
-  return response.data as ApiResponse
+  return response.data as ApiResponse<UserProfile>
 }
 
 /**

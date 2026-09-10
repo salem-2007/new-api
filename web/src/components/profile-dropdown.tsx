@@ -76,6 +76,7 @@ export function ProfileDropdown() {
         <DropdownMenuContent align='end' sideOffset={8} className='w-56'>
           <div className='flex items-center gap-2 px-1.5 py-1.5'>
             <Avatar className='size-8'>
+              {avatarUrl && <AvatarImage src={avatarUrl} alt={avatarName} />}
               <AvatarFallback
                 className={`${avatarFallbackClassName} text-xs`}
                 style={avatarFallbackStyle}

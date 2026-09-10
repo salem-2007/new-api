@@ -251,10 +251,12 @@ function Sidebar({
         data-side={side}
         className={cn(
           'fixed top-[var(--app-header-height,0px)] bottom-0 z-10 hidden h-[calc(100svh-var(--app-header-height,0px))] w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear data-[side=left]:left-0 data-[side=left]:group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)] data-[side=right]:right-0 data-[side=right]:group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)] md:flex',
-          // Adjust the padding for floating and inset variants.
+          // Adjust the padding for floating and inset variants. The standard
+          // `sidebar` variant stays flush with the viewport edge, so it keeps
+          // the full width and relies on its inner panel for the separator.
           variant === 'floating' || variant === 'inset'
             ? 'p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4))+2px)]'
-            : 'group-data-[collapsible=icon]:w-(--sidebar-width-icon) group-data-[side=left]:border-r group-data-[side=right]:border-l',
+            : 'group-data-[collapsible=icon]:w-(--sidebar-width-icon)',
           className
         )}
         {...props}
@@ -262,7 +264,16 @@ function Sidebar({
         <div
           data-sidebar='sidebar'
           data-slot='sidebar-inner'
-          className='bg-sidebar group-data-[variant=floating]:ring-sidebar-border flex size-full flex-col group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:shadow-sm group-data-[variant=floating]:ring-1'
+          className={cn(
+            // Every variant paints the panel as a rounded card: `overflow-hidden`
+            // keeps the navigation surfaces inside the rounded corners, and the
+            // ring replaces the straight border the standard variant used to
+            // draw on the container.
+            'bg-sidebar ring-sidebar-border flex size-full flex-col overflow-hidden shadow-sm ring-1',
+            'group-data-[variant=floating]:rounded-lg',
+            // Inset and standard panels share the main content card radius.
+            'group-data-[variant=inset]:rounded-xl group-data-[variant=sidebar]:rounded-xl'
+          )}
         >
           {children}
         </div>

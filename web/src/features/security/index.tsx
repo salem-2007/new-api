@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Link2, LogIn } from 'lucide-react'
+import { Link2 } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -35,7 +35,6 @@ import { useProfile } from '@/features/profile/hooks/use-profile'
 import { AccessTokenCard } from './components/access-token-card'
 import { AccountActionCard } from './components/account-action-card'
 import { AccountBindings } from './components/account-bindings'
-import { LoginChannelBindings } from './components/login-channel-bindings'
 import { LoginSessionsCard } from './components/login-sessions-card'
 import { PasskeyCard } from './components/passkey-card'
 import { PrivacyCard } from './components/privacy-card'
@@ -99,17 +98,6 @@ export function Security() {
               disableHoverEffect
             >
               <AccountBindings profile={profile} onUpdate={refreshProfile} />
-            </TitledCard>
-            <TitledCard
-              title={t('Linked sign-in providers')}
-              icon={<LogIn className='size-4' />}
-              headerClassName='px-3 py-2.5 !pb-2.5 sm:px-4 sm:py-2.5 sm:!pb-2.5'
-              contentClassName='p-3 sm:p-3'
-              titleClassName='text-sm sm:text-sm'
-              iconClassName='size-7 sm:size-7'
-              disableHoverEffect
-            >
-              <LoginChannelBindings onUpdate={refreshProfile} />
             </TitledCard>
           </section>
           <section aria-labelledby='security-access' className='space-y-4'>
