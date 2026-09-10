@@ -6245,7 +6245,7 @@
     "Sync avatar from linked provider": "从登录渠道同步头像",
     "Avatar synced": "头像已同步",
     "Failed to sync avatar": "同步头像失败",
-    "Linked sign-in providers": "已绑定的登录渠道",
+    "Linked sign-in providers": "登录渠道绑定",
     "Not linked": "未绑定",
     "Unbind this provider? Make sure you have a password or another provider to sign in.": "确定解绑该渠道？请确保你已设置密码或绑定了其他渠道。",
     "Provider unbound": "已解绑",
@@ -6257,6 +6257,12 @@
     "Wallpaper uploaded": "壁纸已上传",
     "Upload failed": "上传失败",
     "Upload avatar": "上传头像",
-    "Sync from provider": "从渠道同步"
+    "Sync from provider": "从渠道同步",
+    "Avatar": "头像",
+    "Display name must be 20 characters or fewer.": "显示名称不能超过 20 个字符。",
+    "Edit Profile": "修改资料",
+    "Failed to load login channels": "登录渠道加载失败",
+    "Update your username, display name and avatar.": "修改用户名、显示名称与头像。",
+    "Username must be 20 characters or fewer.": "用户名不能超过 20 个字符。"
   }
 }

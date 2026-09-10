@@ -31,6 +31,7 @@ import type {
   CheckinResponse,
   AccountSecurityResult,
   EmailBindingFlow,
+  SelfProviderBinding,
 } from './types'
 
 // ============================================================================
@@ -308,25 +309,45 @@ export async function performCheckin(
 
 
 // ============================================================================
-// Avatar & GitHub Binding APIs
+// Avatar & Login Channel Binding APIs
 // ============================================================================
 
-export async function updateSelfAvatar(url: string): Promise<ApiResponse> {
-  const response = await api.post('/user/self/avatar', { url })
+/**
+ * Upload a local image as the current user's avatar
+ */
+export async function uploadSelfAvatar(file: File): Promise<ApiResponse> {
+  const form = new FormData()
+  form.append('file', file)
+  const response = await api.post('/api/user/self/avatar/upload', form)
   return response.data as ApiResponse
 }
 
+/**
+ * Sync the avatar from the currently bound login channel
+ */
 export async function refreshSelfAvatar(): Promise<ApiResponse> {
-  const response = await api.post('/user/self/avatar/refresh')
+  const response = await api.post('/api/user/self/avatar/refresh')
   return response.data as ApiResponse
 }
 
-export async function unbindSelfProvider(provider: string): Promise<ApiResponse> {
-  const response = await api.delete(`/user/self/oauth/${provider}`)
+/**
+ * Unbind a login channel from the current user
+ */
+export async function unbindSelfProvider(
+  provider: string
+): Promise<ApiResponse> {
+  const response = await api.delete(
+    `/api/user/self/oauth/${encodeURIComponent(provider)}`
+  )
   return response.data as ApiResponse
 }
 
-export async function getSelfBindings(): Promise<ApiResponse> {
-  const response = await api.get('/user/self/oauth/binding_status')
-  return response.data as ApiResponse
+/**
+ * Get the binding status of every sign-in channel of the current user
+ */
+export async function getSelfBindings(): Promise<
+  ApiResponse<SelfProviderBinding[]>
+> {
+  const response = await api.get('/api/user/self/oauth/binding_status')
+  return response.data as ApiResponse<SelfProviderBinding[]>
 }

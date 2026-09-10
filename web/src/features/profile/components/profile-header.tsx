@@ -16,11 +16,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Activity, BarChart3, WalletCards } from 'lucide-react'
+import { Activity, BarChart3, Pencil, WalletCards } from 'lucide-react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { StatusBadge } from '@/components/status-badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { IconBadge, type IconBadgeTone } from '@/components/ui/icon-badge'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -30,6 +32,7 @@ import { getRoleLabel } from '@/lib/roles'
 
 import { getDisplayName } from '../lib'
 import type { UserProfile } from '../types'
+import { EditProfileDialog } from './edit-profile-dialog'
 
 // ============================================================================
 // Profile Header Component
@@ -38,10 +41,16 @@ import type { UserProfile } from '../types'
 interface ProfileHeaderProps {
   profile: UserProfile | null
   loading: boolean
+  onProfileUpdate?: () => void | Promise<void>
 }
 
-export function ProfileHeader({ profile, loading }: ProfileHeaderProps) {
+export function ProfileHeader({
+  profile,
+  loading,
+  onProfileUpdate,
+}: ProfileHeaderProps) {
   const { t } = useTranslation()
+  const [editProfileOpen, setEditProfileOpen] = useState(false)
 
   if (loading) {
     return (
@@ -144,6 +153,16 @@ export function ProfileHeader({ profile, loading }: ProfileHeaderProps) {
                 variant='info'
                 copyText={String(profile.id)}
               />
+              <Button
+                type='button'
+                variant='outline'
+                size='sm'
+                className='shrink-0'
+                onClick={() => setEditProfileOpen(true)}
+              >
+                <Pencil className='size-3.5' />
+                {t('Edit Profile')}
+              </Button>
             </div>
 
             <div className='text-muted-foreground flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs sm:gap-x-4 sm:text-sm'>
@@ -187,6 +206,12 @@ export function ProfileHeader({ profile, loading }: ProfileHeaderProps) {
           ))}
         </div>
       </div>
+      <EditProfileDialog
+        open={editProfileOpen}
+        onOpenChange={setEditProfileOpen}
+        profile={profile}
+        onProfileUpdate={onProfileUpdate}
+      />
     </Card>
   )
 }

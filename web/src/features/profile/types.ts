@@ -130,9 +130,18 @@ export interface UserSettings {
  * User update request
  */
 export interface UpdateUserRequest {
+  username?: string
   display_name?: string
   password?: string
   original_password?: string
+}
+
+/**
+ * Sign-in channel binding status of the current user
+ */
+export interface SelfProviderBinding {
+  provider: string
+  bound: boolean
 }
 
 export interface AccountSecurityResult {
