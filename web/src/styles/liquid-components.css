@@ -209,16 +209,25 @@ section > div:not([data-glass-layer='free']) {
 /* ---------- 5. Level 3 — modal surfaces ---------- */
 [data-slot='dialog-content'],
 [data-slot='alert-dialog-content'],
-[data-slot='sheet-content'] {
+[data-slot='sheet-content'],
+[data-slot='drawer-content'] {
   background: var(--liquid-3-fill) !important;
   backdrop-filter: url(#glass-distortion) blur(var(--liquid-blur-deep)) saturate(var(--liquid-saturation));
   -webkit-backdrop-filter: url(#glass-distortion) blur(var(--liquid-blur-deep)) saturate(var(--liquid-saturation));
   border-color: var(--liquid-border) !important;
-  border-radius: var(--liquid-radius-3);
   box-shadow: var(--liquid-highlight), var(--liquid-shadow-modal) !important;
   padding-bottom: env(safe-area-inset-bottom, 0px);
   will-change: transform, opacity;
   contain: layout paint;
+}
+/* Same rule as level 1 and level 2: the level radius lands on the modal slots
+   this sheet owns. The mobile drawer is left out of it — it is a partially
+   open sheet whose corner names the edge it slid in from (`rounded-t-xl` for a
+   bottom drawer), and a panel radius would flatten that. */
+[data-slot='dialog-content'],
+[data-slot='alert-dialog-content'],
+[data-slot='sheet-content'] {
+  border-radius: var(--liquid-radius-3);
 }
 @media (max-width: 640px) {
   [data-slot='dialog-content'] {
@@ -557,6 +566,7 @@ body[data-liquid-glass='off'] [data-slot='command'],
 body[data-liquid-glass='off'] [data-slot='dialog-content'],
 body[data-liquid-glass='off'] [data-slot='alert-dialog-content'],
 body[data-liquid-glass='off'] [data-slot='sheet-content'],
+body[data-liquid-glass='off'] [data-slot='drawer-content'],
 body[data-liquid-glass='off'] [data-slot='sidebar-inner'],
 body[data-liquid-glass='off'] [data-slot='sidebar-inset'],
 body[data-liquid-glass='off'] [data-slot='data-table-card'],

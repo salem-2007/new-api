@@ -56,6 +56,9 @@ export const api = axios.create({
 })
 
 const inFlightGet = new Map<string, Promise<unknown>>()
+// Key -> url of the pending read. A write has to find the reads of the resource
+// it changes, and the url is not recoverable from the key alone.
+const inFlightGetUrls = new Map<string, string>()
 const originalGet = api.get.bind(api)
 
 api.get = ((url: string, config: ApiRequestConfig = {}) => {
@@ -69,10 +72,35 @@ api.get = ((url: string, config: ApiRequestConfig = {}) => {
 
   const request = originalGet(url, config).finally(() => {
     inFlightGet.delete(key)
+    inFlightGetUrls.delete(key)
   })
   inFlightGet.set(key, request)
+  inFlightGetUrls.set(key, url)
   return request
 }) as typeof api.get
+
+/**
+ * Stop the pending reads of a resource from answering the reads that follow.
+ *
+ * A read keeps the row the server had when it was sent. When a write lands
+ * while such a read is still pending, the shared promise hands that pre-write
+ * row to every reader that comes after the write — the read a mutation runs to
+ * confirm itself included, which is how an uploaded avatar reverts to the
+ * previous one. Mutations call this once the server has accepted the write, so
+ * the next read of the resource reaches the server instead.
+ *
+ * Reads of the resource's own sub-paths are dropped too: they describe parts of
+ * the same row. Every other read keeps its shared promise.
+ */
+export function dropInFlightReads(path: string): void {
+  const subPaths = `${path}/`
+  for (const [key, url] of inFlightGetUrls) {
+    if (url === path || url.startsWith(subPaths)) {
+      inFlightGet.delete(key)
+      inFlightGetUrls.delete(key)
+    }
+  }
+}
 
 function redirectToSignIn(): void {
   if (

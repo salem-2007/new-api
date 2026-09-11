@@ -490,7 +490,7 @@ function ChannelEditorNav(props: {
         </div>
 
         <nav
-          className='border-border/60 bg-background rounded-lg border p-1'
+          className='border-border/60 bg-background/60 rounded-lg border p-1'
           aria-label={props.navigationLabel}
         >
           {props.items.map((item) => {

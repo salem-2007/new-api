@@ -31,7 +31,7 @@ import {
 } from '@/components/ui/card'
 import { IconBadge } from '@/components/ui/icon-badge'
 import { Switch } from '@/components/ui/switch'
-import { api } from '@/lib/api'
+import { api, dropInFlightReads } from '@/lib/api'
 import { handleServerError } from '@/lib/handle-server-error'
 import { useAuthStore } from '@/stores/auth-store'
 
@@ -186,6 +186,9 @@ export function SidebarModulesCard() {
         sidebar_modules: serialized,
       })
       if (res.data.success) {
+        // This write changes the self row, so a read that was already pending
+        // for it must not answer the next one (see `dropInFlightReads`).
+        dropInFlightReads('/api/user/self')
         // Sync to auth-store so useSidebarConfig re-runs and the sidebar
         // updates immediately without needing a page refresh.
         if (currentUser) {

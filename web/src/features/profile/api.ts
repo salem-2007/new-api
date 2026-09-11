@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { api } from '@/lib/api'
+import { api, dropInFlightReads } from '@/lib/api'
 import type { CustomOAuthBinding } from '@/lib/oauth'
 import { authRequestOptions, authResult } from '@/lib/secure-verification'
 import type { LoginSession } from '@/stores/auth-store'
@@ -38,11 +38,26 @@ import type {
 // User Profile APIs
 // ============================================================================
 
+const SELF_PATH = '/api/user/self'
+
+/**
+ * Confirm a profile write with a read that reflects it.
+ *
+ * A `/api/user/self` read that is still pending was answered before the write,
+ * so sharing it with the read the caller runs next would put the previous row
+ * back on screen (an uploaded avatar reverting to the old one). Reads that are
+ * already in flight for the row are dropped here, once the server has accepted
+ * the write.
+ */
+function keepSelfReadsFresh(): void {
+  dropInFlightReads(SELF_PATH)
+}
+
 /**
  * Get current user profile
  */
 export async function getUserProfile(): Promise<ApiResponse<UserProfile>> {
-  const res = await api.get('/api/user/self')
+  const res = await api.get(SELF_PATH)
   return res.data
 }
 
@@ -52,9 +67,10 @@ export async function getUserProfile(): Promise<ApiResponse<UserProfile>> {
 export async function updateUserProfile(
   data: UpdateUserRequest
 ): Promise<ApiResponse> {
-  const res = await api.put('/api/user/self', data, {
+  const res = await api.put(SELF_PATH, data, {
     acceptAuthRotation: Boolean(data.password),
   })
+  keepSelfReadsFresh()
   return res.data
 }
 
@@ -64,7 +80,7 @@ export function changeAccountPassword(
   signal: AbortSignal
 ): Promise<AccountSecurityResult & { has_password: boolean }> {
   return authResult(
-    api.put('/api/user/self', data, {
+    api.put(SELF_PATH, data, {
       ...authRequestOptions,
       headers: { 'X-Security-Proof': proofToken },
       acceptAuthRotation: true,
@@ -86,6 +102,8 @@ export async function updateUserSettings(
   }
   const settings = normalizeUserSettings(profile.data.setting)
   const res = await api.put('/api/user/setting', { ...settings, ...data })
+  // `setting` is part of the self row the profile page renders.
+  keepSelfReadsFresh()
   return res.data
 }
 
@@ -95,7 +113,8 @@ export async function updateUserSettings(
 export async function updateUserLanguage(
   language: string
 ): Promise<ApiResponse> {
-  const res = await api.put('/api/user/self', { language })
+  const res = await api.put(SELF_PATH, { language })
+  keepSelfReadsFresh()
   return res.data
 }
 
@@ -107,7 +126,7 @@ export function deleteUserAccount(
   signal: AbortSignal
 ): Promise<AccountSecurityResult> {
   return authResult(
-    api.delete('/api/user/self', {
+    api.delete(SELF_PATH, {
       ...authRequestOptions,
       headers: { 'X-Security-Proof': proof },
       singleUseAuthorization: true,
@@ -325,6 +344,7 @@ export async function uploadSelfAvatar(
     // Keep the browser-generated multipart boundary instead of the JSON default.
     headers: { 'Content-Type': null },
   })
+  keepSelfReadsFresh()
   return response.data as ApiResponse<UserProfile>
 }
 
@@ -333,6 +353,7 @@ export async function uploadSelfAvatar(
  */
 export async function refreshSelfAvatar(): Promise<ApiResponse<UserProfile>> {
   const response = await api.post('/api/user/self/avatar/refresh')
+  keepSelfReadsFresh()
   return response.data as ApiResponse<UserProfile>
 }
 
@@ -345,6 +366,7 @@ export async function unbindSelfProvider(
   const response = await api.delete(
     `/api/user/self/oauth/${encodeURIComponent(provider)}`
   )
+  keepSelfReadsFresh()
   return response.data as ApiResponse<UserProfile>
 }
 

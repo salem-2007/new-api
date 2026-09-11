@@ -60,6 +60,9 @@ export const MOBILE_DRAWER_ANIMATION = {
 export const MOBILE_DRAWER_CONFIG = {
   overlayTransitionDuration: 0.2,
   drawerClassName:
-    'fixed inset-x-0 bottom-3 z-50 mx-auto w-[95%] rounded-xl border border-border bg-background p-4 shadow-lg md:hidden',
+    // Floating panel over the page: the /9x step is the "near-opaque bar over
+    // scrolling content" tier of the glass ladder, so the mobile menu picks up
+    // the floating fill and shadow instead of painting `--background`.
+    'fixed inset-x-0 bottom-3 z-50 mx-auto w-[95%] rounded-xl border border-border bg-background/90 p-4 shadow-lg md:hidden',
   overlayClassName: 'fixed inset-0 z-40 bg-black/50 backdrop-blur-sm',
 } as const

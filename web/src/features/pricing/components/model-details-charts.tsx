@@ -159,9 +159,13 @@ export function LatencyTrendChart(props: {
 
   if (props.series.length === 0) {
     return (
+      // Placeholder panel for the chart that would sit here; it is a container,
+      // so it takes the level-1 glass recipe the panels around it use.
       <div
+        data-slot='card'
+        data-card-hover='false'
         className={cn(
-          'text-muted-foreground flex h-48 items-center justify-center rounded-lg border text-xs',
+          'text-muted-foreground flex h-48 items-center justify-center border text-xs',
           props.className
         )}
       >
@@ -288,8 +292,10 @@ export function UptimeTrendChart(props: {
   if (props.series.length === 0) {
     return (
       <div
+        data-slot='card'
+        data-card-hover='false'
         className={cn(
-          'text-muted-foreground flex h-48 items-center justify-center rounded-lg border text-xs',
+          'text-muted-foreground flex h-48 items-center justify-center border text-xs',
           props.className
         )}
       >

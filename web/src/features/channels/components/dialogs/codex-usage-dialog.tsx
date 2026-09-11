@@ -615,7 +615,7 @@ function InfoField(props: {
   return (
     <div
       className={cn(
-        'bg-background ring-border/60 min-w-0 rounded-lg p-3 ring-1',
+        'bg-background/60 ring-border/60 min-w-0 rounded-lg p-3 ring-1',
         props.className
       )}
     >
@@ -679,7 +679,7 @@ function ResetCreditItem(props: { credit: CodexResetCredit; index: number }) {
     normalizeResetCreditStatus(props.credit.status) === 'available'
 
   return (
-    <div className='bg-background rounded-lg border p-3'>
+    <div className='bg-background/60 rounded-lg border p-3'>
       <div className='flex flex-wrap items-start justify-between gap-3'>
         <div className='min-w-0'>
           <div className='flex flex-wrap items-center gap-2'>

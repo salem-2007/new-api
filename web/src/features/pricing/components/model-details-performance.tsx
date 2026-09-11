@@ -51,7 +51,14 @@ function StatCard(props: {
 }) {
   const Icon = props.icon
   return (
-    <div className='bg-background flex flex-col gap-1 rounded-lg border p-3'>
+    // Level-1 glass surface, like every other card: the tint, rim, blur, radius
+    // and shadow come from the shared token recipe, so the tile matches the
+    // panels it sits beside instead of painting the opaque `--background`.
+    <div
+      data-slot='card'
+      data-card-hover='false'
+      className='flex h-full flex-col gap-1 border p-3'
+    >
       <span className='text-muted-foreground inline-flex items-center gap-1.5 text-[10px] font-medium tracking-wider uppercase'>
         <Icon className='size-3' />
         {props.label}
@@ -64,11 +71,12 @@ function StatCard(props: {
       >
         {props.value}
       </span>
-      {props.hint && (
-        <span className='text-muted-foreground/70 text-[11px]'>
-          {props.hint}
-        </span>
-      )}
+      {/* The caption line is reserved even when a tile has no caption of its
+          own, so all three tiles keep the same height and a shared value
+          baseline. */}
+      <span className='text-muted-foreground/70 min-h-4 text-[11px] leading-4'>
+        {props.hint}
+      </span>
     </div>
   )
 }
@@ -197,7 +205,13 @@ export function ModelDetailsPerformance(props: { model: PricingModel }) {
 
   if (metricsQuery.isLoading || performances.length === 0) {
     return (
-      <div className='text-muted-foreground rounded-lg border p-6 text-center text-sm'>
+      // The placeholder stands where the stat tiles do, so it takes the same
+      // level-1 glass surface.
+      <div
+        data-slot='card'
+        data-card-hover='false'
+        className='text-muted-foreground border p-6 text-center text-sm'
+      >
         {t('Performance data is not yet available for this model.')}
       </div>
     )
