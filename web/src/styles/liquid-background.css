@@ -35,6 +35,9 @@ body {
     linear-gradient(to bottom, rgba(13, 17, 26, 0.60), rgba(13, 17, 26, 0.74)),
     var(--eva-wallpaper, none);
 }
+/* Aurora wash behind the wallpaper. One hue, taken from the theme accent, so
+   the canvas never contradicts the palette and no violet/cyan rainbow shows
+   through the glass. */
 body::before {
   content: '';
   position: fixed;
@@ -42,8 +45,16 @@ body::before {
   pointer-events: none;
   z-index: 0;
   background:
-    radial-gradient(ellipse at 30% 40%, rgba(100, 80, 255, 0.10), transparent 45%),
-    radial-gradient(ellipse at 70% 60%, rgba(0, 200, 255, 0.08), transparent 45%);
+    radial-gradient(
+      ellipse at 30% 40%,
+      color-mix(in srgb, var(--primary) 10%, transparent),
+      transparent 45%
+    ),
+    radial-gradient(
+      ellipse at 70% 60%,
+      color-mix(in srgb, var(--primary) 6%, transparent),
+      transparent 45%
+    );
 
   animation: aurora 18s ease-in-out infinite alternate;
 }

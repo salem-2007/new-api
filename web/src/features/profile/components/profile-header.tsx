@@ -132,6 +132,9 @@ export function ProfileHeader({
           <Avatar className='ring-background h-12 w-12 rounded-xl text-sm ring-2 sm:h-16 sm:w-16 sm:rounded-2xl sm:text-lg sm:ring-4'>
             {avatarUrl && (
               <AvatarImage
+                // Re-mount on every url change so the load probe runs again
+                // instead of reusing the previous element's settled state.
+                key={avatarUrl}
                 src={avatarUrl}
                 alt={avatarFallback}
                 // Follow the frame of the fallback avatar instead of the

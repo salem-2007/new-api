@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import i18next from 'i18next'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { toast } from 'sonner'
 
 import { handleServerError } from '@/lib/handle-server-error'
@@ -38,14 +38,22 @@ export function useProfile() {
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(false)
+  // Ordering guard: profile reads can overlap (an initial load, the silent
+  // refresh that follows a mutation, the refresh on dialog close). Without it a
+  // read that was issued before an avatar upload and answers afterwards would
+  // overwrite the uploaded avatar with the pre-upload row.
+  const latestAnswer = useRef(0)
 
   // Fetch user profile (with optional silent mode)
   const fetchProfile = useCallback(async (silent = false) => {
+    const request = ++latestAnswer.current
     try {
       if (!silent) {
         setLoading(true)
       }
       const response = await getUserProfile()
+
+      if (request !== latestAnswer.current) return
 
       if (response.success && response.data) {
         setProfile(response.data)
@@ -55,6 +63,7 @@ export function useProfile() {
         handleServerError(response, i18next.t('Failed to load profile'))
       }
     } catch (error) {
+      if (request !== latestAnswer.current) return
       if (!silent) {
         handleServerError(error, i18next.t('Failed to load profile'))
       }
@@ -71,6 +80,9 @@ export function useProfile() {
   const refreshProfile = useCallback(
     async (snapshot?: UserProfile) => {
       if (snapshot) {
+        // The snapshot answers a write, so it outranks every read that is
+        // already in flight.
+        latestAnswer.current += 1
         setProfile(snapshot)
         syncAuthUserFromProfile(snapshot)
       }

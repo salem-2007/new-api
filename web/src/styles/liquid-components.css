@@ -22,7 +22,22 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 /* ========================================================================
+ * Liquid glass component recipes.
+ *
+ * This file only consumes the tokens declared in liquid-glass.css, grouped by
+ * elevation. Every level states its recipe exactly once:
+ *
+ *   0  canvas    sidebar inset, layout section panels, nested sub-panels
+ *   1  content   cards, card-grid items, table containers, pricing panels
+ *   2  floating  popover, dropdown, select, command, hover card, tooltip
+ *   3  modal     dialog, alert dialog, sheet
+ *
+ * Members of a level cannot drift from each other: fill, rim, blur, radius and
+ * shadow for a level are written in the level's single recipe and read tokens
+ * for the values. Anything a level needs to change lives in the token block.
  * ===================================================================== */
+
+/* ---------- 1. Transparent wrappers ---------- */
 div.bg-background.text-foreground.relative,
 .group\/sidebar-wrapper,
 [data-slot='sidebar-container'],
@@ -38,73 +53,169 @@ section .bg-background {
   background: transparent !important;
   border-color: transparent !important;
 }
+[data-slot='sidebar-menu-button']:hover {
+  background: var(--liquid-bg-hover) !important;
+}
+
+/* ---------- 2. Level 0 — canvas ---------- */
 [data-slot='sidebar-inner'] {
   background: var(--liquid-bg) !important;
   backdrop-filter: blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation));
   -webkit-backdrop-filter: blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation));
   border-right: 1px solid var(--liquid-border) !important;
+  box-shadow: var(--liquid-highlight) !important;
   will-change: transform;
   contain: layout paint;
 }
-[data-slot='sidebar-menu-button']:hover {
-  background: var(--liquid-bg-hover) !important;
-}
 [data-slot='sidebar-inset'] {
-  background: color-mix(in srgb, var(--glass-tint) calc(var(--glass-alpha) * 55), transparent) !important;
-  backdrop-filter: blur(12px) saturate(var(--liquid-saturation));
-  -webkit-backdrop-filter: blur(12px) saturate(var(--liquid-saturation));
+  background: var(--liquid-0-fill) !important;
+  backdrop-filter: blur(var(--liquid-blur-canvas)) saturate(var(--liquid-saturation));
+  -webkit-backdrop-filter: blur(var(--liquid-blur-canvas)) saturate(var(--liquid-saturation));
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
+/* The canvas-level panel for a layout section. Surfaces that bring their own
+   glass (the landing page, for example) opt out with data-glass-surface='bare'
+   so a wrapper never paints a second sheet behind them. A decorative layer
+   inside such a section opts out on its own with data-glass-layer='free' —
+   otherwise these rules would erase the sheet it paints (a gradient scrim,
+   for instance). */
+[data-slot='section'] > div:not([data-glass-layer='free']),
+section > div:not([data-glass-layer='free']) {
+  background: var(--liquid-0-fill) !important;
+  backdrop-filter: blur(var(--liquid-blur-canvas)) saturate(var(--liquid-saturation));
+  -webkit-backdrop-filter: blur(var(--liquid-blur-canvas)) saturate(var(--liquid-saturation));
+  outline: 1px solid var(--liquid-border);
+  outline-offset: -1px;
+  border-radius: var(--liquid-radius-1);
+}
+[data-glass-surface='bare'] > div:not([data-glass-layer='free']) {
+  background: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+/* ---------- 3. Level 1 — content surfaces ----------
+ * Cards, card-grid items, table containers, the legacy gradient panels and the
+ * pricing panels are one family: same fill, same rim, same blur, same radius,
+ * same shadow. The `main`/`section-page-layout` overrides that used to raise
+ * cards to a deeper fill and a modal-grade shadow are gone — a card is a card
+ * wherever it sits. */
 [data-slot='card'],
-.bg-card {
-  background: var(--liquid-bg) !important;
+.bg-card,
+[data-slot='data-table-card'],
+[data-slot='pricing-model-card'],
+[data-slot='pricing-sidebar'],
+[class*='bg-[linear-gradient(135deg,color-mix'],
+.overflow-hidden.rounded-lg.border:has([data-slot='table']) {
+  background: var(--liquid-bg-deep) !important;
   backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation));
   -webkit-backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation));
-  box-shadow: var(--liquid-highlight), var(--liquid-shadow) !important;
   border-color: var(--liquid-border) !important;
+  box-shadow: var(--liquid-highlight), var(--liquid-shadow) !important;
   transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 }
+/* Radius is a level token, not a per-component choice. Only the level-1
+   surfaces this sheet owns are listed: `.bg-card` is deliberately absent
+   because it is also applied to plain divs that carry their own corner
+   (rounded-2xl dashboard panels, rounded-md inline panels). */
+[data-slot='card'],
+[data-slot='data-table-card'],
+[data-slot='pricing-model-card'],
+[data-slot='pricing-sidebar'],
+.overflow-hidden.rounded-lg.border:has([data-slot='table']) {
+  border-radius: var(--liquid-radius-1);
+}
+/* One hover recipe for the whole level: the fill steps up, the rim brightens
+   and the halo is drawn from the glow tokens. Previously three rules fought
+   over this box-shadow. */
 [data-slot='card']:hover,
-.bg-card:hover {
+.bg-card:hover,
+[data-slot='data-table-card']:hover,
+[data-slot='pricing-model-card']:hover {
   background: var(--liquid-bg-hover) !important;
   border-color: var(--liquid-border-hover) !important;
-  box-shadow: var(--liquid-highlight), 0 16px 45px rgba(31, 45, 71, 0.22) !important;
+  box-shadow:
+    0 0 4px var(--liquid-glow-rim),
+    0 0 10px var(--liquid-glow-soft),
+    0 0 16px var(--liquid-glow-accent),
+    0 0 26px var(--liquid-glow-accent-soft),
+    inset 0 0 6px var(--liquid-glow-inset),
+    var(--liquid-shadow) !important;
 }
-main .bg-card,
-[data-slot='section-page-layout'] .bg-card {
-  background: var(--liquid-bg-deep) !important;
-  backdrop-filter: blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation));
-  -webkit-backdrop-filter: blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation));
-  box-shadow: var(--liquid-highlight), var(--liquid-shadow-deep) !important;
+[data-slot='data-table-card'][data-state='selected'] {
+  border-color: color-mix(in srgb, var(--primary) 55%, transparent) !important;
 }
 .bg-card .recharts-wrapper,
 .bg-card .recharts-surface {
   background: transparent !important;
 }
 
-/* ---------- 5. Popover / Dropdown / Select / Tooltip / Command ---------- */
+/* ---------- 4. Level 2 — floating surfaces ----------
+ * One fill, rim, blur and shadow for every menu-like surface. Radius is a
+ * level token too, except for the tooltip: it is a one-line pill and a panel
+ * radius would eat its height. */
 [data-slot='popover-content'],
 [data-slot='dropdown-menu-content'],
 [data-slot='select-content'],
-[data-slot='tooltip-content'],
 [data-slot='command'],
 [data-slot='hover-card-content'],
 .bg-popover {
-  background: color-mix(in srgb, var(--glass-tint) 92%, transparent) !important;
+  background: var(--liquid-2-fill) !important;
+  backdrop-filter: blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation));
+  -webkit-backdrop-filter: blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation));
+  border-color: var(--liquid-border) !important;
+  box-shadow: var(--liquid-highlight), var(--liquid-shadow-deep) !important;
+  color: var(--popover-foreground) !important;
+}
+/* Same rule as level 1: the level radius lands on the menu slots this sheet
+   owns, not on `.bg-popover`, which is reused on inline panels that pick their
+   own corner. The tooltip is excluded — a one-line pill cannot take a panel
+   radius without losing its shape. */
+[data-slot='popover-content'],
+[data-slot='dropdown-menu-content'],
+[data-slot='select-content'],
+[data-slot='command'],
+[data-slot='hover-card-content'] {
+  border-radius: var(--liquid-radius-2);
+}
+[data-slot='tooltip-content'] {
+  background: var(--liquid-2-fill) !important;
   backdrop-filter: blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation));
   -webkit-backdrop-filter: blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation));
   border-color: var(--liquid-border) !important;
   box-shadow: var(--liquid-highlight), var(--liquid-shadow-deep) !important;
 }
+/* Muted text inside a floating surface is tuned per theme, so the levels stay
+   legible without a per-panel override. */
+[data-slot='tooltip-content'] .text-muted-foreground,
+[data-slot='popover-content'] .text-muted-foreground,
+[data-slot='dropdown-menu-content'] .text-muted-foreground {
+  color: color-mix(in srgb, currentColor 72%, transparent) !important;
+}
+.dark [data-slot='tooltip-content'] .text-muted-foreground,
+.dark [data-slot='popover-content'] .text-muted-foreground,
+.dark [data-slot='dropdown-menu-content'] .text-muted-foreground {
+  color: rgba(203, 213, 225, 0.92) !important;
+}
+/* The arrow must match the surface it belongs to. */
+[data-slot='tooltip-content'] [data-slot='tooltip-arrow'],
+[data-slot='tooltip-arrow'] {
+  fill: var(--liquid-2-fill);
+}
+
+/* ---------- 5. Level 3 — modal surfaces ---------- */
 [data-slot='dialog-content'],
 [data-slot='alert-dialog-content'],
 [data-slot='sheet-content'] {
-  background: var(--liquid-bg-deep) !important;
+  background: var(--liquid-3-fill) !important;
   backdrop-filter: blur(var(--liquid-blur-deep)) saturate(var(--liquid-saturation));
   -webkit-backdrop-filter: blur(var(--liquid-blur-deep)) saturate(var(--liquid-saturation));
   border-color: var(--liquid-border) !important;
-  box-shadow: var(--liquid-highlight), 0 30px 100px rgba(0, 0, 0, 0.35) !important;
-  border-radius: var(--radius-xl, 1.4rem);
+  border-radius: var(--liquid-radius-3);
+  box-shadow: var(--liquid-highlight), var(--liquid-shadow-modal) !important;
   padding-bottom: env(safe-area-inset-bottom, 0px);
   will-change: transform, opacity;
   contain: layout paint;
@@ -117,54 +228,40 @@ main .bg-card,
     max-height: calc(100dvh - 16rem - env(safe-area-inset-bottom, 0px));
   }
 }
-.overflow-hidden.rounded-lg.border:has([data-slot='table']) {
-  background: var(--liquid-bg-deep) !important;
-  backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation));
-  -webkit-backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation));
-  border-color: var(--liquid-border) !important;
-  box-shadow: var(--liquid-highlight), var(--liquid-shadow-deep) !important;
-}
+
+/* ---------- 6. Tables: container is level 1, dividers use one token ------- */
 [data-slot='table-header'],
 [data-slot='table-header'] tr {
-  background: rgba(255, 255, 255, 0.28) !important;
+  background: var(--liquid-row-hover) !important;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
-.dark [data-slot='table-header'],
-.dark [data-slot='table-header'] tr {
-  background: rgba(255, 255, 255, 0.07) !important;
-}
 [data-slot='table-head'],
 [data-slot='table-cell'] {
-  border-color: rgba(255, 255, 255, 0.35) !important;
-}
-.dark [data-slot='table-head'],
-.dark [data-slot='table-cell'] {
-  border-color: rgba(255, 255, 255, 0.08) !important;
+  border-color: var(--liquid-divider) !important;
 }
 [data-slot='table-row'] {
   background: transparent !important;
 }
 [data-slot='table-row']:hover {
-  background: rgba(255, 255, 255, 0.22) !important;
-}
-.dark [data-slot='table-row']:hover {
-  background: rgba(255, 255, 255, 0.06) !important;
+  background: var(--liquid-row-hover) !important;
 }
 [data-slot='dialog-content'] [data-slot='table-container'] tr,
 [data-slot='dialog-content'] table tbody tr {
-  background: rgba(255, 255, 255, 0.14) !important;
+  background: var(--liquid-row-hover) !important;
   border-color: var(--liquid-border) !important;
 }
 
-/* ---------- 8. Input / Textarea / Select ---------- */
+/* ---------- 7. Input / Textarea / Select ----------
+ * Controls are not panels: they keep the control radius step, not a level
+ * radius, so a field inside a dialog still reads as a field. */
 input,
 textarea,
 [data-slot='select-trigger'],
 [data-slot='input'] {
   background: var(--liquid-bg) !important;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation));
+  -webkit-backdrop-filter: blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation));
   border-radius: var(--radius-md, 0.8rem);
   border-color: var(--liquid-border) !important;
 }
@@ -173,9 +270,11 @@ textarea:focus,
 [data-slot='select-trigger']:focus,
 [data-slot='input']:focus {
   background: var(--liquid-bg-hover) !important;
-  border-color: rgba(140, 120, 255, 0.55) !important;
-  box-shadow: 0 0 0 3px rgba(120, 100, 255, 0.12), 0 0 25px rgba(120, 100, 255, 0.08);
+  border-color: var(--liquid-focus-border) !important;
+  box-shadow: var(--liquid-focus-ring);
 }
+
+/* ---------- 8. Header ---------- */
 header {
   background: transparent !important;
   backdrop-filter: none;
@@ -183,46 +282,104 @@ header {
   border-bottom: none !important;
   box-shadow: none !important;
 }
-header [data-slot='card'],
-header .backdrop-blur-2xl,
-header [class*='rounded-2xl'] {
-  box-shadow: var(--liquid-highlight), var(--liquid-shadow-deep) !important;
-}
-.bg-background\/98 {
-  background: color-mix(in srgb, var(--glass-tint) 90%, transparent) !important;
-  backdrop-filter: blur(20px) saturate(var(--liquid-saturation));
-  -webkit-backdrop-filter: blur(20px) saturate(var(--liquid-saturation));
-}
+
+/* ---------- 9. The bg-background/N ladder ----------
+ * These utilities are used at roughly twenty different opacities, but they only
+ * express three intents: a sub-panel nested inside a card, a mid-level panel,
+ * and a near-opaque bar over scrolling content. The previous rule flattened all
+ * of them onto the level-1 deep fill, which is why nested panels looked as
+ * heavy as the card they sat in (and why the /9x case below was dead). The
+ * tiers are ordered so the most specific suffix wins. */
 [class*='bg-background/'] {
-  background: var(--liquid-bg-deep) !important;
+  background: var(--liquid-0-fill) !important;
+  backdrop-filter: blur(var(--liquid-blur-canvas)) saturate(var(--liquid-saturation));
+  -webkit-backdrop-filter: blur(var(--liquid-blur-canvas)) saturate(var(--liquid-saturation));
+  box-shadow: var(--liquid-highlight) !important;
+}
+[class*='bg-background/7'],
+[class*='bg-background/8'] {
+  background: var(--liquid-bg) !important;
   backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation));
   -webkit-backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation));
+  box-shadow: var(--liquid-highlight) !important;
+}
+/* Sticky bars and mobile headers: content scrolls underneath, so they need the
+   floating shadow as well as the near-opaque fill. */
+[class*='bg-background/9'] {
+  background: var(--liquid-2-fill) !important;
+  backdrop-filter: blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation));
+  -webkit-backdrop-filter: blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation));
+  border-color: var(--liquid-border);
   box-shadow: var(--liquid-highlight), var(--liquid-shadow-deep) !important;
 }
-[data-slot='section'] > div,
-section > div {
-  background: color-mix(in srgb, var(--glass-tint) calc(var(--glass-deep-alpha) * 70), transparent) !important;
-  backdrop-filter: blur(calc(var(--liquid-blur-frosted) * 0.8)) saturate(var(--liquid-saturation));
-  -webkit-backdrop-filter: blur(calc(var(--liquid-blur-frosted) * 0.8)) saturate(var(--liquid-saturation));
-  outline: 1px solid var(--liquid-border);
-  outline-offset: -1px;
-  border-radius: var(--liquid-radius);
-}
-.landing-animate-fade-up.rounded-full,
-.group.rounded-full.border-border\/40 {
-  background: var(--liquid-bg-deep) !important;
-  backdrop-filter: blur(14px) saturate(var(--liquid-saturation));
-  -webkit-backdrop-filter: blur(14px) saturate(var(--liquid-saturation));
+
+/* ---------- 10. Layout specifics ---------- */
+[data-slot='section-page-layout'] footer,
+.bg-background.shrink-0.border-t {
+  background: var(--liquid-bg) !important;
+  backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation));
+  -webkit-backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation));
   border-color: var(--liquid-border) !important;
-  box-shadow: var(--liquid-highlight), var(--liquid-shadow-deep) !important;
 }
-.rounded-2xl.border.bg-white\/95,
-[class*='bg-[#0b0f17]'] {
-  background: var(--liquid-bg-deep) !important;
-  backdrop-filter: blur(24px) saturate(170%);
-  -webkit-backdrop-filter: blur(24px) saturate(170%);
-  box-shadow: var(--liquid-highlight), var(--liquid-shadow-deep) !important;
-  border-color: var(--liquid-border) !important;
+[data-slot='section-page-layout'] .bg-background.shrink-0.border-t {
+  position: relative;
+  z-index: 1;
+  overflow: visible;
+  min-height: 3.25rem;
+  padding-bottom: max(0.625rem, env(safe-area-inset-bottom, 0px));
+}
+[data-slot='section-page-layout'] .bg-background.shrink-0.border-t:empty {
+  display: none;
+}
+[data-slot='sidebar-inset'] {
+  overflow: hidden;
+  isolation: isolate;
+}
+[data-slot='sidebar-inset']:is(:where(.peer)[data-variant='inset'] ~ *) {
+  overflow: hidden;
+}
+[data-slot='sidebar-inset'] [data-slot='section-page-layout'],
+[data-slot='sidebar-inset'] main,
+[data-slot='sidebar-inset'] > div {
+  min-width: 0;
+}
+[data-slot='sidebar-inset'] [data-slot='section-page-layout'] > div:last-child {
+  border-bottom-left-radius: inherit;
+  border-bottom-right-radius: inherit;
+}
+@media (min-width: 768px) {
+  [data-slot='sidebar-inset']:is(
+      :where(.peer)[data-variant='inset'] ~ *
+    ) {
+    border-radius: var(--liquid-radius-1);
+    box-shadow: var(--liquid-highlight), var(--liquid-shadow);
+  }
+  [data-slot='sidebar-inset']:is(
+      :where(.peer)[data-variant='sidebar'] ~ *
+    ),
+  [data-slot='sidebar-inset']:is(
+      :where(.peer)[data-variant='floating'] ~ *
+    ) {
+    margin: calc(var(--spacing) * 2);
+    margin-left: 0;
+    height: calc(
+      100svh - var(--app-header-height, 0px) - (var(--spacing) * 4)
+    );
+    border-radius: var(--liquid-radius-1);
+    box-shadow: var(--liquid-highlight), var(--liquid-shadow);
+  }
+  [data-slot='sidebar-inset']:is(:where(.peer)[data-variant='sidebar'] ~ *),
+  [data-slot='sidebar-inset']:is(:where(.peer)[data-variant='floating'] ~ *) {
+    margin-left: 0;
+  }
+  [data-slot='sidebar-inset']:is(
+      :where(.peer)[data-variant='sidebar'][data-state='collapsed'] ~ *
+    ),
+  [data-slot='sidebar-inset']:is(
+      :where(.peer)[data-variant='floating'][data-state='collapsed'] ~ *
+    ) {
+    margin-left: calc(var(--spacing) * 2);
+  }
 }
 @media (max-width: 640px) {
   [class*='pagination'],
@@ -231,31 +388,10 @@ section > div {
   }
 }
 ::selection {
-  background: rgba(96, 165, 250, 0.3);
-}
-[data-slot='dialog-content'],
-[data-slot='alert-dialog-content'],
-[data-slot='sheet-content'] {
-  --liquid-blur: var(--liquid-blur-deep);
-}
-[data-slot='sidebar-inner'] {
-  --liquid-blur: var(--liquid-blur-liquid);
-}
-[data-slot='data-table-card'] {
-  background: var(--liquid-bg) !important;
-  backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation));
-  -webkit-backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation));
-  border-color: var(--liquid-border) !important;
-  box-shadow: var(--liquid-highlight), var(--liquid-shadow) !important;
-}
-[data-slot='data-table-card']:hover {
-  background: var(--liquid-bg-hover) !important;
-  border-color: var(--liquid-border-hover) !important;
-}
-[data-slot='data-table-card'][data-state='selected'] {
-  border-color: rgba(120, 100, 255, 0.55) !important;
+  background: color-mix(in srgb, var(--primary) 30%, transparent);
 }
 
+/* ---------- 11. Component fixes ---------- */
 /* ④ Switch */
 [data-slot='switch'] {
   background: transparent !important;
@@ -280,6 +416,8 @@ section > div {
 [data-slot='switch'] [class*='bg-background/'] {
   background: transparent !important;
 }
+
+/* ---------- 12. Effects ---------- */
 .liquid-glass::before {
   content: '';
   position: absolute;
@@ -324,14 +462,22 @@ section > div {
   height: 220px;
   background:
     radial-gradient(circle, rgba(255, 255, 255, 0.14), transparent 60%),
-    radial-gradient(circle, rgba(140, 120, 255, 0.10), transparent 70%);
+    radial-gradient(
+      circle,
+      color-mix(in srgb, var(--primary) 10%, transparent),
+      transparent 70%
+    );
   filter: blur(24px);
   mix-blend-mode: screen;
 }
 .dark .liquid-glass::after {
   background:
     radial-gradient(circle, rgba(255, 255, 255, 0.07), transparent 60%),
-    radial-gradient(circle, rgba(120, 100, 255, 0.14), transparent 70%);
+    radial-gradient(
+      circle,
+      color-mix(in srgb, var(--primary) 14%, transparent),
+      transparent 70%
+    );
 }
 @media (prefers-reduced-motion: reduce) {
   .liquid-glass:hover::before {
@@ -344,14 +490,7 @@ section > div {
 .bg-card:hover,
 [data-slot='data-table-card']:hover {
   animation: neon-pulse 1.5s ease-in-out infinite;
-  border-color: rgba(255, 255, 255, 0.75) !important;
-}
-[data-slot='card']:hover,
-.bg-card:hover {
-}
-.dark [data-slot='card']:hover,
-.dark .bg-card:hover,
-.dark [data-slot='data-table-card']:hover {
+  border-color: var(--liquid-border-hover) !important;
 }
 @keyframes neon-pulse {
   0%, 100% { opacity: 1; }
@@ -371,154 +510,62 @@ section > div {
     animation: none;
   }
 }
+
+/* ---------- 13. Legacy glass aliases ---------- */
 .glass-3,
 .glass-morphism,
 .glass-1, .glass-2, .glass-4, .glass-5 {
   border: none !important;
   background: var(--liquid-bg) !important;
+  background-image: var(--liquid-refraction) !important;
   backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation)) !important;
   -webkit-backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation)) !important;
   box-shadow: var(--liquid-highlight), var(--liquid-shadow) !important;
 }
 .glass-3::before,
 .glass-3::after {
-  display: none !important;  }
+  display: none !important;
+}
 .glass-3:hover,
 .glass-morphism:hover {
-  box-shadow: var(--liquid-highlight), 0 16px 45px rgba(31, 45, 71, 0.22) !important;
-}
-[class*='bg-[linear-gradient(135deg,color-mix'] {
-  background: var(--liquid-bg-deep) !important;
-  backdrop-filter: blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation)) !important;
-  -webkit-backdrop-filter: blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation)) !important;
-}
-[data-slot='card']:hover,
-.bg-card:hover,
-[data-slot='data-table-card']:hover {
-  box-shadow:
-    0 0 4px rgba(255, 255, 255, 0.5),
-    0 0 10px rgba(255, 255, 255, 0.3),
-    0 0 16px rgba(96, 165, 250, 0.4),
-    0 0 26px rgba(96, 165, 250, 0.22),
-    inset 0 0 6px rgba(255, 255, 255, 0.25),
-    var(--liquid-shadow) !important;
-}
-.dark [data-slot='card']:hover,
-.dark .bg-card:hover,
-.dark [data-slot='data-table-card']:hover {
-  box-shadow:
-    0 0 4px rgba(255, 255, 255, 0.4),
-    0 0 10px rgba(165, 214, 255, 0.28),
-    0 0 16px rgba(96, 165, 250, 0.42),
-    0 0 26px rgba(96, 165, 250, 0.25),
-    inset 0 0 6px rgba(255, 255, 255, 0.18),
-    var(--liquid-shadow) !important;
-}
-:root {
-  --liquid-refraction:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.42) 0%, rgba(255, 255, 255, 0.10) 14%, rgba(255, 255, 255, 0) 30%),
-    linear-gradient(125deg, rgba(255, 255, 255, 0.20) 0%, rgba(200, 220, 255, 0.08) 34%, rgba(178, 190, 255, 0.06) 52%, rgba(255, 255, 255, 0) 74%);
-  --liquid-bg-flat: rgba(245, 247, 250, 0.38);
-  --liquid-bg-flat-hover: rgba(245, 247, 250, 0.48);
-  --liquid-bg-flat-deep: rgba(245, 247, 250, 0.62);
-  --liquid-flat: linear-gradient(var(--liquid-bg-flat), var(--liquid-bg-flat));
-  --liquid-flat-hover: linear-gradient(var(--liquid-bg-flat-hover), var(--liquid-bg-flat-hover));
-  --liquid-flat-deep: linear-gradient(var(--liquid-bg-flat-deep), var(--liquid-bg-flat-deep));
-  --liquid-bg: var(--liquid-refraction), var(--liquid-flat), var(--liquid-bg-flat);
-  --liquid-bg-hover: var(--liquid-refraction), var(--liquid-flat-hover), var(--liquid-bg-flat-hover);
-  --liquid-bg-deep: var(--liquid-refraction), var(--liquid-flat-deep), var(--liquid-bg-flat-deep);
-}
-.dark {
-  --liquid-refraction:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.04) 14%, rgba(255, 255, 255, 0) 30%),
-    linear-gradient(125deg, rgba(148, 178, 255, 0.10) 0%, rgba(120, 110, 255, 0.06) 40%, rgba(255, 255, 255, 0) 70%);
-  --liquid-bg-flat: rgba(30, 38, 54, 0.42);
-  --liquid-bg-flat-hover: rgba(44, 54, 74, 0.52);
-  --liquid-bg-flat-deep: rgba(26, 34, 51, 0.60);
-  --liquid-flat: linear-gradient(var(--liquid-bg-flat), var(--liquid-bg-flat));
-  --liquid-flat-hover: linear-gradient(var(--liquid-bg-flat-hover), var(--liquid-bg-flat-hover));
-  --liquid-flat-deep: linear-gradient(var(--liquid-bg-flat-deep), var(--liquid-bg-flat-deep));
-  --liquid-bg: var(--liquid-refraction), var(--liquid-flat), var(--liquid-bg-flat);
-  --liquid-bg-hover: var(--liquid-refraction), var(--liquid-flat-hover), var(--liquid-bg-flat-hover);
-  --liquid-bg-deep: var(--liquid-refraction), var(--liquid-flat-deep), var(--liquid-bg-flat-deep);
+  box-shadow: var(--liquid-highlight), var(--liquid-shadow-hover) !important;
 }
 [data-slot='sidebar-inset'],
 [class*='bg-[linear-gradient(135deg,color-mix'] {
   background-image: var(--liquid-refraction) !important;
 }
-[data-slot='card'],
-.bg-card,
-[data-slot='data-table-card'],
-.glass-1, .glass-2, .glass-3, .glass-4, .glass-5,
-.glass-morphism {
-  background-image: var(--liquid-refraction) !important;
-}
-.glass-1, .glass-2, .glass-3, .glass-4, .glass-5,
-.glass-morphism {
-  background-color: var(--liquid-bg-flat) !important;
-}
-main .bg-card,
-[data-slot='section-page-layout'] .bg-card {
-  background-color: var(--liquid-bg-flat-deep) !important;
-}
-[data-slot='tooltip-content'],
-[data-slot='popover-content'],
-[data-slot='dropdown-menu-content'],
-[data-slot='select-content'],
-[data-slot='command'],
-.bg-popover {
-  background-color: color-mix(in srgb, var(--glass-tint) 92%, transparent) !important;
-  color: var(--popover-foreground) !important;
-  backdrop-filter: blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation)) !important;
-  -webkit-backdrop-filter: blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation)) !important;
-}
-[data-slot='tooltip-content'] {
-  background-color: color-mix(in srgb, var(--glass-tint) 96%, transparent) !important;
-  box-shadow: 0 6px 24px rgba(15, 23, 42, 0.16), 0 2px 8px rgba(15, 23, 42, 0.10) !important;
-}
-.dark [data-slot='tooltip-content'],
-.dark [data-slot='popover-content'],
-.dark [data-slot='dropdown-menu-content'],
-.dark [data-slot='select-content'],
-.dark [data-slot='command'],
-.dark .bg-popover {
-  background-color: color-mix(in srgb, #1a2233 94%, transparent) !important;
-  color: rgb(226, 232, 240) !important;
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.55) !important;
-}
-[data-slot='tooltip-content'] .text-muted-foreground,
-[data-slot='popover-content'] .text-muted-foreground,
-[data-slot='dropdown-menu-content'] .text-muted-foreground {
-  color: color-mix(in srgb, currentColor 72%, transparent) !important;
-}
-.dark [data-slot='tooltip-content'] .text-muted-foreground,
-.dark [data-slot='popover-content'] .text-muted-foreground,
-.dark [data-slot='dropdown-menu-content'] .text-muted-foreground {
-  color: rgba(203, 213, 225, 0.92) !important;
-}
-[data-slot='tooltip-content'] [data-slot='tooltip-arrow'],
-[data-slot='tooltip-arrow'] {
-  fill: color-mix(in srgb, var(--glass-tint) 96%, transparent);
-}
-.dark [data-slot='tooltip-arrow'] {
-  fill: #1a2233;
-}
+
+/* ---------- 14. Glass switched off: every level flattens ---------- */
 body[data-liquid-glass='off'] [data-slot='card'],
 body[data-liquid-glass='off'] .bg-card,
+body[data-liquid-glass='off'] .glass-1,
+body[data-liquid-glass='off'] .glass-2,
+body[data-liquid-glass='off'] .glass-3,
+body[data-liquid-glass='off'] .glass-4,
+body[data-liquid-glass='off'] .glass-5,
+body[data-liquid-glass='off'] .glass-morphism,
 body[data-liquid-glass='off'] [data-slot='popover-content'],
 body[data-liquid-glass='off'] [data-slot='dropdown-menu-content'],
 body[data-liquid-glass='off'] [data-slot='select-content'],
+body[data-liquid-glass='off'] [data-slot='tooltip-content'],
+body[data-liquid-glass='off'] [data-slot='command'],
 body[data-liquid-glass='off'] [data-slot='dialog-content'],
 body[data-liquid-glass='off'] [data-slot='alert-dialog-content'],
 body[data-liquid-glass='off'] [data-slot='sheet-content'],
 body[data-liquid-glass='off'] [data-slot='sidebar-inner'],
 body[data-liquid-glass='off'] [data-slot='sidebar-inset'],
 body[data-liquid-glass='off'] [data-slot='data-table-card'],
+body[data-liquid-glass='off'] [data-slot='pricing-model-card'],
+body[data-liquid-glass='off'] [data-slot='pricing-sidebar'],
+body[data-liquid-glass='off'] [class*='bg-background/'],
+body[data-liquid-glass='off'] [class*='bg-[linear-gradient(135deg,color-mix'],
+body[data-liquid-glass='off'] section > div,
 body[data-liquid-glass='off'] .bg-popover {
   background: var(--card) !important;
+  background-image: none !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08) !important;
+  box-shadow: var(--liquid-off-shadow) !important;
   border-color: var(--border) !important;
 }
 body[data-liquid-glass='off'] {
@@ -532,147 +579,4 @@ body[data-glass-pulse='off'] .bg-card:hover,
 body[data-glass-pulse='off'] [data-slot='data-table-card']:hover {
   animation: none !important;
   box-shadow: var(--liquid-highlight), var(--liquid-shadow) !important;
-}
-.bg-card,
-[data-slot='data-table-card'],
-main [data-slot='card'],
-[data-slot='section-page-layout'] [data-slot='card'],
-[class*='bg-[linear-gradient(135deg,color-mix'] {
-  background: var(--liquid-bg) !important;
-  backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation)) !important;
-  -webkit-backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation)) !important;
-}
-[data-slot='section-page-layout'] footer,
-.bg-background.shrink-0.border-t {
-  background: var(--liquid-bg) !important;
-  backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation));
-  -webkit-backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation));
-  border-color: var(--liquid-border) !important;
-}
-[data-slot='dropdown-menu-content'] {
-  background: color-mix(in srgb, var(--glass-tint) 88%, transparent) !important;
-}
-[data-slot='sidebar-inset'] {
-  overflow: hidden;
-  isolation: isolate;
-}
-@media (min-width: 768px) {
-  [data-slot='sidebar-inset']:is(
-      :where(.peer)[data-variant='inset'] ~ *
-    ) {
-    border-radius: calc(var(--radius) * 1.4);
-    box-shadow: var(--liquid-highlight), var(--liquid-shadow);
-  }
-}
-[data-slot='sidebar-inset']:is(:where(.peer)[data-variant='inset'] ~ *) {
-  overflow: hidden;
-}
-[data-slot='sidebar-inset'] [data-slot='section-page-layout'],
-[data-slot='sidebar-inset'] main,
-[data-slot='sidebar-inset'] > div {
-  min-width: 0;
-}
-[data-slot='sidebar-inset'] [data-slot='section-page-layout'] > div:last-child {
-  border-bottom-left-radius: inherit;
-  border-bottom-right-radius: inherit;
-}
-[data-slot='section-page-layout'] .bg-background.shrink-0.border-t {
-  position: relative;
-  z-index: 1;
-  overflow: visible;
-}
-[data-slot='section-page-layout'] .bg-background.shrink-0.border-t:empty {
-  display: none;
-}
-@media (min-width: 768px) {
-  [data-slot='sidebar-inset']:is(
-      :where(.peer)[data-variant='sidebar'] ~ *
-    ),
-  [data-slot='sidebar-inset']:is(
-      :where(.peer)[data-variant='floating'] ~ *
-    ) {
-    margin: calc(var(--spacing) * 2);
-    margin-left: 0;
-    height: calc(
-      100svh - var(--app-header-height, 0px) - (var(--spacing) * 4)
-    );
-    border-radius: calc(var(--radius) * 1.4);
-    box-shadow: var(--liquid-highlight), var(--liquid-shadow);
-  }
-  [data-slot='sidebar-inset']:is(:where(.peer)[data-variant='sidebar'] ~ *),
-  [data-slot='sidebar-inset']:is(:where(.peer)[data-variant='floating'] ~ *) {
-    margin-left: 0;
-  }
-  [data-slot='sidebar-inset']:is(
-      :where(.peer)[data-variant='sidebar'][data-state='collapsed'] ~ *
-    ),
-  [data-slot='sidebar-inset']:is(
-      :where(.peer)[data-variant='floating'][data-state='collapsed'] ~ *
-    ) {
-    margin-left: calc(var(--spacing) * 2);
-  }
-}
-.dark [data-slot='data-table-card'],
-.dark [data-slot='card'],
-.dark .bg-card {
-  border-color: rgba(255, 255, 255, 0.16) !important;
-  box-shadow:
-    var(--liquid-highlight),
-    0 8px 32px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.10) !important;
-}
-.dark [data-slot='data-table-card'] {
-  background-color: rgba(38, 48, 68, 0.55) !important;
-}
-[data-slot='data-table-card'] {
-  background-color: rgba(245, 247, 250, 0.55) !important;
-}
-.dark [data-slot='data-table-card'] {
-  background-color: rgba(38, 48, 68, 0.68) !important;
-}
-[data-slot='dialog-content'],
-[data-slot='sheet-content'] {
-  background-color: rgba(245, 247, 250, 0.74) !important;
-}
-.dark [data-slot='dialog-content'],
-.dark [data-slot='sheet-content'] {
-  background-color: rgba(26, 34, 51, 0.80) !important;
-}
-[data-slot='section-page-layout'] .bg-background.shrink-0.border-t {
-  min-height: 3.25rem;
-  padding-bottom: max(0.625rem, env(safe-area-inset-bottom, 0px));
-}
-[data-slot='pricing-model-card'] {
-  background-color: rgba(245, 247, 250, 0.5) !important;
-  border-color: var(--liquid-border) !important;
-  backdrop-filter: blur(20px) saturate(135%);
-  -webkit-backdrop-filter: blur(20px) saturate(135%);
-  box-shadow: var(--liquid-highlight), var(--liquid-shadow) !important;
-  transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
-}
-[data-slot='pricing-model-card']:hover {
-  background-color: rgba(245, 247, 250, 0.6) !important;
-  border-color: var(--liquid-border-hover) !important;
-}
-.dark [data-slot='pricing-model-card'] {
-  background-color: rgba(30, 38, 54, 0.62) !important;
-  border-color: rgba(255, 255, 255, 0.14) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 8px 32px rgba(0, 0, 0, 0.5) !important;
-}
-.dark [data-slot='pricing-model-card']:hover {
-  background-color: rgba(44, 54, 74, 0.7) !important;
-  border-color: rgba(255, 255, 255, 0.24) !important;
-}
-[data-slot='pricing-sidebar'] {
-  background-color: rgba(245, 247, 250, 0.5) !important;
-  border-color: var(--liquid-border) !important;
-  backdrop-filter: blur(20px) saturate(135%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(135%) !important;
-  border-radius: var(--liquid-radius);
-  box-shadow: var(--liquid-highlight), var(--liquid-shadow) !important;
-}
-.dark [data-slot='pricing-sidebar'] {
-  background-color: rgba(30, 38, 54, 0.66) !important;
-  border-color: rgba(255, 255, 255, 0.16) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 8px 32px rgba(0, 0, 0, 0.5) !important;
 }

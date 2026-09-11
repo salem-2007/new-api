@@ -17,6 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { useState, useEffect, useRef, type ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { cn } from '@/lib/utils'
 
@@ -169,6 +170,7 @@ interface HeroTerminalDemoProps {
 }
 
 export function HeroTerminalDemo(props: HeroTerminalDemoProps) {
+  const { t } = useTranslation()
   const [activeIndex, setActiveIndex] = useState(0)
   const [transitioning, setTransitioning] = useState(false)
   const intervalRef = useRef<ReturnType<typeof setInterval>>(undefined)
@@ -208,15 +210,18 @@ export function HeroTerminalDemo(props: HeroTerminalDemoProps) {
 
   return (
     <div className={cn('mx-auto w-full max-w-2xl', props.className)}>
+      {/* Level-1 glass surface: same fill, rim, blur and shadow tokens as every
+          card in the app, so the panel cannot drift from the rest. The fill has
+          to be the level-1 token rather than `--liquid-1-fill`, otherwise the
+          panel reads lighter than the card sitting beside it in this row. */}
       <div
         className={cn(
-          'overflow-hidden rounded-2xl border backdrop-blur-[20px] backdrop-saturate-[135%]',
-          'shadow-[0_20px_50px_-25px_rgba(15,23,42,0.18),inset_0_1px_0_rgba(255,255,255,0.55)]',
-          'dark:shadow-[0_20px_60px_-25px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.10)]'
+          'overflow-hidden rounded-2xl border',
+          'border-[color:var(--liquid-border)]',
+          'backdrop-blur-(--liquid-blur-frosted) backdrop-saturate-(--liquid-saturation)',
+          'shadow-[var(--liquid-highlight),var(--liquid-shadow)]'
         )}
-        style={{
-          backgroundColor: 'color-mix(in srgb, var(--glass-tint) 38%, transparent)',
-        }}
+        style={{ background: 'var(--liquid-bg-deep)' }}
       >
         {/* Tab strip — scrolls instead of overflowing on narrow viewports */}
         <div
@@ -231,6 +236,8 @@ export function HeroTerminalDemo(props: HeroTerminalDemoProps) {
             return (
               <button
                 key={item.id}
+                type='button'
+                aria-pressed={isActive}
                 onClick={() => handleSelect(index)}
                 className={cn(
                   'relative -mb-px flex shrink-0 items-center gap-1.5 border-b-2 px-2.5 py-2.5 text-[11px] font-medium tracking-wide whitespace-nowrap transition-colors sm:px-3 sm:text-xs',
@@ -281,7 +288,8 @@ export function HeroTerminalDemo(props: HeroTerminalDemoProps) {
 
         {/* Body — fixed rows so neither block shifts when switching demos. The
             request block gets a taller share below `sm`, where its longest
-            lines wrap and would otherwise be clipped by the fixed row. */}
+            lines wrap. Both blocks scroll rather than clip when the wrapped
+            lines outgrow the row (320px viewports, large text zoom). */}
         <div className='grid h-[420px] grid-rows-[minmax(0,1.65fr)_minmax(0,1fr)] font-mono text-[12.5px] leading-[1.55] sm:h-[400px] sm:grid-rows-[235px_minmax(0,1fr)]'>
           {/* Request */}
           <RequestBlock demo={demo} transitioning={transitioning} />
@@ -298,6 +306,10 @@ export function HeroTerminalDemo(props: HeroTerminalDemoProps) {
           )}
         >
           <div className='text-foreground/40 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] tabular-nums'>
+            {/* The figures below are the sample answer, not a measurement of
+                this deployment; the label keeps that unambiguous. */}
+            <span className='tracking-wider uppercase'>{t('Example')}</span>
+            <span className='bg-foreground/15 size-1 rounded-full' />
             <span className='flex items-center gap-1'>
               <span className='font-mono'>{demo.latency}</span>
               <span className='tracking-wider uppercase'>ms</span>
@@ -328,7 +340,7 @@ function RequestBlock(props: { demo: ApiDemoConfig; transitioning: boolean }) {
   const { demo, transitioning } = props
 
   return (
-    <div className='relative px-5 py-4'>
+    <div className='no-scrollbar relative min-h-0 overflow-y-auto px-5 py-4'>
       <SectionLabel>Request</SectionLabel>
       <div
         className={cn(
@@ -369,7 +381,7 @@ function ResponseBlock(props: { demo: ApiDemoConfig; transitioning: boolean }) {
   return (
     <div
       className={cn(
-        'relative border-t px-5 py-4',
+        'no-scrollbar relative min-h-0 overflow-y-auto border-t px-5 py-4',
         'border-border/40 bg-muted/20 dark:border-white/[0.05] dark:bg-white/[0.015]'
       )}
     >

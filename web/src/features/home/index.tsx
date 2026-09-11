@@ -26,7 +26,10 @@ import { useTheme } from '@/context/theme-provider'
 import { isLikelyHtml } from '@/lib/content-format'
 import { useAuthStore } from '@/stores/auth-store'
 
-import { Hero } from './components'
+import { CapabilitySection } from './components/capability-section'
+import { GettingStarted } from './components/getting-started'
+import { HomeHero } from './components/home-hero'
+import { StartBand } from './components/start-band'
 import { useHomePageContent } from './hooks'
 
 export function Home() {
@@ -122,7 +125,10 @@ export function Home() {
 
   return (
     <PublicLayout showMainContainer={false}>
-      <Hero isAuthenticated={isAuthenticated} />
+      <HomeHero isAuthenticated={isAuthenticated} />
+      <CapabilitySection isAuthenticated={isAuthenticated} />
+      <GettingStarted />
+      <StartBand isAuthenticated={isAuthenticated} />
       <Footer />
     </PublicLayout>
   )

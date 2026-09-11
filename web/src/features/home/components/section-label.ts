@@ -16,44 +16,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import {
-  Zap,
-  Shield,
-  Globe,
-  Code,
-  Gauge,
-  DollarSign,
-  Users,
-  HeartHandshake,
-  type LucideIcon,
-} from 'lucide-react'
-
 /**
- * Map of icon names to Lucide icon components
+ * Micro-label shared by every home section. The terminal panel uses the same
+ * treatment for its `Request` / `Response` captions, so section headings and
+ * panel captions read as one system.
  */
-const ICON_MAP: Record<string, LucideIcon> = {
-  Zap,
-  Shield,
-  Globe,
-  Code,
-  Gauge,
-  DollarSign,
-  Users,
-  HeartHandshake,
-}
+export const SECTION_LABEL =
+  'font-mono text-[10px] font-semibold tracking-[0.18em] uppercase text-foreground/50'
 
-/**
- * Get a Lucide icon component by name
- */
-export function getFeatureIcon(
-  iconName: string,
-  className?: string
-): React.ReactNode {
-  const Icon = ICON_MAP[iconName]
-  if (!Icon) {
-    // eslint-disable-next-line no-console
-    console.warn(`Icon "${iconName}" not found in icon map`)
-    return null
-  }
-  return <Icon className={className} />
-}
+/** Hairline that separates two stacked blocks without adding a box. */
+export const HAIRLINE = 'border-border/40'

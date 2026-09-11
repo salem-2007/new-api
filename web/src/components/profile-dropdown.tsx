@@ -64,7 +64,11 @@ export function ProfileDropdown() {
           render={<Button variant='ghost' className='relative size-6 p-0' />}
         >
           <Avatar className='size-6'>
-            {avatarUrl && <AvatarImage src={avatarUrl} alt={avatarName} />}
+            {avatarUrl && (
+              // Keyed by url: a changed avatar re-mounts the image and re-runs
+              // its load probe instead of keeping the previous result.
+              <AvatarImage key={avatarUrl} src={avatarUrl} alt={avatarName} />
+            )}
             <AvatarFallback
               className={`${avatarFallbackClassName} text-[11px]`}
               style={avatarFallbackStyle}
@@ -76,7 +80,9 @@ export function ProfileDropdown() {
         <DropdownMenuContent align='end' sideOffset={8} className='w-56'>
           <div className='flex items-center gap-2 px-1.5 py-1.5'>
             <Avatar className='size-8'>
-              {avatarUrl && <AvatarImage src={avatarUrl} alt={avatarName} />}
+              {avatarUrl && (
+                <AvatarImage key={avatarUrl} src={avatarUrl} alt={avatarName} />
+              )}
               <AvatarFallback
                 className={`${avatarFallbackClassName} text-xs`}
                 style={avatarFallbackStyle}
