@@ -28,38 +28,52 @@ For commercial licensing, please contact support@quantumnous.com
  *   2  floating popover, dropdown, select, tooltip, command menu, hover card
  *   3  modal    dialog, alert dialog, sheet
  *
- * `--liquid-*-fill` values are plain colours, so a panel can paint one as a
- * background-color while keeping its own background layers. `--liquid-bg*`
- * compose the refraction highlight on top of them for CSS-only surfaces.
+ * The recipe is the user-supplied "liquid glass" preset:
+ *   outer shadow   0px 6px 24px rgba(0, 0, 0, 0.20)
+ *   inner highlight inset 0 0 13px -8px #ffffff
+ *   tint           rgba(255, 255, 255, 0)   (glassTintOpacity = 0)
+ *   frost blur     0px                      (frostBlurRadius = 0)
+ *   radius         28px
+ *   refraction     <filter id="glass-distortion"> fractalNoise 0.008/2/seed 92
+ *                  -> gaussian 2 -> feDisplacementMap scale 99
+ *   glass text     0px 2px 4px rgba(0, 0, 0, 0.23)
+ *
+ * `--liquid-*-fill` stay plain colours so a panel can paint one as a
+ * background-color while keeping its own background layers.
  * ===================================================================== */
 
 :root {
-  /* -- fills -------------------------------------------------------------- */
-  --liquid-0-fill:        rgba(245, 247, 250, 0.22);
-  --liquid-1-fill:        rgba(245, 247, 250, 0.38);
-  --liquid-1-fill-hover:  rgba(245, 247, 250, 0.48);
-  --liquid-1-fill-strong: rgba(245, 247, 250, 0.62);
-  --liquid-2-fill:        rgba(248, 250, 252, 0.90);
-  --liquid-3-fill:        rgba(248, 250, 252, 0.80);
+  /* -- tint --------------------------------------------------------------
+     glassTintOpacity is 0, so the glass carries no pigment of its own: the
+     read comes from the inner highlight, the rim and the refraction. The
+     hover steps keep a trace of white so interactive surfaces still answer
+     the pointer. */
+  --liquid-tint:          rgba(255, 255, 255, 0);
+  --liquid-tint-hover:    rgba(255, 255, 255, 0.06);
+  --liquid-tint-strong:   rgba(255, 255, 255, 0.09);
+  --liquid-0-fill:        var(--liquid-tint);
+  --liquid-1-fill:        var(--liquid-tint);
+  --liquid-1-fill-hover:  var(--liquid-tint-hover);
+  --liquid-1-fill-strong: var(--liquid-tint-strong);
+  --liquid-2-fill:        var(--liquid-tint);
+  --liquid-3-fill:        var(--liquid-tint);
   /* -- hairlines and separators ------------------------------------------ */
   --liquid-border:        rgba(255, 255, 255, 0.55);
   --liquid-border-hover:  rgba(255, 255, 255, 0.75);
   --liquid-divider:       rgba(255, 255, 255, 0.35);
-  --liquid-row-hover:     rgba(255, 255, 255, 0.22);
-  --liquid-highlight:     inset 0 1px 0 rgba(255, 255, 255, 0.55);
-  /* -- blur --------------------------------------------------------------- */
-  --liquid-blur-canvas:   12px;
-  --liquid-blur-frosted:  20px;
-  --liquid-blur-liquid:   20px;
-  --liquid-blur-deep:     28px;
-  --liquid-saturation:    135%;
-  /* -- shadows ------------------------------------------------------------ */
-  --liquid-shadow:       0 8px 32px rgba(31, 45, 71, 0.18);
-  --liquid-shadow-hover: 0 16px 45px rgba(31, 45, 71, 0.22);
-  --liquid-shadow-deep:
-    0 24px 64px -16px rgba(31, 45, 71, 0.38),
-    0 8px 24px -12px rgba(31, 45, 71, 0.28);
-  --liquid-shadow-modal: 0 30px 100px rgba(15, 23, 42, 0.22);
+  --liquid-row-hover:     rgba(255, 255, 255, 0.14);
+  --liquid-highlight:     inset 0 0 13px -8px #ffffff;
+  /* -- blur: frostBlurRadius = 0, the refraction filter does the work ------ */
+  --liquid-blur-canvas:   0px;
+  --liquid-blur-frosted:  0px;
+  --liquid-blur-liquid:   0px;
+  --liquid-blur-deep:     0px;
+  --liquid-saturation:    140%;
+  /* -- shadows: the preset's single outer shadow ------------------------- */
+  --liquid-shadow:       0 6px 24px rgba(0, 0, 0, 0.20);
+  --liquid-shadow-hover: 0 10px 30px rgba(0, 0, 0, 0.26);
+  --liquid-shadow-deep:  0 6px 24px rgba(0, 0, 0, 0.20);
+  --liquid-shadow-modal: 0 6px 24px rgba(0, 0, 0, 0.20);
   /* -- hover halo on level-1 surfaces ------------------------------------ */
   /* The halo reads the theme accent rather than a fixed blue, so the glass
      stays on-palette under every preset (green, red, teal, orange, violet). */
@@ -73,18 +87,22 @@ For commercial licensing, please contact support@quantumnous.com
   /* -- focus -------------------------------------------------------------- */
   --liquid-focus-border: color-mix(in srgb, var(--ring) 70%, transparent);
   --liquid-focus-ring:   0 0 0 3px color-mix(in srgb, var(--ring) 18%, transparent);
-  /* -- radius: one step per elevation level. All three resolve to the same
-     value the Card already uses, so a panel, a menu and a dialog share an
-     edge; a theme can still separate them here in one place. -------------- */
-  --liquid-radius-1:     var(--radius-xl, 1.4rem);
-  --liquid-radius-2:     var(--radius-xl, 1.4rem);
-  --liquid-radius-3:     var(--radius-xl, 1.4rem);
+  /* -- radius: the preset's borderRadius, one step per elevation level ---- */
+  --liquid-radius-1:     28px;
+  --liquid-radius-2:     28px;
+  --liquid-radius-3:     28px;
   --liquid-radius:       var(--liquid-radius-1);
-  /* -- refraction: the highlight sheet that makes a panel read as glass.
-     Neutral white only — a tinted sheet fights every theme preset. -------- */
-  --liquid-refraction:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.42) 0%, rgba(255, 255, 255, 0.10) 14%, rgba(255, 255, 255, 0) 30%),
-    linear-gradient(125deg, rgba(255, 255, 255, 0.20) 0%, rgba(255, 255, 255, 0.07) 34%, rgba(255, 255, 255, 0.04) 52%, rgba(255, 255, 255, 0) 74%);
+  /* -- refraction ---------------------------------------------------------
+     `--liquid-refraction-filter` is injected once by
+     src/lib/liquid-glass-filter.ts and referenced from every glass surface.
+     `--liquid-refraction-filter-soft` is the same displacement at a much
+     smaller scale, for controls the full 99px offset would shred (switches).
+     `--liquid-refraction` stays a transparent gradient so the background
+     shorthand below keeps its layer count. */
+  --liquid-refraction-filter:      url(#glass-distortion);
+  --liquid-refraction-filter-soft: url(#glass-distortion-soft);
+  --liquid-glass-text-shadow:      0 2px 4px rgba(0, 0, 0, 0.23);
+  --liquid-refraction: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0) 100%);
   --liquid-flat:          linear-gradient(var(--liquid-1-fill), var(--liquid-1-fill));
   --liquid-flat-hover:    linear-gradient(var(--liquid-1-fill-hover), var(--liquid-1-fill-hover));
   --liquid-flat-deep:     linear-gradient(var(--liquid-1-fill-strong), var(--liquid-1-fill-strong));
@@ -95,14 +113,14 @@ For commercial licensing, please contact support@quantumnous.com
   --liquid-bg-hover:      var(--liquid-refraction), var(--liquid-flat-hover), var(--liquid-1-fill-hover);
   --liquid-bg-deep:       var(--liquid-refraction), var(--liquid-flat-deep), var(--liquid-1-fill-strong);
   /* -- legacy aliases kept for existing call sites ------------------------ */
-  --glass-tint: #f5f7fa;
-  --glass-alpha: 0.38;
+  --glass-tint: #ffffff;
+  --glass-alpha: 0;
   --glass-blur: var(--liquid-blur-frosted);
   --glass-sat: var(--liquid-saturation);
   --glass-ring: var(--liquid-border);
   --glass-highlight: var(--liquid-highlight);
   --glass-shadow: var(--liquid-shadow);
-  --glass-deep-alpha: 0.62;
+  --glass-deep-alpha: 0.09;
   --glass-deep-shadow: var(--liquid-shadow-deep);
   --eva-wallpaper-day: var(--eva-wallpaper-day-asset, none);
   --eva-wallpaper-night: var(--eva-wallpaper-night-asset, none);
@@ -110,47 +128,50 @@ For commercial licensing, please contact support@quantumnous.com
 }
 
 .dark {
-  --liquid-0-fill:        rgba(30, 38, 54, 0.24);
-  --liquid-1-fill:        rgba(30, 38, 54, 0.42);
-  --liquid-1-fill-hover:  rgba(44, 54, 74, 0.52);
-  --liquid-1-fill-strong: rgba(26, 34, 51, 0.62);
-  --liquid-2-fill:        rgba(26, 34, 51, 0.94);
-  --liquid-3-fill:        rgba(26, 34, 51, 0.82);
+  /* The preset is tint-free in both themes; only the rim separates the panel
+     from a dark wallpaper. */
+  --liquid-tint:          rgba(255, 255, 255, 0);
+  --liquid-tint-hover:    rgba(255, 255, 255, 0.06);
+  --liquid-tint-strong:   rgba(255, 255, 255, 0.08);
+  --liquid-0-fill:        var(--liquid-tint);
+  --liquid-1-fill:        var(--liquid-tint);
+  --liquid-1-fill-hover:  var(--liquid-tint-hover);
+  --liquid-1-fill-strong: var(--liquid-tint-strong);
+  --liquid-2-fill:        var(--liquid-tint);
+  --liquid-3-fill:        var(--liquid-tint);
   /* One rim for every level: dark mode reads a 0.16 edge as a seam, so the
      brighter per-panel overrides are gone. */
   --liquid-border:        rgba(255, 255, 255, 0.13);
   --liquid-border-hover:  rgba(255, 255, 255, 0.22);
   --liquid-divider:       rgba(255, 255, 255, 0.08);
   --liquid-row-hover:     rgba(255, 255, 255, 0.06);
-  --liquid-highlight:     inset 0 1px 0 rgba(255, 255, 255, 0.10);
-  --liquid-shadow:        0 8px 32px rgba(0, 0, 0, 0.45);
-  --liquid-shadow-hover:  0 16px 45px rgba(0, 0, 0, 0.55);
-  --liquid-shadow-deep:
-    0 24px 64px -16px rgba(0, 0, 0, 0.7),
-    0 8px 24px -12px rgba(0, 0, 0, 0.45);
-  --liquid-shadow-modal:  0 30px 100px rgba(0, 0, 0, 0.55);
+  --liquid-highlight:     inset 0 0 13px -8px #ffffff;
+  --liquid-shadow:        0 6px 24px rgba(0, 0, 0, 0.35);
+  --liquid-shadow-hover:  0 10px 30px rgba(0, 0, 0, 0.45);
+  --liquid-shadow-deep:   0 6px 24px rgba(0, 0, 0, 0.35);
+  --liquid-shadow-modal:  0 6px 24px rgba(0, 0, 0, 0.35);
   --liquid-glow-rim:          rgba(255, 255, 255, 0.4);
   --liquid-glow-soft:         color-mix(in srgb, var(--primary) 26%, transparent);
   --liquid-glow-accent:       color-mix(in srgb, var(--primary) 42%, transparent);
   --liquid-glow-accent-soft:  color-mix(in srgb, var(--primary) 25%, transparent);
   --liquid-glow-inset:        rgba(255, 255, 255, 0.18);
   --liquid-off-shadow:    0 1px 2px rgba(0, 0, 0, 0.3);
-  --liquid-refraction:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.04) 14%, rgba(255, 255, 255, 0) 30%),
-    linear-gradient(125deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.04) 40%, rgba(255, 255, 255, 0) 70%);
-  --glass-tint: #1a2233;
-  --glass-alpha: 0.42;
+  --liquid-refraction: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0) 100%);
+  --glass-tint: #ffffff;
+  --glass-alpha: 0;
   --eva-wallpaper: var(--eva-wallpaper-night);
 }
+
 .liquid-glass {
   --liquid-blur: var(--liquid-blur-frosted);
   position: relative;
   background: var(--liquid-bg);
   border: 1px solid var(--liquid-border);
-  backdrop-filter: blur(var(--liquid-blur)) saturate(var(--liquid-saturation));
-  -webkit-backdrop-filter: blur(var(--liquid-blur)) saturate(var(--liquid-saturation));
+  backdrop-filter: var(--liquid-refraction-filter) blur(var(--liquid-blur)) saturate(var(--liquid-saturation));
+  -webkit-backdrop-filter: var(--liquid-refraction-filter) blur(var(--liquid-blur)) saturate(var(--liquid-saturation));
   box-shadow: var(--liquid-highlight), var(--liquid-shadow);
   border-radius: var(--liquid-radius);
+  text-shadow: var(--liquid-glass-text-shadow);
   transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 }
 .liquid-glass[data-glass='frosted'] { --liquid-blur: var(--liquid-blur-frosted); }

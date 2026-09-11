@@ -58,10 +58,9 @@ const MoreIcon = () => (
 )
 
 /**
- * Landing hero. The statement spans the full measure and the proof sits under
- * it in two unequal columns — a headline squeezed into a narrow column breaks
- * mid-phrase in CJK, so it gets the whole width and the code panel takes the
- * wider half of the row below.
+ * Landing hero. The statement and its proof share one row: the headline, the
+ * calls to action and the supported clients take the narrower left column,
+ * the terminal demo takes the wider right one. They stack on narrow viewports.
  */
 export function HomeHero(props: HomeHeroProps) {
   const { t } = useTranslation()
@@ -108,7 +107,9 @@ export function HomeHero(props: HomeHeroProps) {
         className='pointer-events-none absolute inset-x-0 top-0 -z-10 h-[560px] bg-[linear-gradient(180deg,color-mix(in_srgb,var(--background)_88%,transparent)_0%,color-mix(in_srgb,var(--background)_58%,transparent)_52%,transparent_100%)]'
       />
       <div className='mx-auto max-w-6xl'>
-        <AnimateInView animation='fade-up' className='max-w-3xl'>
+        <div className='mt-10 grid items-start gap-10 lg:grid-cols-12 lg:gap-10 xl:gap-14'>
+          <div className='lg:col-span-5'>
+            <AnimateInView animation='fade-up'>
           <div className='border-border/50 bg-muted/15 inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-medium tracking-[0.06em] uppercase'>
             <span className='relative flex size-1.5'>
               <span className='bg-primary/60 absolute inline-flex h-full w-full animate-ping rounded-full' />
@@ -137,9 +138,7 @@ export function HomeHero(props: HomeHeroProps) {
           </p>
         </AnimateInView>
 
-        <div className='mt-10 grid items-start gap-10 lg:grid-cols-12 lg:gap-10 xl:gap-14'>
-          <div className='lg:col-span-5'>
-            <AnimateInView animation='fade-up' delay={60}>
+            <AnimateInView animation='fade-up' delay={60} className='mt-8'>
               <div className='flex flex-wrap items-center gap-3'>
                 {props.isAuthenticated ? (
                   <>

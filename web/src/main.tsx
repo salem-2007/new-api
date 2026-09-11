@@ -37,7 +37,9 @@ import { routeTree } from './routeTree.gen'
 
 // Styles
 import './styles/index.css'
+import { injectLiquidGlassFilter } from '@/lib/liquid-glass-filter'
 import { injectLiquidSwitchFilter } from '@/lib/liquid-switch'
+injectLiquidGlassFilter()
 injectLiquidSwitchFilter()
 if (window.matchMedia('(pointer: fine)').matches) {
   document.addEventListener('pointermove', (e) => {

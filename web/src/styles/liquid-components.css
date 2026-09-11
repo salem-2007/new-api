@@ -60,8 +60,8 @@ section .bg-background {
 /* ---------- 2. Level 0 — canvas ---------- */
 [data-slot='sidebar-inner'] {
   background: var(--liquid-bg) !important;
-  backdrop-filter: blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation));
-  -webkit-backdrop-filter: blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation));
+  backdrop-filter: url(#glass-distortion) blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation));
+  -webkit-backdrop-filter: url(#glass-distortion) blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation));
   border-right: 1px solid var(--liquid-border) !important;
   box-shadow: var(--liquid-highlight) !important;
   will-change: transform;
@@ -69,8 +69,8 @@ section .bg-background {
 }
 [data-slot='sidebar-inset'] {
   background: var(--liquid-0-fill) !important;
-  backdrop-filter: blur(var(--liquid-blur-canvas)) saturate(var(--liquid-saturation));
-  -webkit-backdrop-filter: blur(var(--liquid-blur-canvas)) saturate(var(--liquid-saturation));
+  backdrop-filter: url(#glass-distortion) blur(var(--liquid-blur-canvas)) saturate(var(--liquid-saturation));
+  -webkit-backdrop-filter: url(#glass-distortion) blur(var(--liquid-blur-canvas)) saturate(var(--liquid-saturation));
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 /* The canvas-level panel for a layout section. Surfaces that bring their own
@@ -82,8 +82,8 @@ section .bg-background {
 [data-slot='section'] > div:not([data-glass-layer='free']),
 section > div:not([data-glass-layer='free']) {
   background: var(--liquid-0-fill) !important;
-  backdrop-filter: blur(var(--liquid-blur-canvas)) saturate(var(--liquid-saturation));
-  -webkit-backdrop-filter: blur(var(--liquid-blur-canvas)) saturate(var(--liquid-saturation));
+  backdrop-filter: url(#glass-distortion) blur(var(--liquid-blur-canvas)) saturate(var(--liquid-saturation));
+  -webkit-backdrop-filter: url(#glass-distortion) blur(var(--liquid-blur-canvas)) saturate(var(--liquid-saturation));
   outline: 1px solid var(--liquid-border);
   outline-offset: -1px;
   border-radius: var(--liquid-radius-1);
@@ -111,8 +111,8 @@ section > div:not([data-glass-layer='free']) {
 [class*='bg-[linear-gradient(135deg,color-mix'],
 .overflow-hidden.rounded-lg.border:has([data-slot='table']) {
   background: var(--liquid-bg-deep) !important;
-  backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation));
-  -webkit-backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation));
+  backdrop-filter: url(#glass-distortion) blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation));
+  -webkit-backdrop-filter: url(#glass-distortion) blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation));
   border-color: var(--liquid-border) !important;
   box-shadow: var(--liquid-highlight), var(--liquid-shadow) !important;
   transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
@@ -164,8 +164,8 @@ section > div:not([data-glass-layer='free']) {
 [data-slot='hover-card-content'],
 .bg-popover {
   background: var(--liquid-2-fill) !important;
-  backdrop-filter: blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation));
-  -webkit-backdrop-filter: blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation));
+  backdrop-filter: url(#glass-distortion) blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation));
+  -webkit-backdrop-filter: url(#glass-distortion) blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation));
   border-color: var(--liquid-border) !important;
   box-shadow: var(--liquid-highlight), var(--liquid-shadow-deep) !important;
   color: var(--popover-foreground) !important;
@@ -183,8 +183,8 @@ section > div:not([data-glass-layer='free']) {
 }
 [data-slot='tooltip-content'] {
   background: var(--liquid-2-fill) !important;
-  backdrop-filter: blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation));
-  -webkit-backdrop-filter: blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation));
+  backdrop-filter: url(#glass-distortion) blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation));
+  -webkit-backdrop-filter: url(#glass-distortion) blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation));
   border-color: var(--liquid-border) !important;
   box-shadow: var(--liquid-highlight), var(--liquid-shadow-deep) !important;
 }
@@ -211,8 +211,8 @@ section > div:not([data-glass-layer='free']) {
 [data-slot='alert-dialog-content'],
 [data-slot='sheet-content'] {
   background: var(--liquid-3-fill) !important;
-  backdrop-filter: blur(var(--liquid-blur-deep)) saturate(var(--liquid-saturation));
-  -webkit-backdrop-filter: blur(var(--liquid-blur-deep)) saturate(var(--liquid-saturation));
+  backdrop-filter: url(#glass-distortion) blur(var(--liquid-blur-deep)) saturate(var(--liquid-saturation));
+  -webkit-backdrop-filter: url(#glass-distortion) blur(var(--liquid-blur-deep)) saturate(var(--liquid-saturation));
   border-color: var(--liquid-border) !important;
   border-radius: var(--liquid-radius-3);
   box-shadow: var(--liquid-highlight), var(--liquid-shadow-modal) !important;
@@ -233,8 +233,8 @@ section > div:not([data-glass-layer='free']) {
 [data-slot='table-header'],
 [data-slot='table-header'] tr {
   background: var(--liquid-row-hover) !important;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: url(#glass-distortion) blur(8px);
+  -webkit-backdrop-filter: url(#glass-distortion) blur(8px);
 }
 [data-slot='table-head'],
 [data-slot='table-cell'] {
@@ -260,8 +260,8 @@ textarea,
 [data-slot='select-trigger'],
 [data-slot='input'] {
   background: var(--liquid-bg) !important;
-  backdrop-filter: blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation));
-  -webkit-backdrop-filter: blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation));
+  backdrop-filter: url(#glass-distortion) blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation));
+  -webkit-backdrop-filter: url(#glass-distortion) blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation));
   border-radius: var(--radius-md, 0.8rem);
   border-color: var(--liquid-border) !important;
 }
@@ -292,23 +292,23 @@ header {
  * tiers are ordered so the most specific suffix wins. */
 [class*='bg-background/'] {
   background: var(--liquid-0-fill) !important;
-  backdrop-filter: blur(var(--liquid-blur-canvas)) saturate(var(--liquid-saturation));
-  -webkit-backdrop-filter: blur(var(--liquid-blur-canvas)) saturate(var(--liquid-saturation));
+  backdrop-filter: url(#glass-distortion) blur(var(--liquid-blur-canvas)) saturate(var(--liquid-saturation));
+  -webkit-backdrop-filter: url(#glass-distortion) blur(var(--liquid-blur-canvas)) saturate(var(--liquid-saturation));
   box-shadow: var(--liquid-highlight) !important;
 }
 [class*='bg-background/7'],
 [class*='bg-background/8'] {
   background: var(--liquid-bg) !important;
-  backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation));
-  -webkit-backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation));
+  backdrop-filter: url(#glass-distortion) blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation));
+  -webkit-backdrop-filter: url(#glass-distortion) blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation));
   box-shadow: var(--liquid-highlight) !important;
 }
 /* Sticky bars and mobile headers: content scrolls underneath, so they need the
    floating shadow as well as the near-opaque fill. */
 [class*='bg-background/9'] {
   background: var(--liquid-2-fill) !important;
-  backdrop-filter: blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation));
-  -webkit-backdrop-filter: blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation));
+  backdrop-filter: url(#glass-distortion) blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation));
+  -webkit-backdrop-filter: url(#glass-distortion) blur(var(--liquid-blur-liquid)) saturate(var(--liquid-saturation));
   border-color: var(--liquid-border);
   box-shadow: var(--liquid-highlight), var(--liquid-shadow-deep) !important;
 }
@@ -317,8 +317,8 @@ header {
 [data-slot='section-page-layout'] footer,
 .bg-background.shrink-0.border-t {
   background: var(--liquid-bg) !important;
-  backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation));
-  -webkit-backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation));
+  backdrop-filter: url(#glass-distortion) blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation));
+  -webkit-backdrop-filter: url(#glass-distortion) blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation));
   border-color: var(--liquid-border) !important;
 }
 [data-slot='section-page-layout'] .bg-background.shrink-0.border-t {
@@ -394,11 +394,16 @@ header {
 /* ---------- 11. Component fixes ---------- */
 /* ④ Switch */
 [data-slot='switch'] {
+  /* Liquid-glass switch: the displacement map comes from the rounded-rect
+     SDF filter injected by src/lib/liquid-switch.ts, at a much smaller scale
+     than the panel refraction — the full offset would shred a 32px control.
+     Frost blur is 0 and the surface keeps the shared inner highlight and the
+     same outer-shadow family as every other glass surface. */
   background: transparent !important;
   border: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  box-shadow: none !important;
+  backdrop-filter: var(--liquid-refraction-filter-soft) blur(0px) saturate(var(--liquid-saturation)) !important;
+  -webkit-backdrop-filter: var(--liquid-refraction-filter-soft) blur(0px) saturate(var(--liquid-saturation)) !important;
+  box-shadow: var(--liquid-highlight), 0 2px 8px rgba(0, 0, 0, 0.2) !important;
 }
 [data-slot='switch'][data-unchecked] {
   background: var(--input) !important;
@@ -518,8 +523,8 @@ header {
   border: none !important;
   background: var(--liquid-bg) !important;
   background-image: var(--liquid-refraction) !important;
-  backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation)) !important;
-  -webkit-backdrop-filter: blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation)) !important;
+  backdrop-filter: url(#glass-distortion) blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation)) !important;
+  -webkit-backdrop-filter: url(#glass-distortion) blur(var(--liquid-blur-frosted)) saturate(var(--liquid-saturation)) !important;
   box-shadow: var(--liquid-highlight), var(--liquid-shadow) !important;
 }
 .glass-3::before,
