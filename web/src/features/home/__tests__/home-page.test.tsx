@@ -186,14 +186,6 @@ describe('home hero', () => {
     expect(action('View Pricing')).toHaveAttribute('href', '/pricing')
   })
 
-  it('names the clients that already speak the protocol', () => {
-    render(<HomeHero isAuthenticated={false} />)
-
-    expect(screen.getByText('Cherry Studio')).toBeInTheDocument()
-    expect(screen.getByText('CC Switch')).toBeInTheDocument()
-    expect(screen.getByText('Supported Applications')).toBeInTheDocument()
-  })
-
   it('marks the reading scrim so the canvas sheet cannot erase it', () => {
     // The gradient scrim is a direct child of a `data-glass-surface='bare'`
     // section, which makes it a target for the generic `section > div` sheet

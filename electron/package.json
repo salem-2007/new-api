@@ -1,6 +1,6 @@
 {
   "name": "new-api-electron",
-  "version": "1.0.0",
+  "version": "1.0.0-rc.36-custom.1",
   "description": "New API - AI Model Gateway Desktop Application",
   "main": "main.js",
   "scripts": {
@@ -9,7 +9,8 @@
     "build": "electron-builder",
     "build:mac": "electron-builder --mac",
     "build:win": "electron-builder --win",
-    "build:linux": "electron-builder --linux"
+    "build:linux": "electron-builder --linux",
+    "prebuild:win": "node ./sync-version.mjs"
   },
   "keywords": [
     "ai",

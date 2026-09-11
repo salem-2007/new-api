@@ -16,46 +16,20 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { CherryStudio } from '@lobehub/icons'
 import { Link } from '@tanstack/react-router'
 import { ArrowRight, BookOpen } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { AnimateInView } from '@/components/animate-in-view'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { useStatus } from '@/hooks/use-status'
-import { cn } from '@/lib/utils'
 
 import { HeroTerminalDemo } from './hero-terminal-demo'
-import { SECTION_LABEL } from './section-label'
 
 interface HomeHeroProps {
   isAuthenticated: boolean
 }
 
-/**
- * Geometry shared by the application pills. `min-w-0` allows the pill to shrink
- * below its content width on narrow viewports, which is what lets the label
- * truncate instead of pushing the row out of the glass card.
- */
-const APP_PILL_BASE =
-  'group flex max-w-full min-w-0 items-center gap-3 rounded-full border border-border/40 bg-muted/15 px-4 py-2.5 text-sm font-medium backdrop-blur-xs transition-colors duration-300 sm:px-5'
-
-// Stylized three-dots indicator representing "More"
-const MoreIcon = () => (
-  <svg
-    className='text-muted-foreground/60 group-hover:text-foreground size-6 shrink-0 transition-colors'
-    viewBox='0 0 24 24'
-    fill='none'
-    xmlns='http://www.w3.org/2000/svg'
-    aria-hidden
-  >
-    <circle cx='6' cy='12' r='2' fill='currentColor' />
-    <circle cx='12' cy='12' r='2' fill='currentColor' />
-    <circle cx='18' cy='12' r='2' fill='currentColor' />
-  </svg>
-)
 
 /**
  * Landing hero. The statement and its proof share one row: the headline, the
@@ -175,77 +149,6 @@ export function HomeHero(props: HomeHeroProps) {
               </div>
             </AnimateInView>
 
-            {/* Supported applications — the clients that already speak this
-                protocol. Real integrations, not decoration. */}
-            <AnimateInView animation='fade-up' delay={140} className='mt-8'>
-              <Card data-card-hover='false' className='gap-0 py-0'>
-                <CardContent className='p-5'>
-                  <p className={SECTION_LABEL}>{t('Supported Applications')}</p>
-                  <p className='text-foreground/60 mt-2 text-xs leading-relaxed'>
-                    {t(
-                      'Supports one-click configuration and perfectly adapts to NewAPI multi-protocol configuration.'
-                    )}
-                  </p>
-                  <div className='mt-4 flex min-w-0 flex-wrap items-center gap-2.5 sm:gap-3'>
-                    <a
-                      href='https://cherry-ai.com'
-                      target='_blank'
-                      rel='noopener noreferrer'
-                      className={cn(
-                        APP_PILL_BASE,
-                        'text-foreground/80 hover:border-border hover:bg-muted/30 hover:text-foreground focus-visible:ring-ring/50 focus-visible:ring-2 focus-visible:outline-none'
-                      )}
-                    >
-                      <CherryStudio.Color size={24} className='shrink-0' />
-                      <span className='truncate'>Cherry Studio</span>
-                    </a>
-
-                    <a
-                      href='https://ccswitch.io'
-                      target='_blank'
-                      rel='noopener noreferrer'
-                      className={cn(
-                        APP_PILL_BASE,
-                        'text-foreground/80 hover:border-border hover:bg-muted/30 hover:text-foreground focus-visible:ring-ring/50 focus-visible:ring-2 focus-visible:outline-none'
-                      )}
-                    >
-                      <img
-                        src='https://ccswitch.io/favicon.png'
-                        alt=''
-                        className='size-6 shrink-0 rounded-md object-contain'
-                        onError={(event) => {
-                          // Fall back to a text mark when the remote favicon is
-                          // unavailable (offline or sandboxed environments).
-                          event.currentTarget.style.display = 'none'
-                          const fallback =
-                            event.currentTarget
-                              .nextElementSibling as HTMLElement | null
-                          if (fallback) fallback.style.display = 'flex'
-                        }}
-                      />
-                      <span
-                        aria-hidden
-                        style={{ display: 'none' }}
-                        className='bg-primary/10 text-primary size-6 shrink-0 items-center justify-center rounded-md text-[10px] font-bold'
-                      >
-                        CC
-                      </span>
-                      <span className='truncate'>CC Switch</span>
-                    </a>
-
-                    <div
-                      className={cn(
-                        APP_PILL_BASE,
-                        'text-foreground/55 cursor-default'
-                      )}
-                    >
-                      <MoreIcon />
-                      <span className='truncate'>{t('More Apps')}</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </AnimateInView>
           </div>
 
           <AnimateInView

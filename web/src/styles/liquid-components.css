@@ -585,3 +585,18 @@ body[data-glass-pulse='off'] [data-slot='data-table-card']:hover {
   animation: none !important;
   box-shadow: var(--liquid-highlight), var(--liquid-shadow) !important;
 }
+
+/* ---------- 13. Top navigation bar ---------- */
+/* The app header and the landing header used to carry their own hardcoded
+   glass (a fixed tint, a 40px blur and a two-layer shadow each). Both now
+   take the shared recipe so the bar matches every other glass surface. */
+.liquid-topbar-glass {
+  border-radius: var(--liquid-radius-1);
+  background: var(--liquid-bg-deep);
+  backdrop-filter: var(--liquid-refraction-filter) blur(var(--liquid-blur-frosted))
+    saturate(var(--liquid-saturation));
+  -webkit-backdrop-filter: var(--liquid-refraction-filter) blur(var(--liquid-blur-frosted))
+    saturate(var(--liquid-saturation));
+  box-shadow: var(--liquid-highlight), var(--liquid-shadow);
+  outline: 1px solid var(--liquid-border);
+}
