@@ -19,17 +19,15 @@ For commercial licensing, please contact support@quantumnous.com
 import { Link } from '@tanstack/react-router'
 import { X, User, Wallet, LogOut, ShieldCheck } from 'lucide-react'
 import { AnimatePresence, motion, type Variants } from 'motion/react'
-import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { SignOutDialog } from '@/components/sign-out-dialog'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { UserAvatar } from '@/components/user-avatar'
 import useDialogState from '@/hooks/use-dialog'
 import { useIsSidebarModuleVisible } from '@/hooks/use-sidebar-config'
 import { useUserDisplay } from '@/hooks/use-user-display'
-import { getUserAvatarStyle, getUserAvatarUrl } from '@/lib/avatar'
 import type { AuthUser } from '@/stores/auth-store'
 
 import { MOBILE_DRAWER_ANIMATION, MOBILE_DRAWER_CONFIG } from '../constants'
@@ -85,12 +83,6 @@ function MobileUserProfile({ user, onNavigate }: MobileUserProfileProps) {
   const [signOutOpen, setSignOutOpen] = useDialogState()
   const { displayName, initials, roleLabel } = useUserDisplay(user)
   const isSecurityVisible = useIsSidebarModuleVisible('/security')
-  const avatarName = user?.username || displayName
-  const avatarUrl = getUserAvatarUrl(user)
-  const avatarFallbackStyle = useMemo(
-    () => getUserAvatarStyle(avatarName),
-    [avatarName]
-  )
 
   if (!user) return null
 
@@ -100,19 +92,13 @@ function MobileUserProfile({ user, onNavigate }: MobileUserProfileProps) {
       <div className='flex flex-col text-sm'>
         {/* User header - simplified */}
         <div className='border-border flex items-center gap-2.5 border-b p-2.5'>
-          <Avatar className='size-9'>
-            {avatarUrl && (
-              // Keying on the url re-mounts the image whenever it changes, so a
-              // fresh avatar is never served from the previous element's state.
-              <AvatarImage key={avatarUrl} src={avatarUrl} alt={avatarName} />
-            )}
-            <AvatarFallback
-              className='text-xs font-semibold text-white'
-              style={avatarFallbackStyle}
-            >
-              {initials}
-            </AvatarFallback>
-          </Avatar>
+          <UserAvatar
+            user={user}
+            name={displayName}
+            className='size-9'
+            fallbackClassName='text-xs'
+            fallback={initials}
+          />
           <div className='flex flex-1 flex-col gap-0.5 overflow-hidden'>
             <p className='text-foreground truncate font-medium'>
               {displayName}

@@ -187,6 +187,20 @@ async function uploadAvatar() {
   )
 }
 
+/**
+ * Commit the dialog's pending avatar draft.
+ *
+ * The dialog only writes the avatar when the user saves, so picking a file is
+ * not enough: the upload is issued by the footer button.
+ */
+function saveAvatarDraft() {
+  const save = [...document.body.querySelectorAll('button')].find(
+    (button) => button.textContent === 'Save'
+  )
+  if (!save) throw new Error('save button not found')
+  fireEvent.click(save)
+}
+
 // ============================================================================
 // Rendering helpers
 // ============================================================================
@@ -353,6 +367,7 @@ describe('avatar write against an in-flight profile read', () => {
         files: [new File(['avatar'], 'avatar.png', { type: 'image/png' })],
       },
     })
+    saveAvatarDraft()
 
     await waitFor(() => expect(imageSources(page())).toContain(AVATAR_URL))
 

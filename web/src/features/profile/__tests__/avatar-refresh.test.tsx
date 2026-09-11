@@ -258,6 +258,20 @@ function uploadAvatar() {
   })
 }
 
+/**
+ * Commit the pending avatar draft.
+ *
+ * Picking a file only previews it; the upload is issued by the dialog's save
+ * button, so a case that expects a write has to save as well.
+ */
+function saveAvatarDraft() {
+  const save = [...document.body.querySelectorAll('button')].find(
+    (button) => button.textContent === 'Save'
+  )
+  if (!save) throw new Error('save button not found')
+  fireEvent.click(save)
+}
+
 beforeEach(() => {
   storedProfile = baseProfile
   nextReadGate = null
@@ -293,6 +307,7 @@ describe('avatar updates', () => {
 
     await openEditDialog()
     uploadAvatar()
+    saveAvatarDraft()
 
     await waitFor(() =>
       expect(api.post).toHaveBeenCalledWith(
@@ -318,6 +333,7 @@ describe('avatar updates', () => {
 
     await openEditDialog()
     uploadAvatar()
+    saveAvatarDraft()
 
     await waitFor(() => {
       expect(imageSources(page())).toContain(AVATAR_URL)
@@ -330,6 +346,7 @@ describe('avatar updates', () => {
     renderSurfaces()
     await openEditDialog()
     uploadAvatar()
+    saveAvatarDraft()
     await waitFor(() => expect(imageSources(page())).toContain(AVATAR_URL))
 
     // Closing the dialog re-reads the profile; that read must not roll the
@@ -383,16 +400,20 @@ describe('avatar updates', () => {
     expect(container.textContent).toContain('Alice')
   })
 
-  it('keeps the letter avatar when the avatar image cannot be loaded', async () => {
-    // A failed image request is the only way a successful upload can still show
-    // the letter; the fallback is the correct output for it.
+  it('never falls back to the letter once the account has an avatar url', async () => {
+    // The letter belongs to an account without an avatar. An image request that
+    // fails must not put the initials back on top of a url the account holds,
+    // which is what made an upload look like it had been overwritten.
     failingImages.add(AVATAR_URL)
     storedProfile = { ...baseProfile, avatar_url: AVATAR_URL }
     renderSurfaces()
     await screen.findByRole('button', { name: 'Edit Profile' })
 
-    await waitFor(() => expect(imageSources(page())).toEqual([]))
-    expect(within(page()).getByText('A')).toBeInTheDocument()
+    // The load probe still runs for the stored url...
+    await waitFor(() => expect(probedImageSources).toContain(AVATAR_URL))
+    // ...but the letter stays out of the avatar frame.
+    expect(within(page()).queryByText('A')).toBeNull()
+    expect(imageSources(page())).toEqual([])
   })
 
   it('keeps a relative avatar path rooted at the site origin', async () => {
@@ -418,6 +439,7 @@ describe('avatar updates', () => {
     mockAvatarUpload(nextUrl)
     await openEditDialog()
     uploadAvatar()
+    saveAvatarDraft()
 
     await waitFor(() => expect(imageSources(page())).toContain(nextUrl))
     expect(imageSources(page())).not.toContain(PREVIOUS_AVATAR_URL)

@@ -6267,6 +6267,9 @@
     "Edit Profile": "修改资料",
     "Failed to load login channels": "登录渠道加载失败",
     "Update your username, display name and avatar.": "修改用户名、显示名称与头像。",
-    "Username must be 20 characters or fewer.": "用户名不能超过 20 个字符。"
+    "Username must be 20 characters or fewer.": "用户名不能超过 20 个字符。",
+    "The image must be 4MB or smaller.": "图片不能超过 4MB。",
+    "Only jpg, jpeg, png and webp images are supported.": "仅支持 jpg、jpeg、png、webp 格式的图片。",
+    "Pending save, the new avatar is not applied yet": "待保存，新头像尚未生效"
   }
 }
