@@ -102,7 +102,8 @@ func SetApiRouter(router *gin.Engine) {
 				selfRoute.GET("/self", controller.GetSelf)
 				selfRoute.POST("/self/avatar/upload", middleware.CriticalRateLimit(), controller.UploadSelfAvatar)
 				selfRoute.POST("/self/avatar/refresh", middleware.DisableCache(), controller.RefreshSelfAvatarSync)
-				selfRoute.POST("/self/avatar/channel", middleware.DisableCache(), controller.FetchChannelAvatar)
+				// Deprecated compatibility alias; the UI uses /avatar/refresh only.
+				selfRoute.POST("/self/avatar/channel", middleware.DisableCache(), controller.RefreshSelfAvatarSync)
 				selfRoute.GET("/self/oauth/binding_status", middleware.DisableCache(), controller.GetSelfBindings)
 				selfRoute.DELETE("/self/oauth/:provider", middleware.CriticalRateLimit(), middleware.DisableCache(), controller.UnbindSelfProvider)
 				selfRoute.GET("/models", controller.GetUserModels)

@@ -29,7 +29,6 @@ type bindingStatus struct {
 	Bound    bool   `json:"bound"`
 }
 
-
 const githubUserAPI = "https://api.github.com/user/%s"
 
 // DefaultAvatarURL is the fallback avatar shown when user has no avatar set.
@@ -45,17 +44,17 @@ func defaultIfEmpty(val, def string) string {
 }
 
 type githubPublicUser struct {
-	Login      string `json:"login"`
-	AvatarURL  string `json:"avatar_url"`
-	Name       string `json:"name"`
-	APIURL     string `json:"url"`
-	HTMLURL    string `json:"html_url"`
-	Type       string `json:"type"`
-	ID         int64  `json:"id"`
-	CreatedAt  string `json:"created_at"`
-	UpdatedAt  string `json:"updated_at"`
-	PublicGists int   `json:"public_gists"`
-	PublicRepos int   `json:"public_repos"`
+	Login       string `json:"login"`
+	AvatarURL   string `json:"avatar_url"`
+	Name        string `json:"name"`
+	APIURL      string `json:"url"`
+	HTMLURL     string `json:"html_url"`
+	Type        string `json:"type"`
+	ID          int64  `json:"id"`
+	CreatedAt   string `json:"created_at"`
+	UpdatedAt   string `json:"updated_at"`
+	PublicGists int    `json:"public_gists"`
+	PublicRepos int    `json:"public_repos"`
 }
 
 func fetchGitHubAvatarByAPI(githubID string) (string, error) {
@@ -264,79 +263,43 @@ func fetchProviderAvatar(user *model.User) (string, string, error) {
 	return "", "", errors.New("当前登录渠道不支持自动同步头像, 请重新通过该渠道登录以更新头像, 或手动填写头像 URL")
 }
 
-// FetchChannelAvatar retrieves the avatar URL from a specific channel.
-// This allows users to use channel avatars as their profile avatar.
-func FetchChannelAvatar(c *gin.Context) {
-	id := c.GetInt("id")
-	user, err := model.GetUserById(id, false)
-	if err != nil {
-		common.ApiError(c, err)
-		return
-	}
-
-	// Find the first bound channel for the user
+// findBoundAvatarChannel returns the first channel associated with a bound login
+// provider. Its avatar_url is the fallback when the provider API has no avatar.
+func findBoundAvatarChannel(user *model.User) (model.Channel, error) {
 	var channel model.Channel
-	if user.GitHubId != "" {
-		// Look for GitHub channel type
-		if err := model.DB.Where("type = ? AND key LIKE ?", 8, user.GitHubId+"%").First(&channel).Error; err != nil {
-			common.ApiErrorMsg(c, "未找到绑定的渠道")
-			return
-		}
-	} else if user.OidcId != "" {
-		if err := model.DB.Where("type = ? AND oidc_id = ?", 14, user.OidcId).First(&channel).Error; err != nil {
-			common.ApiErrorMsg(c, "未找到绑定的渠道")
-			return
-		}
-	} else if user.WeChatId != "" {
-		if err := model.DB.Where("type = ? AND wechat_id = ?", 101, user.WeChatId).First(&channel).Error; err != nil {
-			common.ApiErrorMsg(c, "未找到绑定的渠道")
-			return
-		}
-	} else if user.TelegramId != "" {
-		if err := model.DB.Where("type = ? AND telegram_id = ?", 113, user.TelegramId).First(&channel).Error; err != nil {
-			common.ApiErrorMsg(c, "未找到绑定的渠道")
-			return
-		}
-	} else {
-		common.ApiErrorMsg(c, "当前账号没有绑定的渠道")
-		return
+	var err error
+	switch {
+	case user.GitHubId != "":
+		err = model.DB.Where("type = ? AND key LIKE ?", 8, user.GitHubId+"%").First(&channel).Error
+	case user.OidcId != "":
+		err = model.DB.Where("type = ? AND oidc_id = ?", 14, user.OidcId).First(&channel).Error
+	case user.WeChatId != "":
+		err = model.DB.Where("type = ? AND wechat_id = ?", 101, user.WeChatId).First(&channel).Error
+	case user.TelegramId != "":
+		err = model.DB.Where("type = ? AND telegram_id = ?", 113, user.TelegramId).First(&channel).Error
+	default:
+		return channel, errors.New("当前账号没有绑定的渠道")
 	}
-
-	// Get avatar from channel - try provider avatar first
-	avatarURL, provider, err := fetchProviderAvatar(user)
-	if err == nil && avatarURL != "" {
-		if err := model.DB.Model(&model.User{}).Where("id = ?", id).Update("avatar_url", avatarURL).Error; err != nil {
-			common.ApiError(c, err)
-			return
-		}
-		user.AvatarURL = avatarURL
-		c.JSON(http.StatusOK, gin.H{
-			"success": true,
-			"message": fmt.Sprintf("已从 %s 同步最新头像", provider),
-			"data":    buildSelfUserData(user),
-		})
-		return
+	if err != nil {
+		return channel, errors.New("未找到绑定的渠道")
 	}
-
-	// Try channel's avatar_url field
-	if channel.AvatarURL != "" {
-		if err := model.DB.Model(&model.User{}).Where("id = ?", id).Update("avatar_url", channel.AvatarURL).Error; err != nil {
-			common.ApiError(c, err)
-			return
-		}
-		user.AvatarURL = channel.AvatarURL
-		c.JSON(http.StatusOK, gin.H{
-			"success": true,
-			"message": "头像已从渠道同步",
-			"data":    buildSelfUserData(user),
-		})
-		return
-	}
-
-	common.ApiErrorMsg(c, "该渠道没有可用的头像")
+	return channel, nil
 }
 
-// RefreshSelfAvatarSync syncs the avatar from the currently bound provider.
+// syncBoundAvatar gets the provider avatar first and falls back to the bound
+// channel's stored avatar. Both old UI actions used to call these same sources.
+func syncBoundAvatar(user *model.User) (string, string, error) {
+	if avatarURL, provider, err := fetchProviderAvatar(user); err == nil && avatarURL != "" {
+		return avatarURL, provider, nil
+	}
+	channel, err := findBoundAvatarChannel(user)
+	if err == nil && strings.TrimSpace(channel.AvatarURL) != "" {
+		return strings.TrimSpace(channel.AvatarURL), "channel", nil
+	}
+	return "", "", errors.New("当前登录渠道没有可用头像，请重新通过该渠道登录或手动填写头像 URL")
+}
+
+// RefreshSelfAvatarSync is the single avatar synchronization endpoint.
 func RefreshSelfAvatarSync(c *gin.Context) {
 	id := c.GetInt("id")
 	user, err := model.GetUserById(id, false)
@@ -348,7 +311,7 @@ func RefreshSelfAvatarSync(c *gin.Context) {
 		common.ApiErrorMsg(c, "当前账号使用密码/邮箱登录, 请在下方手动填写头像 URL")
 		return
 	}
-	avatarURL, provider, err := fetchProviderAvatar(user)
+	avatarURL, source, err := syncBoundAvatar(user)
 	if err != nil {
 		common.ApiError(c, err)
 		return
@@ -360,11 +323,7 @@ func RefreshSelfAvatarSync(c *gin.Context) {
 		}
 	}
 	user.AvatarURL = avatarURL
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"message": fmt.Sprintf("已从 %s 同步最新头像", provider),
-		"data":    buildSelfUserData(user),
-	})
+	buildAvatarResponse(c, user, fmt.Sprintf("已从 %s 同步最新头像", source))
 }
 
 var _ = time.Second // keep time import if unused later

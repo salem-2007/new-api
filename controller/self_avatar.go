@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fmt"
+	_ "golang.org/x/image/webp"
 	"image"
 	_ "image/gif"
 	_ "image/jpeg"
@@ -73,8 +74,18 @@ func UploadSelfAvatar(c *gin.Context) {
 		common.ApiError(c, err)
 		return
 	}
-	defer saved.Close()
+	committed := false
+	defer func() {
+		if !committed {
+			_ = os.Remove(target)
+		}
+	}()
 	if _, err := io.Copy(saved, f); err != nil {
+		_ = saved.Close()
+		common.ApiError(c, err)
+		return
+	}
+	if err := saved.Close(); err != nil {
 		common.ApiError(c, err)
 		return
 	}
@@ -84,6 +95,7 @@ func UploadSelfAvatar(c *gin.Context) {
 		common.ApiError(c, err)
 		return
 	}
+	committed = true
 	user, err := model.GetUserById(id, false)
 	if err != nil {
 		common.ApiError(c, err)

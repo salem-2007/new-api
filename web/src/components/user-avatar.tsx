@@ -62,33 +62,27 @@ export function UserAvatarContent({
   fallbackClassName,
   fallback,
 }: UserAvatarContentProps) {
-  if (!url) {
-    // No avatar URL - show default avatar image
-    return (
+  const imageUrl = url || DEFAULT_AVATAR_URL
+
+  return (
+    <>
+      <AvatarImage
+        key={imageUrl}
+        src={imageUrl}
+        alt={url ? name : 'Default avatar'}
+        className={cn('rounded-[inherit]', imageClassName)}
+      />
       <AvatarFallback
         className={cn(
           'flex items-center justify-center rounded-[inherit]',
           fallbackClassName
         )}
         style={getUserAvatarStyle(name)}
-        aria-label="No avatar"
+        aria-label={url ? name : 'No avatar'}
       >
-        <img
-          src={DEFAULT_AVATAR_URL}
-          alt="Default avatar"
-          className="h-full w-full object-contain"
-        />
+        {fallback ?? getUserAvatarFallback(name)}
       </AvatarFallback>
-    )
-  }
-
-  return (
-    <AvatarImage
-      key={url}
-      src={url}
-      alt={name}
-      className={cn('rounded-[inherit]', imageClassName)}
-    />
+    </>
   )
 }
 

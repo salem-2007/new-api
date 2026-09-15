@@ -42,7 +42,6 @@ import {
   refreshSelfAvatar,
   updateUserProfile,
   uploadSelfAvatar,
-  fetchChannelAvatar,
 } from '../api'
 import { appendAvatarChange } from '../lib/avatar-commit-log'
 import type { UserProfile } from '../types'
@@ -204,11 +203,6 @@ function EditProfileForm({
     setAvatarFlow('ready')
   }
 
-  const selectChannelAvatar = () => {
-    setAvatarDraft({ kind: 'channel' })
-    setAvatarFlow('ready')
-  }
-
   /**
    * Commit the pending avatar change, if there is one.
    *
@@ -225,9 +219,7 @@ function EditProfileForm({
       response =
         draft.kind === 'upload'
           ? await uploadSelfAvatar(draft.file)
-          : draft.kind === 'channel'
-            ? await fetchChannelAvatar()
-            : await refreshSelfAvatar()
+          : await refreshSelfAvatar()
     } catch {
       response = null
     }
@@ -235,13 +227,7 @@ function EditProfileForm({
     if (!response?.success || !response.data) {
       toast.error(
         response?.message ||
-          t(
-            action === 'upload'
-              ? 'Failed to update avatar'
-              : action === 'channel'
-                ? 'Failed to sync avatar'
-                : 'Failed to sync avatar'
-          )
+          t(action === 'upload' ? 'Failed to update avatar' : 'Failed to sync avatar')
       )
       appendAvatarChange({
         at: new Date().toISOString(),
@@ -387,26 +373,15 @@ function EditProfileForm({
                   {t('Upload avatar')}
                 </Button>
                 {canSyncAvatar && (
-                  <>
-                    <Button
-                      type='button'
-                      variant='ghost'
-                      size='sm'
-                      disabled={saving}
-                      onClick={selectAvatarSync}
-                    >
-                      {t('Sync from provider')}
-                    </Button>
-                    <Button
-                      type='button'
-                      variant='ghost'
-                      size='sm'
-                      disabled={saving}
-                      onClick={selectChannelAvatar}
-                    >
-                      {t('Sync from channel')}
-                    </Button>
-                  </>
+                  <Button
+                    type='button'
+                    variant='ghost'
+                    size='sm'
+                    disabled={saving}
+                    onClick={selectAvatarSync}
+                  >
+                    {t('Sync from provider')}
+                  </Button>
                 )}
               </div>
               {avatarFlow === 'ready' && avatarDraft !== null && (
@@ -450,4 +425,3 @@ export type AvatarFlowState = 'idle' | 'ready' | 'saving' | 'saved'
 export type AvatarDraft =
   | { kind: 'upload'; file: File; previewUrl: string }
   | { kind: 'sync' }
-  | { kind: 'channel' }

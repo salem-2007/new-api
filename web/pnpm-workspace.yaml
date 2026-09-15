@@ -16,3 +16,4 @@ minimumReleaseAgeExclude:
   - '@rspack/binding-win32-x64-msvc@2.2.3'
   - '@rspack/binding@2.2.3'
   - '@rspack/core@2.2.3'
+  - '@lobehub/ui@5.47.1'

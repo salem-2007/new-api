@@ -358,15 +358,6 @@ export async function refreshSelfAvatar(): Promise<ApiResponse<UserProfile>> {
 }
 
 /**
- * Fetch avatar from the user's bound channel
- */
-export async function fetchChannelAvatar(): Promise<ApiResponse<UserProfile>> {
-  const response = await api.post('/api/user/self/avatar/channel')
-  keepSelfReadsFresh()
-  return response.data as ApiResponse<UserProfile>
-}
-
-/**
  * Unbind a login channel from the current user
  */
 export async function unbindSelfProvider(

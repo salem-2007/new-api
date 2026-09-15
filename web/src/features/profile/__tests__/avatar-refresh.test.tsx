@@ -298,12 +298,12 @@ describe('avatar updates', () => {
     mockAvatarUpload(AVATAR_URL)
     renderSurfaces()
 
-    // Before the upload the header shows the generated letter, not an image.
+    // Before the upload the header shows the bundled default avatar.
     expect(
       await screen.findByRole('button', { name: 'Edit Profile' })
     ).toBeInTheDocument()
-    expect(imageSources(page())).toEqual([])
-    expect(within(page()).getByText('A')).toBeInTheDocument()
+    expect(imageSources(page())).toContain('/default-avatar.webp')
+    expect(within(page()).queryByText('A')).toBeNull()
 
     await openEditDialog()
     uploadAvatar()
@@ -400,19 +400,14 @@ describe('avatar updates', () => {
     expect(container.textContent).toContain('Alice')
   })
 
-  it('never falls back to the letter once the account has an avatar url', async () => {
-    // The letter belongs to an account without an avatar. An image request that
-    // fails must not put the initials back on top of a url the account holds,
-    // which is what made an upload look like it had been overwritten.
+  it('falls back to the letter when the stored avatar fails to load', async () => {
     failingImages.add(AVATAR_URL)
     storedProfile = { ...baseProfile, avatar_url: AVATAR_URL }
     renderSurfaces()
     await screen.findByRole('button', { name: 'Edit Profile' })
 
-    // The load probe still runs for the stored url...
     await waitFor(() => expect(probedImageSources).toContain(AVATAR_URL))
-    // ...but the letter stays out of the avatar frame.
-    expect(within(page()).queryByText('A')).toBeNull()
+    expect(within(page()).getByText('A')).toBeInTheDocument()
     expect(imageSources(page())).toEqual([])
   })
 
