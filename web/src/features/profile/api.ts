@@ -328,7 +328,7 @@ export async function performCheckin(
 
 
 // ============================================================================
-// Avatar & Login Channel Binding APIs
+// Avatar APIs
 // ============================================================================
 
 /**
@@ -353,6 +353,15 @@ export async function uploadSelfAvatar(
  */
 export async function refreshSelfAvatar(): Promise<ApiResponse<UserProfile>> {
   const response = await api.post('/api/user/self/avatar/refresh')
+  keepSelfReadsFresh()
+  return response.data as ApiResponse<UserProfile>
+}
+
+/**
+ * Fetch avatar from the user's bound channel
+ */
+export async function fetchChannelAvatar(): Promise<ApiResponse<UserProfile>> {
+  const response = await api.post('/api/user/self/avatar/channel')
   keepSelfReadsFresh()
   return response.data as ApiResponse<UserProfile>
 }

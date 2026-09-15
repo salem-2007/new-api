@@ -432,6 +432,51 @@ func findOrCreateOAuthUser(c *gin.Context, provider oauth.Provider, oauthUser *o
 				user.AvatarURL = oauthUser.AvatarURL
 			}
 		}
+		// If user has no avatar, sync from channel if the channel has an avatar_url set
+		if user.AvatarURL == "" {
+			var channel model.Channel
+			channelUpdate := map[string]interface{}{
+				"avatar_url": oauthUser.AvatarURL,
+			}
+			switch {
+			case user.GitHubId != "":
+				if err := model.DB.Where("type = ? AND github_id = ?", 8, user.GitHubId).First(&channel).Error; err == nil && channel.AvatarURL != "" {
+					user.AvatarURL = channel.AvatarURL
+					channelUpdate = nil
+				}
+			case user.DiscordId != "":
+				if err := model.DB.Where("type = ? AND discord_id = ?", 3, user.DiscordId).First(&channel).Error; err == nil && channel.AvatarURL != "" {
+					user.AvatarURL = channel.AvatarURL
+					channelUpdate = nil
+				}
+			case user.OidcId != "":
+				if err := model.DB.Where("oidc_id = ?", user.OidcId).First(&channel).Error; err == nil && channel.AvatarURL != "" {
+					user.AvatarURL = channel.AvatarURL
+					channelUpdate = nil
+				}
+			case user.WeChatId != "":
+				if err := model.DB.Where("type = ? AND wechat_id = ?", 101, user.WeChatId).First(&channel).Error; err == nil && channel.AvatarURL != "" {
+					user.AvatarURL = channel.AvatarURL
+					channelUpdate = nil
+				}
+			case user.TelegramId != "":
+				if err := model.DB.Where("type = ? AND telegram_id = ?", 113, user.TelegramId).First(&channel).Error; err == nil && channel.AvatarURL != "" {
+					user.AvatarURL = channel.AvatarURL
+					channelUpdate = nil
+				}
+			case user.LinuxDOId != "":
+				if err := model.DB.Where("type = ? AND linux_do_id = ?", 99, user.LinuxDOId).First(&channel).Error; err == nil && channel.AvatarURL != "" {
+					user.AvatarURL = channel.AvatarURL
+					channelUpdate = nil
+				}
+			}
+			// If the channel has no avatar_url set, save the oauthUser.AvatarURL as the channel's avatar_url for future use
+			if channelUpdate != nil {
+				if oauthUser.AvatarURL != "" {
+					_ = model.DB.Model(&model.Channel{}).Where("type = ? AND key LIKE ?", channel.Type, user.GitHubId+"%").Update("avatar_url", oauthUser.AvatarURL)
+				}
+			}
+		}
 		return user, nil
 	}
 

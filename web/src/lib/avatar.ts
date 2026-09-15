@@ -44,8 +44,19 @@ export function getUserAvatarFallback(name: string): string {
   return name.trim().charAt(0).toUpperCase() || '?'
 }
 
+/**
+ * Default avatar URL — used when the user has no avatar.
+ * Points to the embedded WebP in web/public.
+ */
+export const DEFAULT_AVATAR_URL = '/default-avatar.webp'
+
+/**
+ * Get the avatar URL for a user.
+ * Returns null if no avatar is available (user avatar > channel avatar > empty).
+ * Unlike before, there's no default letter fallback when no URL exists.
+ */
 export function getUserAvatarUrl(
-  user?: { avatar_url?: string } | null
+  user?: { avatar_url?: string; username?: string } | null
 ): string | null {
   const url = user?.avatar_url?.trim()
   if (!url) return null
@@ -54,4 +65,28 @@ export function getUserAvatarUrl(
   // against the current route and 404, leaving the letter fallback on screen.
   if (/^(?:[a-z][a-z0-9+.-]*:|\/\/|\/)/i.test(url)) return url
   return `/${url}`
+}
+
+/**
+ * Get the avatar URL from channel or user.
+ * Priority: user avatar_url > channel avatar_url > null (no fallback)
+ */
+export function getChannelOrUserAvatarUrl(
+  user?: { avatar_url?: string; username?: string } | null,
+  channelAvatarUrl?: string | null
+): string | null {
+  // First, try user's own avatar
+  const url = user?.avatar_url?.trim()
+  if (url) {
+    if (/^(?:[a-z][a-z0-9+.-]*:|\/\/|\/)/i.test(url)) return url
+    return `/${url}`
+  }
+  // Fall back to channel's avatar
+  const channelUrl = channelAvatarUrl?.trim()
+  if (channelUrl) {
+    if (/^(?:[a-z][a-z0-9+.-]*:|\/\/|\/)/i.test(channelUrl)) return channelUrl
+    return `/${channelUrl}`
+  }
+  // No avatar available - return null to show no avatar image
+  return null
 }

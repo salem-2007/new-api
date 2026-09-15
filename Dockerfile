@@ -2,13 +2,16 @@ FROM node:22-bookworm-slim AS builder
 
 WORKDIR /build/web
 COPY web/package.json ./
-RUN npm install --no-audit --no-fund
+RUN npm install --legacy-peer-deps --no-audit --no-fund
 COPY ./web ./
 COPY ./VERSION /build/VERSION
 RUN DISABLE_ESLINT_PLUGIN='true' VITE_REACT_APP_VERSION=$(cat /build/VERSION) npm run build
 
 FROM golang:1.26.1-alpine@sha256:2389ebfa5b7f43eeafbd6be0c3700cc46690ef842ad962f6c5bd6be49ed82039 AS builder2
 ENV GO111MODULE=on CGO_ENABLED=0 GOWORK=off
+# 中国网络下加速 Go 模块下载；海外构建可用 --build-arg GOPROXY=direct 覆盖
+ARG GOPROXY_URL=https://goproxy.cn,direct
+ENV GOPROXY=${GOPROXY_URL}
 
 ARG TARGETOS
 ARG TARGETARCH

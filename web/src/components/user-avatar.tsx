@@ -23,6 +23,7 @@ import {
   getUserAvatarFallback,
   getUserAvatarStyle,
   getUserAvatarUrl,
+  DEFAULT_AVATAR_URL,
 } from '@/lib/avatar'
 import { cn } from '@/lib/utils'
 
@@ -51,6 +52,8 @@ interface UserAvatarContentProps {
  * belongs to an account without an avatar, and showing it while an avatar
  * exists is what made an upload look like it had been overwritten by the
  * initials.
+ *
+ * When no avatar URL exists, the default avatar WebP is shown.
  */
 export function UserAvatarContent({
   url,
@@ -60,12 +63,21 @@ export function UserAvatarContent({
   fallback,
 }: UserAvatarContentProps) {
   if (!url) {
+    // No avatar URL - show default avatar image
     return (
       <AvatarFallback
-        className={cn('font-semibold text-white', fallbackClassName)}
+        className={cn(
+          'flex items-center justify-center rounded-[inherit]',
+          fallbackClassName
+        )}
         style={getUserAvatarStyle(name)}
+        aria-label="No avatar"
       >
-        {fallback ?? getUserAvatarFallback(name)}
+        <img
+          src={DEFAULT_AVATAR_URL}
+          alt="Default avatar"
+          className="h-full w-full object-contain"
+        />
       </AvatarFallback>
     )
   }
@@ -88,7 +100,10 @@ type UserAvatarProps = Omit<UserAvatarContentProps, 'url' | 'name'> & {
   className?: string
 }
 
-/** Avatar of a user, rendering the stored image whenever one exists. */
+/**
+ * Avatar of a user, rendering the stored image whenever one exists.
+ * Supports channel avatar fallback via getChannelOrUserAvatarUrl.
+ */
 export function UserAvatar({
   user,
   name,

@@ -55,6 +55,10 @@ type Channel struct {
 
 	OtherSettings string `json:"settings" gorm:"column:settings"` // 其他设置，存储azure版本等不需要检索的信息，详见dto.ChannelOtherSettings
 
+	// AvatarURL is the avatar image URL for this channel.
+	// When a user's avatar_url is empty, it falls back to this channel's avatar.
+	AvatarURL string `json:"avatar_url" gorm:"type:varchar(512);column:avatar_url"`
+
 	// cache info
 	Keys []string `json:"-" gorm:"-"`
 }

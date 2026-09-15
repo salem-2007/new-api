@@ -42,6 +42,7 @@ import {
   refreshSelfAvatar,
   updateUserProfile,
   uploadSelfAvatar,
+  fetchChannelAvatar,
 } from '../api'
 import { appendAvatarChange } from '../lib/avatar-commit-log'
 import type { UserProfile } from '../types'
@@ -85,34 +86,22 @@ function validateAvatarFile(
   return null
 }
 
-/**
- * State of the avatar change while the dialog is open. The avatar is only
- * written on save, so a picked image waits here as a draft until then.
- */
-export type AvatarFlowState = 'idle' | 'ready' | 'saving' | 'saved'
-
-/**
- * A pending avatar change: a locally previewed upload, or a provider sync whose
- * image can only be fetched when the save commits.
- */
-export type AvatarDraft =
-  | { kind: 'upload'; file: File; previewUrl: string }
-  | { kind: 'sync' }
-
-interface EditProfileDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  profile: UserProfile
-  /** Receives the fresh server snapshot returned by avatar mutations. */
-  onProfileUpdate?: (snapshot?: UserProfile) => void | Promise<void>
-}
+// ============================================================================
+// Edit Profile Dialog
+// ============================================================================
 
 export function EditProfileDialog({
   open,
   onOpenChange,
   profile,
   onProfileUpdate,
-}: EditProfileDialogProps) {
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  profile: UserProfile
+  /** Receives the fresh server snapshot returned by avatar mutations. */
+  onProfileUpdate?: (snapshot?: UserProfile) => void | Promise<void>
+}) {
   const queryClient = useQueryClient()
 
   const invalidateAfterClose = async () => {
@@ -215,6 +204,11 @@ function EditProfileForm({
     setAvatarFlow('ready')
   }
 
+  const selectChannelAvatar = () => {
+    setAvatarDraft({ kind: 'channel' })
+    setAvatarFlow('ready')
+  }
+
   /**
    * Commit the pending avatar change, if there is one.
    *
@@ -231,7 +225,9 @@ function EditProfileForm({
       response =
         draft.kind === 'upload'
           ? await uploadSelfAvatar(draft.file)
-          : await refreshSelfAvatar()
+          : draft.kind === 'channel'
+            ? await fetchChannelAvatar()
+            : await refreshSelfAvatar()
     } catch {
       response = null
     }
@@ -242,7 +238,9 @@ function EditProfileForm({
           t(
             action === 'upload'
               ? 'Failed to update avatar'
-              : 'Failed to sync avatar'
+              : action === 'channel'
+                ? 'Failed to sync avatar'
+                : 'Failed to sync avatar'
           )
       )
       appendAvatarChange({
@@ -389,15 +387,26 @@ function EditProfileForm({
                   {t('Upload avatar')}
                 </Button>
                 {canSyncAvatar && (
-                  <Button
-                    type='button'
-                    variant='ghost'
-                    size='sm'
-                    disabled={saving}
-                    onClick={selectAvatarSync}
-                  >
-                    {t('Sync from provider')}
-                  </Button>
+                  <>
+                    <Button
+                      type='button'
+                      variant='ghost'
+                      size='sm'
+                      disabled={saving}
+                      onClick={selectAvatarSync}
+                    >
+                      {t('Sync from provider')}
+                    </Button>
+                    <Button
+                      type='button'
+                      variant='ghost'
+                      size='sm'
+                      disabled={saving}
+                      onClick={selectChannelAvatar}
+                    >
+                      {t('Sync from channel')}
+                    </Button>
+                  </>
                 )}
               </div>
               {avatarFlow === 'ready' && avatarDraft !== null && (
@@ -431,3 +440,14 @@ function EditProfileForm({
     </>
   )
 }
+
+// ============================================================================
+// Types
+// ============================================================================
+
+export type AvatarFlowState = 'idle' | 'ready' | 'saving' | 'saved'
+
+export type AvatarDraft =
+  | { kind: 'upload'; file: File; previewUrl: string }
+  | { kind: 'sync' }
+  | { kind: 'channel' }
