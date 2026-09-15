@@ -4,7 +4,7 @@
 
 # New API — Liquid Glass Edition
 
-基于 [QuantumNous/new-api](https://github.com/QuantumNous/new-api) `v1.0.0-rc.36` 的个人定制版。
+基于 [QuantumNous/new-api](https://github.com/QuantumNous/new-api)  的个人定制版。
 
 [简体中文](#中文) | [English](#english)
 
@@ -60,7 +60,7 @@ docker run -d --name new-api \
 
 **What is this**
 
-A personal fork of [QuantumNous/new-api](https://github.com/QuantumNous/new-api) based on upstream `v1.0.0-rc.36`, fully merged. All official features (LLM gateway, channel management, billing, user system) are preserved, with UI and desktop enhancements on top.
+A personal fork of [QuantumNous/new-api](https://github.com/QuantumNous/new-api) based on upstream , fully merged. All official features (LLM gateway, channel management, billing, user system) are preserved, with UI and desktop enhancements on top.
 
 **What was changed**
 
