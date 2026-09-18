@@ -28,12 +28,25 @@ For commercial licensing, please contact support@quantumnous.com
 import * as LobeIcons from '@lobehub/icons'
 import type React from 'react'
 
+import sglangLogo from '@/assets/brand-icons/sglang.svg'
 import { IconSub2api } from '@/assets/custom/icon-sub2api'
 import { IconAgnes } from '@/assets/custom/icon-agnes'
+import { IconWan } from '@/assets/custom/icon-wan'
 
 const CUSTOM_ICONS: Record<string, React.ComponentType<{ size?: number }>> = {
+  SGLang: (props) => (
+    <img
+      src={sglangLogo}
+      alt=''
+      aria-hidden='true'
+      width={props.size ?? 20}
+      height={props.size ?? 20}
+      className='object-contain'
+    />
+  ),
   Sub2API: IconSub2api,
   Agnes: IconAgnes,
+  Wan: IconWan,
 }
 
 /**

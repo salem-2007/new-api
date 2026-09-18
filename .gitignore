@@ -12,6 +12,7 @@ build
 *.db-wal
 logs
 web/dist
+node_modules
 web/node_modules
 .env
 one-api
@@ -44,3 +45,4 @@ relaykit/relayconvert/chat_responses_live_local_test.go
 service/openaicompat/chat_responses_live_local_test.go
 go.work
 go.work.sum
+
